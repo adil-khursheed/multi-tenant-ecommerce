@@ -1,26 +1,29 @@
-import { Grid } from '@/components/Grid'
-import { ProductGridItem } from '@/components/ProductGridItem'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import React from 'react'
+import type { Metadata } from "next";
 
-export const metadata = {
-  description: 'Search for products in the store.',
-  title: 'Shop',
-}
+import { getPayload } from "payload";
 
-type SearchParams = { [key: string]: string | string[] | undefined }
+import configPromise from "@payload-config";
+
+import { Grid } from "@/components/Grid";
+import { ProductGridItem } from "@/components/ProductGridItem";
+
+export const metadata: Metadata = {
+  description: "Search for products in the store.",
+  title: "Shop",
+};
+
+type SearchParams = { [key: string]: string | string[] | undefined };
 
 type Props = {
-  searchParams: Promise<SearchParams>
-}
+  searchParams: Promise<SearchParams>;
+};
 
 export default async function ShopPage({ searchParams }: Props) {
-  const { q: searchValue, sort, category } = await searchParams
-  const payload = await getPayload({ config: configPromise })
+  const { q: searchValue, sort, category } = await searchParams;
+  const payload = await getPayload({ config: configPromise });
 
   const products = await payload.find({
-    collection: 'products',
+    collection: "products",
     draft: false,
     overrideAccess: false,
     select: {
@@ -28,16 +31,16 @@ export default async function ShopPage({ searchParams }: Props) {
       slug: true,
       gallery: true,
       categories: true,
-      priceInUSD: true,
+      priceInINR: true,
     },
-    ...(sort ? { sort } : { sort: 'title' }),
+    ...(sort ? { sort } : { sort: "title" }),
     ...(searchValue || category
       ? {
           where: {
             and: [
               {
                 _status: {
-                  equals: 'published',
+                  equals: "published",
                 },
               },
               ...(searchValue
@@ -71,16 +74,16 @@ export default async function ShopPage({ searchParams }: Props) {
           },
         }
       : {}),
-  })
+  });
 
-  const resultsText = products.docs.length > 1 ? 'results' : 'result'
+  const resultsText = products.docs.length > 1 ? "results" : "result";
 
   return (
     <div>
       {searchValue ? (
         <p className="mb-4">
           {products.docs?.length === 0
-            ? 'There are no products that match '
+            ? "There are no products that match "
             : `Showing ${products.docs.length} ${resultsText} for `}
           <span className="font-bold">&quot;{searchValue}&quot;</span>
         </p>
@@ -93,10 +96,10 @@ export default async function ShopPage({ searchParams }: Props) {
       {products?.docs.length > 0 ? (
         <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.docs.map((product) => {
-            return <ProductGridItem key={product.id} product={product} />
+            return <ProductGridItem key={product.id} product={product} />;
           })}
         </Grid>
       ) : null}
     </div>
-  )
+  );
 }

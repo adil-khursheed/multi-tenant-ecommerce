@@ -405,12 +405,12 @@ export const CheckoutPage: React.FC = () => {
               if (!quantity) return null;
 
               let image = gallery?.[0]?.image || meta?.image;
-              let price = product?.priceInUSD;
+              let price = product?.priceInINR;
 
               const isVariant = Boolean(variant) && typeof variant === "object";
 
               if (isVariant) {
-                price = variant?.priceInUSD;
+                price = variant?.priceInINR;
 
                 const imageVariant = product.gallery?.find((item: any) => {
                   if (!item.variantOption) return false;

@@ -66,7 +66,10 @@ export default buildConfig({
         ChecklistFeature(),
         TextStateFeature({
           state: {
+            color: textStateConfig.color,
             letterSpacing: textStateConfig.letterSpacing,
+            fontSize: textStateConfig.fontSize,
+            fontFamily: textStateConfig.fontFamily,
           },
         }),
         LinkFeature({

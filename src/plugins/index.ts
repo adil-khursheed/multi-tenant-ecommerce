@@ -9,6 +9,7 @@ import {
   HeadingFeature,
   lexicalEditor,
 } from "@payloadcms/richtext-lexical";
+import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
 import { adminOrPublishedStatus } from "@/access/adminOrPublishedStatus";
@@ -85,6 +86,17 @@ export const plugins: Plugin[] = [
     },
   }),
   ecommercePlugin({
+    currencies: {
+      defaultCurrency: "INR",
+      supportedCurrencies: [
+        {
+          code: "INR",
+          label: "Indian Rupee",
+          symbol: "₹",
+          decimals: 2,
+        },
+      ],
+    },
     access: {
       adminOnlyFieldAccess,
       adminOrPublishedStatus,
@@ -135,5 +147,12 @@ export const plugins: Plugin[] = [
     products: {
       productsCollectionOverride: ProductsCollection,
     },
+  }),
+  vercelBlobStorage({
+    enabled: true,
+    collections: {
+      media: true,
+    },
+    token: process.env.BLOB_READ_WRITE_TOKEN,
   }),
 ];

@@ -1,72 +1,78 @@
-import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
+import type {
+  CollectionSlug,
+  File,
+  GlobalSlug,
+  Payload,
+  PayloadRequest,
+} from "payload";
 
-import { contactFormData } from './contact-form'
-import { contactPageData } from './contact-page'
-import { productHatData } from './product-hat'
-import { productTshirtData, productTshirtVariant } from './product-tshirt'
-import { homePageData } from './home'
-import { imageHatData } from './image-hat'
-import { imageTshirtBlackData } from './image-tshirt-black'
-import { imageTshirtWhiteData } from './image-tshirt-white'
-import { imageHero1Data } from './image-hero-1'
-import { Address, Transaction, VariantOption } from '@/payload-types'
+import { Address, Transaction, VariantOption } from "@/payload-types";
+import { contactFormData } from "./contact-form";
+import { contactPageData } from "./contact-page";
+import { homePageData } from "./home";
+import { imageHatData } from "./image-hat";
+import { imageHero1Data } from "./image-hero-1";
+import { imageTshirtBlackData } from "./image-tshirt-black";
+import { imageTshirtWhiteData } from "./image-tshirt-white";
+import { productHatData } from "./product-hat";
+import { productTshirtData, productTshirtVariant } from "./product-tshirt";
 
 const collections: CollectionSlug[] = [
-  'categories',
-  'media',
-  'pages',
-  'products',
-  'forms',
-  'form-submissions',
-  'variants',
-  'variantOptions',
-  'variantTypes',
-  'carts',
-  'transactions',
-  'addresses',
-  'orders',
-]
+  "categories",
+  "media",
+  "pages",
+  "products",
+  "forms",
+  "form-submissions",
+  "variants",
+  "variantOptions",
+  "variantTypes",
+  "carts",
+  "transactions",
+  "addresses",
+  "orders",
+];
 
-const categories = ['Accessories', 'T-Shirts', 'Hats']
+const categories = ["Accessories", "T-Shirts", "Hats"];
 
 const sizeVariantOptions = [
-  { label: 'Small', value: 'small' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Large', value: 'large' },
-  { label: 'X Large', value: 'xlarge' },
-]
+  { label: "Small", value: "small" },
+  { label: "Medium", value: "medium" },
+  { label: "Large", value: "large" },
+  { label: "X Large", value: "xlarge" },
+];
 
 const colorVariantOptions = [
-  { label: 'Black', value: 'black' },
-  { label: 'White', value: 'white' },
-]
+  { label: "Black", value: "black" },
+  { label: "White", value: "white" },
+];
 
-const globals: GlobalSlug[] = ['header', 'footer']
+const globals: GlobalSlug[] = ["header", "footer"];
 
-const baseAddressUSData: Transaction['billingAddress'] = {
-  title: 'Dr.',
-  firstName: 'Otto',
-  lastName: 'Octavius',
-  phone: '1234567890',
-  company: 'Oscorp',
-  addressLine1: '123 Main St',
-  addressLine2: 'Suite 100',
-  city: 'New York',
-  state: 'NY',
-  postalCode: '10001',
-  country: 'US',
-}
+const baseAddressUSData: Transaction["billingAddress"] = {
+  title: "Dr.",
+  firstName: "Otto",
+  lastName: "Octavius",
+  phone: "1234567890",
+  company: "Oscorp",
+  addressLine1: "123 Main St",
+  addressLine2: "Suite 100",
+  city: "New York",
+  state: "NY",
+  postalCode: "10001",
+  country: "US",
+};
 
-const baseAddressUKData: Transaction['billingAddress'] = {
-  title: 'Mr.',
-  firstName: 'Oliver',
-  lastName: 'Twist',
-  phone: '1234567890',
-  addressLine1: '48 Great Portland St',
-  city: 'London',
-  postalCode: 'W1W 7ND',
-  country: 'GB',
-}
+const baseAddressUKData: Transaction["billingAddress"] = {
+  title: "Mr.",
+  firstName: "Oliver",
+  lastName: "Twist",
+  phone: "1234567890",
+  addressLine1: "48 Great Portland St",
+  city: "London",
+  postalCode: "W1W 7ND",
+  country: "GB",
+};
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -76,16 +82,16 @@ export const seed = async ({
   payload,
   req,
 }: {
-  payload: Payload
-  req: PayloadRequest
+  payload: Payload;
+  req: PayloadRequest;
 }): Promise<void> => {
-  payload.logger.info('Seeding database...')
+  payload.logger.info("Seeding database...");
 
   // we need to clear the media directory before seeding
   // as well as the collections and globals
   // this is because while `yarn seed` drops the database
   // the custom `/api/seed` endpoint does not
-  payload.logger.info(`— Clearing collections and globals...`)
+  payload.logger.info(`— Clearing collections and globals...`);
 
   // clear the database
   await Promise.all(
@@ -101,44 +107,48 @@ export const seed = async ({
         },
       }),
     ),
-  )
+  );
 
   for (const collection of collections) {
-    await payload.db.deleteMany({ collection, req, where: {} })
+    await payload.db.deleteMany({ collection, req, where: {} });
     if (payload.collections[collection].config.versions) {
-      await payload.db.deleteVersions({ collection, req, where: {} })
+      await payload.db.deleteVersions({ collection, req, where: {} });
     }
   }
 
-  payload.logger.info(`— Seeding customer and customer data...`)
+  payload.logger.info(`— Seeding customer and customer data...`);
 
   await payload.delete({
-    collection: 'users',
+    collection: "users",
     depth: 0,
     where: {
       email: {
-        equals: 'customer@example.com',
+        equals: "customer@example.com",
       },
     },
-  })
+  });
 
-  payload.logger.info(`— Seeding media...`)
+  payload.logger.info(`— Seeding media...`);
 
-  const [imageHatBuffer, imageTshirtBlackBuffer, imageTshirtWhiteBuffer, heroBuffer] =
-    await Promise.all([
-      fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/hat-logo.png',
-      ),
-      fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/tshirt-black.png',
-      ),
-      fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/tshirt-white.png',
-      ),
-      fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
-      ),
-    ])
+  const [
+    imageHatBuffer,
+    imageTshirtBlackBuffer,
+    imageTshirtWhiteBuffer,
+    heroBuffer,
+  ] = await Promise.all([
+    fetchFileByURL(
+      "https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/hat-logo.png",
+    ),
+    fetchFileByURL(
+      "https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/tshirt-black.png",
+    ),
+    fetchFileByURL(
+      "https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/tshirt-white.png",
+    ),
+    fetchFileByURL(
+      "https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp",
+    ),
+  ]);
 
   const [
     customer,
@@ -151,94 +161,95 @@ export const seed = async ({
     hatsCategory,
   ] = await Promise.all([
     payload.create({
-      collection: 'users',
+      collection: "users",
       data: {
-        name: 'Customer',
-        email: 'customer@example.com',
-        password: 'password',
-        roles: ['customer'],
+        name: "Customer",
+        email: "customer@example.com",
+        password: "password",
+        roles: ["customer"],
       },
     }),
     payload.create({
-      collection: 'media',
+      collection: "media",
       data: imageHatData,
       file: imageHatBuffer,
     }),
     payload.create({
-      collection: 'media',
+      collection: "media",
       data: imageTshirtBlackData,
       file: imageTshirtBlackBuffer,
     }),
     payload.create({
-      collection: 'media',
+      collection: "media",
       data: imageTshirtWhiteData,
       file: imageTshirtWhiteBuffer,
     }),
     payload.create({
-      collection: 'media',
+      collection: "media",
       data: imageHero1Data,
       file: heroBuffer,
     }),
     ...categories.map((category) =>
       payload.create({
-        collection: 'categories',
+        collection: "categories",
         data: {
           title: category,
           slug: category,
+          image: "",
         },
       }),
     ),
-  ])
+  ]);
 
-  payload.logger.info(`— Seeding variant types and options...`)
+  payload.logger.info(`— Seeding variant types and options...`);
 
   const sizeVariantType = await payload.create({
-    collection: 'variantTypes',
+    collection: "variantTypes",
     data: {
-      name: 'size',
-      label: 'Size',
+      name: "size",
+      label: "Size",
     },
-  })
+  });
 
-  const sizeVariantOptionsResults: VariantOption[] = []
+  const sizeVariantOptionsResults: VariantOption[] = [];
 
   for (const option of sizeVariantOptions) {
     const result = await payload.create({
-      collection: 'variantOptions',
+      collection: "variantOptions",
       data: {
         ...option,
         variantType: sizeVariantType.id,
       },
-    })
-    sizeVariantOptionsResults.push(result)
+    });
+    sizeVariantOptionsResults.push(result);
   }
 
-  const [small, medium, large, xlarge] = sizeVariantOptionsResults
+  const [small, medium, large, xlarge] = sizeVariantOptionsResults;
 
   const colorVariantType = await payload.create({
-    collection: 'variantTypes',
+    collection: "variantTypes",
     data: {
-      name: 'color',
-      label: 'Color',
+      name: "color",
+      label: "Color",
     },
-  })
+  });
 
   const [black, white] = await Promise.all(
     colorVariantOptions.map((option) => {
       return payload.create({
-        collection: 'variantOptions',
+        collection: "variantOptions",
         data: {
           ...option,
           variantType: colorVariantType.id,
         },
-      })
+      });
     }),
-  )
+  );
 
-  payload.logger.info(`— Seeding products...`)
+  payload.logger.info(`— Seeding products...`);
 
   const productHat = await payload.create({
-    collection: 'products',
+    collection: "products",
     depth: 0,
     data: productHatData({
       galleryImage: imageHat,
@@ -247,10 +258,10 @@ export const seed = async ({
       categories: [hatsCategory],
       relatedProducts: [],
     }),
-  })
+  });
 
   const productTshirt = await payload.create({
-    collection: 'products',
+    collection: "products",
     depth: 0,
     data: productTshirtData({
       galleryImages: [
@@ -263,12 +274,12 @@ export const seed = async ({
       categories: [tshirtsCategory],
       relatedProducts: [productHat],
     }),
-  })
+  });
 
-  let hoodieID: number | string = productTshirt.id
+  let hoodieID: number | string = productTshirt.id;
 
-  if (payload.db.defaultIDType === 'text') {
-    hoodieID = `"${hoodieID}"`
+  if (payload.db.defaultIDType === "text") {
+    hoodieID = `"${hoodieID}"`;
   }
 
   const [
@@ -279,7 +290,7 @@ export const seed = async ({
   ] = await Promise.all(
     [small, medium, large, xlarge].map((variantOption) =>
       payload.create({
-        collection: 'variants',
+        collection: "variants",
         depth: 0,
         data: productTshirtVariant({
           product: productTshirt,
@@ -287,35 +298,35 @@ export const seed = async ({
         }),
       }),
     ),
-  )
+  );
 
   await Promise.all(
     [small, medium, large, xlarge].map((variantOption) =>
       payload.create({
-        collection: 'variants',
+        collection: "variants",
         depth: 0,
         data: productTshirtVariant({
           product: productTshirt,
           variantOptions: [variantOption, black],
-          ...(variantOption.value === 'medium' ? { inventory: 0 } : {}),
+          ...(variantOption.value === "medium" ? { inventory: 0 } : {}),
         }),
       }),
     ),
-  )
+  );
 
-  payload.logger.info(`— Seeding contact form...`)
+  payload.logger.info(`— Seeding contact form...`);
 
   const contactForm = await payload.create({
-    collection: 'forms',
+    collection: "forms",
     depth: 0,
     data: contactFormData(),
-  })
+  });
 
-  payload.logger.info(`— Seeding pages...`)
+  payload.logger.info(`— Seeding pages...`);
 
   const [_, contactPage] = await Promise.all([
     payload.create({
-      collection: 'pages',
+      collection: "pages",
       depth: 0,
       data: homePageData({
         contentImage: imageHero,
@@ -323,80 +334,80 @@ export const seed = async ({
       }),
     }),
     payload.create({
-      collection: 'pages',
+      collection: "pages",
       depth: 0,
       data: contactPageData({
         contactForm: contactForm,
       }),
     }),
-  ])
+  ]);
 
-  payload.logger.info(`— Seeding addresses...`)
+  payload.logger.info(`— Seeding addresses...`);
 
   const customerUSAddress = await payload.create({
-    collection: 'addresses',
+    collection: "addresses",
     depth: 0,
     data: {
       customer: customer.id,
       ...(baseAddressUSData as Address),
     },
-  })
+  });
 
   const customerUKAddress = await payload.create({
-    collection: 'addresses',
+    collection: "addresses",
     depth: 0,
     data: {
       customer: customer.id,
       ...(baseAddressUKData as Address),
     },
-  })
+  });
 
-  payload.logger.info(`— Seeding transactions...`)
+  payload.logger.info(`— Seeding transactions...`);
 
   const pendingTransaction = await payload.create({
-    collection: 'transactions',
+    collection: "transactions",
     data: {
-      currency: 'USD',
+      currency: "INR",
       customer: customer.id,
-      paymentMethod: 'stripe',
+      paymentMethod: "stripe",
       stripe: {
-        customerID: 'cus_123',
-        paymentIntentID: 'pi_123',
+        customerID: "cus_123",
+        paymentIntentID: "pi_123",
       },
-      status: 'pending',
+      status: "pending",
       billingAddress: baseAddressUSData,
     },
-  })
+  });
 
   const succeededTransaction = await payload.create({
-    collection: 'transactions',
+    collection: "transactions",
     data: {
-      currency: 'USD',
+      currency: "INR",
       customer: customer.id,
-      paymentMethod: 'stripe',
+      paymentMethod: "stripe",
       stripe: {
-        customerID: 'cus_123',
-        paymentIntentID: 'pi_123',
+        customerID: "cus_123",
+        paymentIntentID: "pi_123",
       },
-      status: 'succeeded',
+      status: "succeeded",
       billingAddress: baseAddressUSData,
     },
-  })
+  });
 
-  let succeededTransactionID: number | string = succeededTransaction.id
+  let succeededTransactionID: number | string = succeededTransaction.id;
 
-  if (payload.db.defaultIDType === 'text') {
-    succeededTransactionID = `"${succeededTransactionID}"`
+  if (payload.db.defaultIDType === "text") {
+    succeededTransactionID = `"${succeededTransactionID}"`;
   }
 
-  payload.logger.info(`— Seeding carts...`)
+  payload.logger.info(`— Seeding carts...`);
 
   // This cart is open as it's created now
   const openCart = await payload.create({
-    collection: 'carts',
+    collection: "carts",
     data: {
       customer: customer.id,
-      currency: 'USD',
+      currency: "INR",
       items: [
         {
           product: productTshirt.id,
@@ -405,15 +416,15 @@ export const seed = async ({
         },
       ],
     },
-  })
+  });
 
-  const oldTimestamp = new Date('2023-01-01T00:00:00Z').toISOString()
+  const oldTimestamp = new Date("2023-01-01T00:00:00Z").toISOString();
 
   // Cart is abandoned because it was created long in the past
   const abandonedCart = await payload.create({
-    collection: 'carts',
+    collection: "carts",
     data: {
-      currency: 'USD',
+      currency: "INR",
       createdAt: oldTimestamp,
       items: [
         {
@@ -422,14 +433,14 @@ export const seed = async ({
         },
       ],
     },
-  })
+  });
 
   // Cart is purchased because it has a purchasedAt date
   const completedCart = await payload.create({
-    collection: 'carts',
+    collection: "carts",
     data: {
       customer: customer.id,
-      currency: 'USD',
+      currency: "INR",
       purchasedAt: new Date().toISOString(),
       subtotal: 7499,
       items: [
@@ -445,21 +456,21 @@ export const seed = async ({
         },
       ],
     },
-  })
+  });
 
-  let completedCartID: number | string = completedCart.id
+  let completedCartID: number | string = completedCart.id;
 
-  if (payload.db.defaultIDType === 'text') {
-    completedCartID = `"${completedCartID}"`
+  if (payload.db.defaultIDType === "text") {
+    completedCartID = `"${completedCartID}"`;
   }
 
-  payload.logger.info(`— Seeding orders...`)
+  payload.logger.info(`— Seeding orders...`);
 
   const orderInCompleted = await payload.create({
-    collection: 'orders',
+    collection: "orders",
     data: {
       amount: 7499,
-      currency: 'USD',
+      currency: "INR",
       customer: customer.id,
       shippingAddress: baseAddressUSData,
       items: [
@@ -474,16 +485,16 @@ export const seed = async ({
           quantity: 1,
         },
       ],
-      status: 'completed',
+      status: "completed",
       transactions: [succeededTransaction.id],
     },
-  })
+  });
 
   const orderInProcessing = await payload.create({
-    collection: 'orders',
+    collection: "orders",
     data: {
       amount: 7499,
-      currency: 'USD',
+      currency: "INR",
       customer: customer.id,
       shippingAddress: baseAddressUSData,
       items: [
@@ -498,100 +509,100 @@ export const seed = async ({
           quantity: 1,
         },
       ],
-      status: 'processing',
+      status: "processing",
       transactions: [succeededTransaction.id],
     },
-  })
+  });
 
-  payload.logger.info(`— Seeding globals...`)
+  payload.logger.info(`— Seeding globals...`);
 
   await Promise.all([
     payload.updateGlobal({
-      slug: 'header',
+      slug: "header",
       data: {
         navItems: [
           {
             link: {
-              type: 'custom',
-              label: 'Home',
-              url: '/',
+              type: "custom",
+              label: "Home",
+              url: "/",
             },
           },
           {
             link: {
-              type: 'custom',
-              label: 'Shop',
-              url: '/shop',
+              type: "custom",
+              label: "Shop",
+              url: "/shop",
             },
           },
           {
             link: {
-              type: 'custom',
-              label: 'Account',
-              url: '/account',
+              type: "custom",
+              label: "Account",
+              url: "/account",
             },
           },
         ],
       },
     }),
     payload.updateGlobal({
-      slug: 'footer',
+      slug: "footer",
       data: {
         navItems: [
           {
             link: {
-              type: 'custom',
-              label: 'Admin',
-              url: '/admin',
+              type: "custom",
+              label: "Admin",
+              url: "/admin",
             },
           },
           {
             link: {
-              type: 'custom',
-              label: 'Find my order',
-              url: '/find-order',
+              type: "custom",
+              label: "Find my order",
+              url: "/find-order",
             },
           },
           {
             link: {
-              type: 'custom',
-              label: 'Source Code',
+              type: "custom",
+              label: "Source Code",
               newTab: true,
-              url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+              url: "https://github.com/payloadcms/payload/tree/main/templates/website",
             },
           },
           {
             link: {
-              type: 'custom',
-              label: 'Payload',
+              type: "custom",
+              label: "Payload",
               newTab: true,
-              url: 'https://payloadcms.com/',
+              url: "https://payloadcms.com/",
             },
           },
         ],
       },
     }),
-  ])
+  ]);
 
-  payload.logger.info('Seeded database successfully!')
-}
+  payload.logger.info("Seeded database successfully!");
+};
 
 async function fetchFileByURL(url: string): Promise<File> {
   const res = await fetch(url, {
-    credentials: 'include',
-    method: 'GET',
-  })
+    credentials: "include",
+    method: "GET",
+  });
 
   if (!res.ok) {
-    throw new Error(`Failed to fetch file from ${url}, status: ${res.status}`)
+    throw new Error(`Failed to fetch file from ${url}, status: ${res.status}`);
   }
 
-  const data = await res.arrayBuffer()
+  const data = await res.arrayBuffer();
 
   return {
-    name: url.split('/').pop() || `file-${Date.now()}`,
+    name: url.split("/").pop() || `file-${Date.now()}`,
     data: Buffer.from(data),
-    mimetype: `image/${url.split('.').pop()}`,
+    mimetype: `image/${url.split(".").pop()}`,
     size: data.byteLength,
-  }
+  };
 }

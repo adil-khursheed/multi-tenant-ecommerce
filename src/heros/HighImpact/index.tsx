@@ -11,18 +11,22 @@ export const HighImpactHero: React.FC<Page["hero"]> = ({
   richText,
 }) => {
   return (
-    <div className="relative h-dvh flex flex-col-reverse md:flex-row-reverse items-center justify-center text-primary">
-      <div className="mb-8 z-10 relative flex items-center justify-center md:w-1/3">
-        <div className="px-5 md:px-10">
+    <div className="relative container md:h-[1027px] flex flex-col-reverse md:flex-row-reverse items-center justify-center">
+      <div className="mb-8 z-10 relative flex items-center justify-center flex-1">
+        <div className="w-full md:px-8 md:max-w-lg mx-auto">
           {richText && (
             <RichText className="mb-6" data={richText} enableGutter={false} />
           )}
           {Array.isArray(links) && links.length > 0 && (
-            <ul className="flex md:justify-center gap-4">
+            <ul className="flex gap-4">
               {links.map(({ link }, i) => {
                 return (
                   <li key={i}>
-                    <CMSLink {...link} />
+                    <CMSLink
+                      {...link}
+                      size={"lg"}
+                      className="h-11 px-4 text-sm font-medium uppercase"
+                    />
                   </li>
                 );
               })}
@@ -30,12 +34,13 @@ export const HighImpactHero: React.FC<Page["hero"]> = ({
           )}
         </div>
       </div>
-      <div className="min-h-dvh select-none flex-1">
+      <div className="select-none flex-1 h-full">
         {media && typeof media === "object" && (
           <Media
-            fill
-            imgClassName="object-cover object-top"
-            className="relative w-full min-h-dvh"
+            width={768}
+            height={1027}
+            imgClassName="object-cover object-top w-full h-full"
+            className="relative w-full h-full"
             priority
             resource={media}
           />

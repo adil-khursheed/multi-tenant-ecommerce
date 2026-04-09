@@ -19,6 +19,9 @@ export const env = createEnv({
     STRIPE_WEBHOOKS_SIGNING_SECRET: z
       .string()
       .min(1, "Stripe webhooks signing secret is required"),
+    BLOB_READ_WRITE_TOKEN: z
+      .string()
+      .min(1, "Blob read write token is required"),
   },
   client: {
     NEXT_PUBLIC_SERVER_URL: z
