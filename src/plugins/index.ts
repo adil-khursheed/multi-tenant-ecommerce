@@ -85,6 +85,17 @@ export const plugins: Plugin[] = [
     },
   }),
   ecommercePlugin({
+    currencies: {
+      defaultCurrency: "INR",
+      supportedCurrencies: [
+        {
+          code: "INR",
+          label: "Indian Rupee",
+          symbol: "₹",
+          decimals: 2,
+        },
+      ],
+    },
     access: {
       adminOnlyFieldAccess,
       adminOrPublishedStatus,

@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-import { type ButtonProps } from "@/components/ui/button";
+import { buttonVariants, type ButtonProps } from "@/components/ui/button";
 import type { Page, Product } from "@/payload-types";
 import { cn } from "@/utilities/cn";
 
@@ -60,11 +60,13 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
   }
 
   return (
-    // <Button className={className} size={size} variant={appearance}>
-    <Link className={cn(className)} href={href} {...newTabProps}>
+    <Link
+      className={cn(buttonVariants({ size, variant: appearance }), className)}
+      href={href}
+      {...newTabProps}
+    >
       {label && label}
       {children && children}
     </Link>
-    // </Button>
   );
 };

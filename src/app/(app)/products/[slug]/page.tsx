@@ -87,17 +87,17 @@ export default async function ProductPage({ params }: Args) {
       })
     : product.inventory! > 0;
 
-  let price = product.priceInUSD;
+  let price = product.priceInINR;
 
   if (product.enableVariants && product?.variants?.docs?.length) {
     price = product?.variants?.docs?.reduce((acc, variant) => {
       if (
         typeof variant === "object" &&
-        variant?.priceInUSD &&
+        variant?.priceInINR &&
         acc &&
-        variant?.priceInUSD > acc
+        variant?.priceInINR > acc
       ) {
-        return variant.priceInUSD;
+        return variant.priceInINR;
       }
       return acc;
     }, price);
@@ -115,7 +115,7 @@ export default async function ProductPage({ params }: Args) {
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
       price: price,
-      priceCurrency: "usd",
+      priceCurrency: "inr",
     },
   };
 
@@ -193,7 +193,7 @@ function RelatedProducts({ products }: { products: Product[] }) {
             >
               <GridTileImage
                 label={{
-                  amount: product.priceInUSD!,
+                  amount: product.priceInINR!,
                   title: product.title,
                 }}
                 media={product.meta?.image as Media}
@@ -231,7 +231,7 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
     populate: {
       variants: {
         title: true,
-        priceInUSD: true,
+        priceInINR: true,
         inventory: true,
         options: true,
       },

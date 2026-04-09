@@ -254,7 +254,7 @@ export interface Order {
   transactions?: (string | Transaction)[] | null;
   status?: OrderStatus;
   amount?: number | null;
-  currency?: 'USD' | null;
+  currency?: 'INR' | null;
   accessToken?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -297,8 +297,8 @@ export interface Product {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  priceInUSDEnabled?: boolean | null;
-  priceInUSD?: number | null;
+  priceInINREnabled?: boolean | null;
+  priceInINR?: number | null;
   relatedProducts?: (string | Product)[] | null;
   meta?: {
     title?: string | null;
@@ -483,6 +483,7 @@ export interface Page {
     | ArchiveBlock
     | CarouselBlock
     | ThreeItemGridBlock
+    | FourItemGridBlock
     | BannerBlock
     | FormBlock
   )[];
@@ -604,6 +605,7 @@ export interface Category {
    */
   generateSlug?: boolean | null;
   slug: string;
+  image: string | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -648,6 +650,16 @@ export interface ThreeItemGridBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'threeItemGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FourItemGridBlock".
+ */
+export interface FourItemGridBlock {
+  categories?: (string | Category)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'fourItemGrid';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -887,8 +899,8 @@ export interface Variant {
   product: string | Product;
   options: (string | VariantOption)[];
   inventory?: number | null;
-  priceInUSDEnabled?: boolean | null;
-  priceInUSD?: number | null;
+  priceInINREnabled?: boolean | null;
+  priceInINR?: number | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -932,7 +944,7 @@ export interface Transaction {
   order?: (string | null) | Order;
   cart?: (string | null) | Cart;
   amount?: number | null;
-  currency?: 'USD' | null;
+  currency?: 'INR' | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -955,7 +967,7 @@ export interface Cart {
   purchasedAt?: string | null;
   status?: ('active' | 'purchased' | 'abandoned') | null;
   subtotal?: number | null;
-  currency?: 'USD' | null;
+  currency?: 'INR' | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1224,6 +1236,7 @@ export interface PagesSelect<T extends boolean = true> {
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
+        fourItemGrid?: T | FourItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
       };
@@ -1339,6 +1352,15 @@ export interface ThreeItemGridBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FourItemGridBlock_select".
+ */
+export interface FourItemGridBlockSelect<T extends boolean = true> {
+  categories?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BannerBlock_select".
  */
 export interface BannerBlockSelect<T extends boolean = true> {
@@ -1366,6 +1388,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   generateSlug?: T;
   slug?: T;
+  image?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1566,8 +1589,8 @@ export interface VariantsSelect<T extends boolean = true> {
   product?: T;
   options?: T;
   inventory?: T;
-  priceInUSDEnabled?: T;
-  priceInUSD?: T;
+  priceInINREnabled?: T;
+  priceInINR?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -1623,8 +1646,8 @@ export interface ProductsSelect<T extends boolean = true> {
   enableVariants?: T;
   variantTypes?: T;
   variants?: T;
-  priceInUSDEnabled?: T;
-  priceInUSD?: T;
+  priceInINREnabled?: T;
+  priceInINR?: T;
   relatedProducts?: T;
   meta?:
     | T
