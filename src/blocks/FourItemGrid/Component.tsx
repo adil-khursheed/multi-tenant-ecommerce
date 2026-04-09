@@ -26,7 +26,7 @@ export const FourItemGridItem: React.FC<{
           />
         )}
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/50 flex items-end p-8">
-          <span className="text-white text-3xl font-serif capitalize drop-shadow-xs">
+          <span className="text-white text-2xl md:text-3xl font-serif capitalize drop-shadow-xs">
             {item.title}
           </span>
         </div>
@@ -41,17 +41,14 @@ export const FourItemGridBlock: React.FC<
     className?: string;
   }
 > = async ({ categories }) => {
-  if (
-    !categories ||
-    !categories[0] ||
-    !categories[1] ||
-    !categories[2] ||
-    !categories[3]
-  )
-    return null;
+  const populatedCategories = (categories ?? []).filter(
+    (category): category is Category =>
+      typeof category === "object" && category !== null,
+  );
+  if (populatedCategories.length < 4) return null;
 
   const [firstCategory, secondCategory, thirdCategory, fourthCategory] =
-    categories;
+    populatedCategories;
 
   return (
     <section className="container grid gap-4 pb-4 md:grid-cols-4">

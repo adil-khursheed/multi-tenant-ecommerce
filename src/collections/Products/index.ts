@@ -1,45 +1,47 @@
-import { CallToAction } from '@/blocks/CallToAction/config'
-import { Content } from '@/blocks/Content/config'
-import { MediaBlock } from '@/blocks/MediaBlock/config'
-import { slugField } from 'payload'
-import { generatePreviewPath } from '@/utilities/generatePreviewPath'
-import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
+import { DefaultDocumentIDType, slugField, Where } from "payload";
+import { CollectionOverride } from "@payloadcms/plugin-ecommerce/types";
 import {
   MetaDescriptionField,
   MetaImageField,
   MetaTitleField,
   OverviewField,
   PreviewField,
-} from '@payloadcms/plugin-seo/fields'
+} from "@payloadcms/plugin-seo/fields";
 import {
   FixedToolbarFeature,
   HeadingFeature,
   HorizontalRuleFeature,
   InlineToolbarFeature,
   lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-import { DefaultDocumentIDType, Where } from 'payload'
+} from "@payloadcms/richtext-lexical";
 
-export const ProductsCollection: CollectionOverride = ({ defaultCollection }) => ({
+import { CallToAction } from "@/blocks/CallToAction/config";
+import { Content } from "@/blocks/Content/config";
+import { MediaBlock } from "@/blocks/MediaBlock/config";
+import { generatePreviewPath } from "@/utilities/generatePreviewPath";
+
+export const ProductsCollection: CollectionOverride = ({
+  defaultCollection,
+}) => ({
   ...defaultCollection,
   admin: {
     ...defaultCollection?.admin,
-    defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
+    defaultColumns: ["title", "enableVariants", "_status", "variants.variants"],
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
           slug: data?.slug,
-          collection: 'products',
+          collection: "products",
           req,
         }),
     },
     preview: (data, { req }) =>
       generatePreviewPath({
         slug: data?.slug as string,
-        collection: 'products',
+        collection: "products",
         req,
       }),
-    useAsTitle: 'title',
+    useAsTitle: "title",
   },
   defaultPopulate: {
     ...defaultCollection?.defaultPopulate,
@@ -49,110 +51,117 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     variants: true,
     enableVariants: true,
     gallery: true,
-    priceInUSD: true,
+    priceInINR: true,
     inventory: true,
     meta: true,
   },
   fields: [
-    { name: 'title', type: 'text', required: true },
+    { name: "title", type: "text", required: true },
     {
-      type: 'tabs',
+      type: "tabs",
       tabs: [
         {
           fields: [
             {
-              name: 'description',
-              type: 'richText',
+              name: "description",
+              type: "richText",
               editor: lexicalEditor({
                 features: ({ rootFeatures }) => {
                   return [
                     ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    HeadingFeature({
+                      enabledHeadingSizes: ["h1", "h2", "h3", "h4"],
+                    }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
                     HorizontalRuleFeature(),
-                  ]
+                  ];
                 },
               }),
               label: false,
               required: false,
             },
             {
-              name: 'gallery',
-              type: 'array',
+              name: "gallery",
+              type: "array",
               minRows: 1,
               fields: [
                 {
-                  name: 'image',
-                  type: 'upload',
-                  relationTo: 'media',
+                  name: "image",
+                  type: "upload",
+                  relationTo: "media",
                   required: true,
                 },
                 {
-                  name: 'variantOption',
-                  type: 'relationship',
-                  relationTo: 'variantOptions',
+                  name: "variantOption",
+                  type: "relationship",
+                  relationTo: "variantOptions",
                   admin: {
                     condition: (data) => {
-                      return data?.enableVariants === true && data?.variantTypes?.length > 0
+                      return (
+                        data?.enableVariants === true &&
+                        data?.variantTypes?.length > 0
+                      );
                     },
                   },
                   filterOptions: ({ data }) => {
                     if (data?.enableVariants && data?.variantTypes?.length) {
-                      const variantTypeIDs = data.variantTypes.map((item: any) => {
-                        if (typeof item === 'object' && item?.id) {
-                          return item.id
-                        }
-                        return item
-                      }) as DefaultDocumentIDType[]
+                      const variantTypeIDs = data.variantTypes.map(
+                        (item: any) => {
+                          if (typeof item === "object" && item?.id) {
+                            return item.id;
+                          }
+                          return item;
+                        },
+                      ) as DefaultDocumentIDType[];
 
                       if (variantTypeIDs.length === 0)
                         return {
                           variantType: {
                             in: [],
                           },
-                        }
+                        };
 
                       const query: Where = {
                         variantType: {
                           in: variantTypeIDs,
                         },
-                      }
+                      };
 
-                      return query
+                      return query;
                     }
 
                     return {
                       variantType: {
                         in: [],
                       },
-                    }
+                    };
                   },
                 },
               ],
             },
 
             {
-              name: 'layout',
-              type: 'blocks',
+              name: "layout",
+              type: "blocks",
               blocks: [CallToAction, Content, MediaBlock],
             },
           ],
-          label: 'Content',
+          label: "Content",
         },
         {
           fields: [
             ...defaultCollection.fields,
             {
-              name: 'relatedProducts',
-              type: 'relationship',
+              name: "relatedProducts",
+              type: "relationship",
               filterOptions: ({ id }) => {
                 if (id) {
                   return {
                     id: {
                       not_in: [id],
                     },
-                  }
+                  };
                 }
 
                 // ID comes back as undefined during seeding so we need to handle that case
@@ -160,28 +169,28 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                   id: {
                     exists: true,
                   },
-                }
+                };
               },
               hasMany: true,
-              relationTo: 'products',
+              relationTo: "products",
             },
           ],
-          label: 'Product Details',
+          label: "Product Details",
         },
         {
-          name: 'meta',
-          label: 'SEO',
+          name: "meta",
+          label: "SEO",
           fields: [
             OverviewField({
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
-              imagePath: 'meta.image',
+              titlePath: "meta.title",
+              descriptionPath: "meta.description",
+              imagePath: "meta.image",
             }),
             MetaTitleField({
               hasGenerateFn: true,
             }),
             MetaImageField({
-              relationTo: 'media',
+              relationTo: "media",
             }),
 
             MetaDescriptionField({}),
@@ -190,23 +199,23 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
               hasGenerateFn: true,
 
               // field paths to match the target field for data
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
+              titlePath: "meta.title",
+              descriptionPath: "meta.description",
             }),
           ],
         },
       ],
     },
     {
-      name: 'categories',
-      type: 'relationship',
+      name: "categories",
+      type: "relationship",
       admin: {
-        position: 'sidebar',
-        sortOptions: 'title',
+        position: "sidebar",
+        sortOptions: "title",
       },
       hasMany: true,
-      relationTo: 'categories',
+      relationTo: "categories",
     },
     slugField(),
   ],
-})
+});
