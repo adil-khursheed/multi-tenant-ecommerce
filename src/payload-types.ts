@@ -336,7 +336,7 @@ export interface Tenant {
    */
   name: string;
   /**
-   * This is the subdomain of the store (e.g. [slug].dtlea.com)
+   * This is the subdomain of the store (e.g. [slug].localhost:3000)
    */
   slug: string;
   logo?: (string | null) | Media;

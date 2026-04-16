@@ -36,7 +36,19 @@ export const businessInfoSchema = z.object({
   businessName: z.string().min(1, "Business name is required."),
   businessType: z.string().min(1, "Business type is required."),
   storeName: z.string().min(1, "Store name is required."),
-  storeSlug: z.string().min(1, "Store slug is required."),
+  storeSlug: z
+    .string()
+    .min(3, "Store slug must be at least 3 characters.")
+    .max(63, "Store slug must be less than 63 characters")
+    .regex(
+      /^[a-z0-9][a-z0-9-]*[a-z0-9]$/,
+      "Store slug can only contain lowercase letters, numbers and hyphens. It must start and end with a letter or number",
+    )
+    .refine(
+      (val) => !val.includes("--"),
+      "Store slug cannot contain consecutive hyphens",
+    )
+    .transform((val) => val.toLowerCase()),
   storeLogo: z.string().optional(),
   panNumber: z
     .string()

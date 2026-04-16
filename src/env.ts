@@ -4,6 +4,11 @@ import * as z from "zod";
 
 export const env = createEnv({
   extends: [vercel()],
+  shared: {
+    NODE_ENV: z
+      .enum(["development", "production", "test"])
+      .default("development"),
+  },
   server: {
     PAYLOAD_SECRET: z.string().min(1, "Payload secret is required"),
     DATABASE_URL: z.url().min(1, "Database URL is required"),
@@ -53,6 +58,7 @@ export const env = createEnv({
       .min(1, "Firebase measurement ID is required"),
   },
   experimental__runtimeEnv: {
+    NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,

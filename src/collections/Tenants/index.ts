@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { env } from "@/env";
+
 export const Tenants: CollectionConfig = {
   slug: "tenants",
   admin: {
@@ -22,8 +24,7 @@ export const Tenants: CollectionConfig = {
       required: true,
       unique: true,
       admin: {
-        description:
-          "This is the subdomain of the store (e.g. [slug].dtlea.com)",
+        description: `This is the subdomain of the store (e.g. [slug].${env.NEXT_PUBLIC_SERVER_URL.split("//")[1]})`,
       },
     },
     {

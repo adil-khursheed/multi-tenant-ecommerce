@@ -37,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { env } from "@/env";
 import { type CreateAccountFormData } from "./createAccountSchema";
 
 const businessTypes = [
@@ -64,6 +65,7 @@ const BusinessInfoForm = ({
   watch: UseFormWatch<CreateAccountFormData>;
 }) => {
   const watchedIsGST = watch("isGST");
+  const watchedStoreSlug = watch("storeSlug");
 
   const slugTransform = useCallback((value?: string) => {
     if (value && typeof value === "string")
@@ -206,9 +208,17 @@ const BusinessInfoForm = ({
                 <HugeiconsIcon icon={Globe02Icon} />
               </InputGroupAddon>
             </InputGroup>
-            <FieldDescription>
-              This is the subdomain of the store (e.g. [slug].dtlea.com)
-            </FieldDescription>
+            <Activity
+              mode={
+                watchedStoreSlug && !fieldState.invalid ? "visible" : "hidden"
+              }
+            >
+              <FieldDescription>
+                Your store will be available at{" "}
+                <span className="font-bold">{watchedStoreSlug}</span>.
+                {env.NEXT_PUBLIC_SERVER_URL.split("//")[1]}
+              </FieldDescription>
+            </Activity>
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
         )}
