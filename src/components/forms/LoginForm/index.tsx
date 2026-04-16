@@ -5,19 +5,21 @@ import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { FormError } from "@/components/forms/FormError";
-import { FormItem } from "@/components/forms/FormItem";
-import { Message } from "@/components/Message";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/providers/Auth";
-import { cn } from "@/utilities/cn";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type FormData = {
-  email: string;
-  password: string;
-};
+import { Message } from "@/components/Message";
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldError,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "@/providers/Auth";
+import { loginSchema, type LoginFormData } from "./loginSchema";
 
 export const LoginForm: React.FC = () => {
   const searchParams = useSearchParams();
@@ -30,14 +32,21 @@ export const LoginForm: React.FC = () => {
   const [error, setError] = React.useState<null | string>(null);
 
   const {
-    formState: { errors, isLoading },
+    formState: { errors, isSubmitting },
     handleSubmit,
     register,
-  } = useForm<FormData>();
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const onSubmit = useCallback(
-    async (data: FormData) => {
+    async (data: LoginFormData) => {
       try {
+        setError(null);
         await login(data);
         if (redirect?.current) router.push(redirect.current);
         else router.push("/account");
@@ -51,62 +60,112 @@ export const LoginForm: React.FC = () => {
   );
 
   return (
-    <form className="" onSubmit={handleSubmit(onSubmit)}>
-      <Message className="classes.message" error={error} />
-      <div className="flex flex-col gap-8">
-        <FormItem>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            {...register("email", { required: "Email is required." })}
-          />
-          {errors.email && <FormError message={errors.email.message} />}
-        </FormItem>
-
-        <FormItem>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            {...register("password", {
-              required: "Please provide a password.",
-            })}
-          />
-          {errors.password && <FormError message={errors.password.message} />}
-        </FormItem>
-
-        <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
-          <p>
-            Forgot your password?{" "}
-            <Link href={`/forgot-password${allParams}`}>
-              Click here to reset it
+    <div className="flex w-full flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24">
+      <div className="mx-auto w-full max-w-md">
+        {/* Header */}
+        <div className="mb-10">
+          <p className="mb-3 font-sans text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Welcome back
+          </p>
+          <h1 className="font-serif text-3xl font-light tracking-tight text-foreground sm:text-4xl">
+            Sign in to your wardrobe.
+          </h1>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link
+              href={`/create-account${allParams}`}
+              className="font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline"
+            >
+              Create one &rarr;
             </Link>
           </p>
         </div>
-      </div>
 
-      <div className="flex gap-4 justify-between">
-        <Link
-          href={`/create-account${allParams}`}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            "grow max-w-[50%]",
-          )}
-        >
-          Create an account
-        </Link>
+        <Separator className="mb-8" />
 
-        <Button
-          className="grow"
-          disabled={isLoading}
-          size="lg"
-          type="submit"
-          variant="default"
-        >
-          {isLoading ? "Processing" : "Continue"}
-        </Button>
+        {/* Error Message */}
+        {error && <Message className="mb-6" error={error} />}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-6">
+            <Field>
+              <FieldLabel className="font-sans text-xs font-medium uppercase tracking-[0.15em]">
+                Email Address
+              </FieldLabel>
+              <Input
+                id="login-email"
+                type="email"
+                placeholder="name@example.com"
+                className="h-12 border-border/60 bg-transparent font-sans text-sm transition-colors focus:border-primary"
+                {...register("email")}
+              />
+              {errors.email && <FieldError>{errors.email.message}</FieldError>}
+            </Field>
+
+            <Field>
+              <div className="flex items-center justify-between">
+                <FieldLabel className="font-sans text-xs font-medium uppercase tracking-[0.15em]">
+                  Password
+                </FieldLabel>
+                <Link
+                  href={`/forgot-password${allParams}`}
+                  className="font-sans text-[0.65rem] font-medium uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-primary"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
+                id="login-password"
+                type="password"
+                placeholder="••••••••"
+                className="h-12 border-border/60 bg-transparent font-sans text-sm transition-colors focus:border-primary"
+                {...register("password")}
+              />
+              {errors.password && (
+                <FieldError>{errors.password.message}</FieldError>
+              )}
+            </Field>
+
+            {/* Sign In Button */}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-2 h-12 w-full text-xs font-semibold uppercase tracking-[0.2em]"
+              size="lg"
+            >
+              {isSubmitting ? <Spinner /> : "Sign In"}
+            </Button>
+          </div>
+
+          {/* OR Separator */}
+          <div className="my-8">
+            <FieldSeparator>or</FieldSeparator>
+          </div>
+
+          {/* Social / Alternative Login */}
+          <div className="flex gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              // disabled
+              className="h-12 flex-1 text-xs uppercase tracking-[0.15em]"
+              title="Coming soon"
+            >
+              Google
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              // disabled
+              className="h-12 flex-1 text-xs uppercase tracking-[0.15em]"
+              title="Coming soon"
+            >
+              OTP
+            </Button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   );
 };

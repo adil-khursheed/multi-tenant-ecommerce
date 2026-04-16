@@ -2,6 +2,7 @@ import { Plugin } from "payload";
 import { ecommercePlugin } from "@payloadcms/plugin-ecommerce";
 import { stripeAdapter } from "@payloadcms/plugin-ecommerce/payments/stripe";
 import { formBuilderPlugin } from "@payloadcms/plugin-form-builder";
+import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
 import { seoPlugin } from "@payloadcms/plugin-seo";
 import { GenerateTitle, GenerateURL } from "@payloadcms/plugin-seo/types";
 import {
@@ -18,6 +19,7 @@ import { isAdmin } from "@/access/isAdmin";
 import { isDocumentOwner } from "@/access/isDocumentOwner";
 import { ProductsCollection } from "@/collections/Products";
 import { env } from "@/env";
+import type { Config } from "@/payload-types";
 import { Page, Product } from "@/payload-types";
 import { getServerSideURL } from "@/utilities/getURL";
 
@@ -154,5 +156,15 @@ export const plugins: Plugin[] = [
       media: true,
     },
     token: process.env.BLOB_READ_WRITE_TOKEN,
+  }),
+  multiTenantPlugin<Config>({
+    collections: {
+      products: {},
+    },
+    tenantsArrayField: {
+      includeDefaultField: false,
+    },
+    userHasAccessToAllTenants: (user) =>
+      Boolean(user?.roles?.includes("admin")),
   }),
 ];

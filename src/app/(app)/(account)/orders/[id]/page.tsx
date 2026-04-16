@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers as getHeaders } from "next/headers.js";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -15,6 +14,7 @@ import { ProductItem } from "@/components/ProductItem";
 import { buttonVariants } from "@/components/ui/button";
 import type { Order } from "@/payload-types";
 import { formatDateTime } from "@/utilities/formatDateTime";
+import { getUser } from "@/utilities/getUser";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
 
 export const dynamic = "force-dynamic";
@@ -25,9 +25,9 @@ type PageProps = {
 };
 
 export default async function Order({ params, searchParams }: PageProps) {
-  const headers = await getHeaders();
   const payload = await getPayload({ config: configPromise });
-  const { user } = await payload.auth({ headers });
+
+  const user = await getUser();
 
   const { id } = await params;
   const { email = "", accessToken = "" } = await searchParams;

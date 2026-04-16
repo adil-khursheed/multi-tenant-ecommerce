@@ -76,6 +76,7 @@ export interface Config {
     pages: Page;
     categories: Category;
     media: Media;
+    tenants: Tenant;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -109,6 +110,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    tenants: TenantsSelect<false> | TenantsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -186,8 +188,9 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
-  name?: string | null;
+  name: string;
   roles?: ('admin' | 'customer')[] | null;
+  isActive?: boolean | null;
   orders?: {
     docs?: (string | Order)[];
     hasNextPage?: boolean;
@@ -210,6 +213,8 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -265,6 +270,7 @@ export interface Order {
  */
 export interface Product {
   id: string;
+  tenant?: (string | null) | Tenant;
   title: string;
   description?: {
     root: {
@@ -318,6 +324,36 @@ export interface Product {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: string;
+  /**
+   * This is the name of the store (e.g. John's Store)
+   */
+  name: string;
+  /**
+   * This is the subdomain of the store (e.g. [slug].dtlea.com)
+   */
+  slug: string;
+  logo?: (string | null) | Media;
+  banner?: (string | null) | Media;
+  verificationStatus?: ('pending' | 'under_review' | 'approved' | 'rejected') | null;
+  bankDetails: {
+    accountNumber: string;
+    ifscCode: string;
+    bankName: string;
+    accountHolderName: string;
+  };
+  /**
+   * You cannot create products until you submit your bank details.
+   */
+  bankDetailsSubmitted?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1090,6 +1126,10 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'tenants';
+        value: string | Tenant;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: string | Form;
       } | null)
@@ -1178,6 +1218,7 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   roles?: T;
+  isActive?: T;
   orders?: T;
   cart?: T;
   addresses?: T;
@@ -1188,6 +1229,8 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1413,6 +1456,28 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  logo?: T;
+  banner?: T;
+  verificationStatus?: T;
+  bankDetails?:
+    | T
+    | {
+        accountNumber?: T;
+        ifscCode?: T;
+        bankName?: T;
+        accountHolderName?: T;
+      };
+  bankDetailsSubmitted?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
@@ -1626,6 +1691,7 @@ export interface VariantOptionsSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   description?: T;
   gallery?:

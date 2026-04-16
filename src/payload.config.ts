@@ -17,12 +17,15 @@ import {
   UnorderedListFeature,
 } from "@payloadcms/richtext-lexical";
 
+import sharp from "sharp";
+
 import { Categories } from "@/collections/Categories";
 import { Media } from "@/collections/Media";
 import { Pages } from "@/collections/Pages";
 import { Users } from "@/collections/Users";
 import { Footer } from "@/globals/Footer";
 import { Header } from "@/globals/Header";
+import { Tenants } from "./collections/Tenants";
 import { env } from "./env";
 import { textStateConfig } from "./fields/textStateConfig";
 import { plugins } from "./plugins";
@@ -51,7 +54,7 @@ export default buildConfig({
       ],
     },
   },
-  collections: [Users, Pages, Categories, Media],
+  collections: [Users, Pages, Categories, Media, Tenants],
   db: mongooseAdapter({
     url: env.DATABASE_URL || "",
   }),
@@ -103,12 +106,9 @@ export default buildConfig({
   endpoints: [],
   globals: [Header, Footer],
   plugins,
-  secret: env.PAYLOAD_SECRET || "",
+  secret: env.PAYLOAD_SECRET,
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  // Sharp is now an optional dependency -
-  // if you want to resize images, crop, set focal point, etc.
-  // make sure to install it and pass it to the config.
-  // sharp,
+  sharp,
 });

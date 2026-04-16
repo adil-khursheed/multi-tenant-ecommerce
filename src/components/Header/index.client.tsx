@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { FavouriteIcon } from "@hugeicons/core-free-icons";
+import { FavouriteIcon, User02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { Header } from "src/payload-types";
 
@@ -12,15 +12,25 @@ import { Cart } from "@/components/Cart";
 import { OpenCartButton } from "@/components/Cart/OpenCart";
 import { LogoIcon } from "@/components/icons/logo";
 import { CMSLink } from "@/components/Link";
+import { User } from "@/payload-types";
 import { cn } from "@/utilities/cn";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import { MobileMenu } from "./MobileMenu";
 
 type Props = {
   header: Header;
+  user: User | null;
 };
 
-export function HeaderClient({ header }: Props) {
+export function HeaderClient({ header, user }: Props) {
   const menu = header.navItems || [];
   const pathname = usePathname();
 
@@ -70,7 +80,7 @@ export function HeaderClient({ header }: Props) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative navLink items-center hover:bg-transparent [&_svg:not([class*='size-'])]:size-5"
+                className="items-center hover:bg-transparent [&_svg:not([class*='size-'])]:size-5"
               >
                 <HugeiconsIcon icon={FavouriteIcon} />
               </Button>
@@ -79,6 +89,66 @@ export function HeaderClient({ header }: Props) {
             <Suspense fallback={<OpenCartButton />}>
               <Cart />
             </Suspense>
+
+            <div className="hidden gap-8 text-sm md:flex md:items-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="items-center hover:bg-transparent [&_svg:not([class*='size-'])]:size-5"
+                    >
+                      <HugeiconsIcon icon={User02Icon} />
+                    </Button>
+                  }
+                />
+                <DropdownMenuContent className="w-40" align="start">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    {user ? (
+                      <></>
+                    ) : (
+                      <>
+                        <DropdownMenuItem
+                          render={
+                            <Link
+                              href="/login"
+                              className={cn(
+                                buttonVariants({
+                                  variant: "outline",
+                                  size: "lg",
+                                }),
+                                "w-full cursor-pointer",
+                              )}
+                            >
+                              Login
+                            </Link>
+                          }
+                        />
+
+                        <DropdownMenuItem
+                          render={
+                            <Link
+                              href="/create-account"
+                              className={cn(
+                                buttonVariants({
+                                  variant: "default",
+                                  size: "lg",
+                                }),
+                                "w-full cursor-pointer",
+                              )}
+                            >
+                              Create Account
+                            </Link>
+                          }
+                        />
+                      </>
+                    )}
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </nav>
