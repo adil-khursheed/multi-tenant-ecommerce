@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Activity, useCallback, useState } from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -13,6 +13,7 @@ import {
   UserLock01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, IconSvgElement } from "@hugeicons/react";
+import { useMutation } from "@tanstack/react-query";
 
 import ArtisanIcon from "@/components/icons/artisan";
 import { Message } from "@/components/Message";
@@ -23,16 +24,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePhoneVerification } from "@/hooks/usePhoneVerification";
 import { useAuth } from "@/providers/Auth";
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@/utilities/cn";
-import AddressForm from "./address-form";
-import BankAccountInfoForm from "./bank-account-info-form";
-import BusinessInfoForm from "./business-info-form";
 import {
-  addressSchema,
-  bankAccountSchema,
-  businessInfoSchema,
   createAccountSchema,
-  personalInfoSchema,
+  // personalInfoSchema,
   type CreateAccountFormData,
 } from "./createAccountSchema";
 import PersonalInfoForm from "./personal-info-form";
@@ -60,15 +56,15 @@ const accountTypes = [
 ];
 
 export const CreateAccountForm: React.FC = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const steps = [
-    { name: "personalInfo", schema: personalInfoSchema },
-    { name: "businessInfo", schema: businessInfoSchema },
-    { name: "address", schema: addressSchema },
-    { name: "bankAccount", schema: bankAccountSchema },
-  ] as const;
+  // const [activeStep, setActiveStep] = useState(0);
+  // const steps = [
+  //   { name: "personalInfo", schema: personalInfoSchema },
+  //   { name: "businessInfo", schema: businessInfoSchema },
+  //   { name: "address", schema: addressSchema },
+  //   { name: "bankAccount", schema: bankAccountSchema },
+  // ] as const;
 
-  const currentStep = steps[activeStep].name;
+  // const currentStep = steps[activeStep].name;
 
   const [error, setError] = useState<null | string>(null);
 
@@ -81,6 +77,21 @@ export const CreateAccountForm: React.FC = () => {
 
   const router = useRouter();
 
+  const trpc = useTRPC();
+
+  const registrationMutation = useMutation(
+    trpc.auth.register.mutationOptions({
+      onSuccess: () => {
+        router.push(
+          `/login?success=${encodeURIComponent("Please verify your email to login with the verification link sent to your inbox")}`,
+        );
+      },
+      onError: (error) => {
+        setError(error.message);
+      },
+    }),
+  );
+
   const defaultValues: CreateAccountFormData = {
     accountType: "customer",
     firstName: "",
@@ -91,38 +102,11 @@ export const CreateAccountForm: React.FC = () => {
     isPhoneVerified: false,
     password: "",
     passwordConfirm: "",
-    businessName: "",
-    businessType: "",
-    storeName: "",
-    storeSlug: "",
-    storeLogo: "",
-    panNumber: "",
-    isGST: false,
-    gst: "",
-    country: {
-      name: "",
-      isoCode: "",
-    },
-    state: {
-      name: "",
-      isoCode: "",
-    },
-    city: "",
-    addressLine1: "",
-    addressLine2: "",
-    pincode: "",
-    bankAccountNumber: "",
-    bankIfscCode: "",
-    bankName: "",
-    bankBranch: "",
-    bankAccountHolderName: "",
-    bankAccountType: "savings",
   };
 
   const {
     control,
     watch,
-    trigger,
     reset,
     setValue,
     formState: { isSubmitting, errors },
@@ -132,51 +116,12 @@ export const CreateAccountForm: React.FC = () => {
     defaultValues,
   });
 
-  const watchedAccountType = watch("accountType");
-
   const { reset: resetPhoneVerification } = usePhoneVerification();
 
-  const onSubmit = useCallback(
-    async (data: CreateAccountFormData) => {
-      // try {
-      //   setError(null);
-
-      //   const response = await fetch(
-      //     `${env.NEXT_PUBLIC_SERVER_URL}/api/users`,
-      //     {
-      //       body: JSON.stringify(data),
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //       method: "POST",
-      //     },
-      //   );
-
-      //   if (!response.ok) {
-      //     const message =
-      //       response.statusText || "There was an error creating the account.";
-      //     setError(message);
-      //     return;
-      //   }
-
-      //   const redirect = searchParams.get("redirect");
-
-      //   await login(data);
-      //   if (redirect) router.push(redirect);
-      //   else
-      //     router.push(
-      //       `/account?success=${encodeURIComponent("Account created successfully")}`,
-      //     );
-      // } catch (_) {
-      //   setError(
-      //     "There was an error with the credentials provided. Please try again.",
-      //   );
-      // }
-
-      console.log(data);
-    },
-    [login, router, searchParams],
-  );
+  const onSubmit = async (data: CreateAccountFormData) => {
+    setError(null);
+    await registrationMutation.mutateAsync(data);
+  };
 
   return (
     <div className="flex w-full flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
@@ -228,6 +173,7 @@ export const CreateAccountForm: React.FC = () => {
                         <TabsTrigger
                           key={accountType.id}
                           value={accountType.id}
+                          disabled={isSubmitting}
                           className={cn(
                             "flex flex-col items-center gap-3 whitespace-normal overflow-hidden",
                             field.value === accountType.id &&
@@ -243,7 +189,6 @@ export const CreateAccountForm: React.FC = () => {
                               { keepDirtyValues: false },
                             );
                             resetPhoneVerification();
-                            setActiveStep(0);
                           }}
                           aria-selected={field.value === accountType.id}
                         >
@@ -261,17 +206,17 @@ export const CreateAccountForm: React.FC = () => {
                 )}
               />
 
-              <Activity
+              {/* <Activity
                 mode={currentStep === "personalInfo" ? "visible" : "hidden"}
-              >
-                <PersonalInfoForm
-                  control={control}
-                  setValue={setValue}
-                  watch={watch}
-                />
-              </Activity>
+              > */}
+              <PersonalInfoForm
+                control={control}
+                setValue={setValue}
+                watch={watch}
+              />
+              {/* </Activity> */}
 
-              <Activity
+              {/* <Activity
                 mode={
                   watchedAccountType === "vendor" &&
                   currentStep === "businessInfo"
@@ -309,10 +254,10 @@ export const CreateAccountForm: React.FC = () => {
                 }
               >
                 <BankAccountInfoForm control={control} />
-              </Activity>
+              </Activity> */}
 
               <Field orientation={"horizontal"} className="gap-6">
-                {watchedAccountType === "vendor" && activeStep > 0 && (
+                {/* {watchedAccountType === "vendor" && activeStep > 0 && (
                   <Button
                     type="button"
                     variant="outline"
@@ -342,20 +287,20 @@ export const CreateAccountForm: React.FC = () => {
                     >
                       Save & Next
                     </Button>
-                  )}
+                  )} */}
 
-                {watchedAccountType === "customer" ||
+                {/* {watchedAccountType === "customer" ||
                 (watchedAccountType === "vendor" &&
-                  activeStep === steps.length - 1) ? (
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="h-12 flex-1 text-xs font-semibold uppercase tracking-[0.2em]"
-                    size="lg"
-                  >
-                    {isSubmitting ? <Spinner /> : "Create My Account"}
-                  </Button>
-                ) : null}
+                  activeStep === steps.length - 1) ? ( */}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="h-12 flex-1 text-xs font-semibold uppercase tracking-[0.2em]"
+                  size="lg"
+                >
+                  {isSubmitting ? <Spinner /> : "Create My Account"}
+                </Button>
+                {/* ) : null} */}
               </Field>
             </FieldGroup>
           </form>

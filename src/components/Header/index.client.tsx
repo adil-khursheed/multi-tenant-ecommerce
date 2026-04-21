@@ -103,7 +103,7 @@ export function HeaderClient({ header, user }: Props) {
                     </Button>
                   }
                 />
-                <DropdownMenuContent className="w-40" align="start">
+                <DropdownMenuContent className="w-56" align="start">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     {user ? (
@@ -145,6 +145,23 @@ export function HeaderClient({ header, user }: Props) {
                         />
                       </>
                     )}
+
+                    <DropdownMenuItem
+                      render={
+                        <Link
+                          href="/create-account/vendor"
+                          className={cn(
+                            buttonVariants({
+                              variant: "default",
+                              size: "lg",
+                            }),
+                            "w-full cursor-pointer",
+                          )}
+                        >
+                          Start Selling
+                        </Link>
+                      }
+                    />
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>

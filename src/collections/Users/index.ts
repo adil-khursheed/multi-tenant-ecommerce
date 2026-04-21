@@ -5,6 +5,8 @@ import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
 import { adminOrSelf } from "@/access/adminOrSelf";
 import { publicAccess } from "@/access/publicAccess";
 import { checkRole } from "@/access/utilities";
+import { forgotPasswordHTML, verifyEmailHTML } from "@/email/templates";
+import { env } from "@/env";
 import { ensureFirstUserIsAdmin } from "./hooks/ensureFirstUserIsAdmin";
 
 export const Users: CollectionConfig = {
@@ -24,26 +26,59 @@ export const Users: CollectionConfig = {
   },
   auth: {
     tokenExpiration: 1209600,
-    verify: true,
     maxLoginAttempts: 5,
     lockTime: 600000,
+    verify: {
+      generateEmailHTML: ({ token, user }) => {
+        const verificationUrl = `${env.NEXT_PUBLIC_SERVER_URL}/verify-email?token=${token}`;
+        return verifyEmailHTML({
+          userName: user.name,
+          verificationUrl,
+        });
+      },
+      generateEmailSubject: () => {
+        return "Verify your email – DTLEA";
+      },
+    },
+    forgotPassword: {
+      generateEmailHTML(args) {
+        const resetUrl = `${env.NEXT_PUBLIC_SERVER_URL}/reset-password?token=${args?.token}`;
+        return forgotPasswordHTML({
+          userName: args?.user?.name,
+          resetUrl,
+        });
+      },
+      generateEmailSubject: () => {
+        return "Reset your password – DTLEA";
+      },
+    },
   },
   fields: [
     {
       name: "name",
+      label: "Full Name",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "phone",
+      label: "Phone Number",
       type: "text",
       required: true,
     },
     {
       name: "roles",
       type: "select",
+      defaultValue: ["customer"],
+      hasMany: true,
       access: {
         create: adminOnlyFieldAccess,
         read: adminOnlyFieldAccess,
         update: adminOnlyFieldAccess,
       },
-      defaultValue: ["customer"],
-      hasMany: true,
+      admin: {
+        position: "sidebar",
+      },
       hooks: {
         beforeChange: [ensureFirstUserIsAdmin],
       },
@@ -51,6 +86,10 @@ export const Users: CollectionConfig = {
         {
           label: "admin",
           value: "admin",
+        },
+        {
+          label: "vendor",
+          value: "vendor",
         },
         {
           label: "customer",
@@ -62,14 +101,10 @@ export const Users: CollectionConfig = {
       name: "isActive",
       type: "checkbox",
       defaultValue: true,
-      hidden: true,
-    },
-    {
-      name: "_verified",
-      type: "checkbox",
-      defaultValue: false,
-      admin: {
-        hidden: true,
+      access: {
+        create: adminOnlyFieldAccess,
+        read: adminOnlyFieldAccess,
+        update: adminOnlyFieldAccess,
       },
     },
     {

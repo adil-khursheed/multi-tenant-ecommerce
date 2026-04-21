@@ -43,7 +43,7 @@ export default async function Login() {
       </div>
 
       {/* Right Form Panel */}
-      <div className="flex flex-1 items-center justify-center bg-background lg:w-1/2 lg:max-w-[640px] lg:flex-none">
+      <div className="flex flex-col flex-1 items-center justify-center bg-background lg:w-1/2 lg:max-w-[640px] lg:flex-none">
         <Suspense fallback={null}>
           <RenderParams />
         </Suspense>

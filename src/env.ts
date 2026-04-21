@@ -27,6 +27,9 @@ export const env = createEnv({
     BLOB_READ_WRITE_TOKEN: z
       .string()
       .min(1, "Blob read write token is required"),
+    SMTP_HOST: z.string().min(1, "SMTP host is required"),
+    SMTP_USER: z.string().min(1, "SMTP user is required"),
+    SMTP_PASS: z.string().min(1, "SMTP pass is required"),
   },
   client: {
     NEXT_PUBLIC_SERVER_URL: z

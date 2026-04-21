@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { GST_REGEX, PAN_REGEX } from "@/lib/constants";
+
 export const accountTypeSchema = z.object({
   accountType: z.enum(["customer", "vendor"]),
 });
@@ -32,6 +34,15 @@ export const personalInfoSchema = z
     path: ["phone"],
   });
 
+export const createAccountSchema = accountTypeSchema.extend(
+  personalInfoSchema.shape,
+);
+
+export type CreateAccountFormData = z.infer<typeof createAccountSchema>;
+// z
+// .discriminatedUnion("accountType", [customerSchema, vendorSchema])
+// .and(personalInfoSchema);
+
 export const businessInfoSchema = z.object({
   businessName: z.string().min(1, "Business name is required."),
   businessType: z.string().min(1, "Business type is required."),
@@ -53,17 +64,14 @@ export const businessInfoSchema = z.object({
   panNumber: z
     .string()
     .min(10, "PAN is required.")
-    .regex(/^[a-zA-z]{5}\d{4}[a-zA-Z]{1}$/, "Invalid PAN"),
+    .regex(PAN_REGEX, "Invalid PAN"),
   isGST: z.boolean(),
   gst: z
     .string()
     .optional()
     .refine((val) => {
       if (!val) return true;
-      return (
-        val.length === 15 &&
-        /^[0123][0-9][a-z]{5}[0-9]{4}[a-z][0-9][a-z0-9][a-z0-9]$/gi.test(val)
-      );
+      return val.length === 15 && GST_REGEX.test(val);
     }, "Invalid GST"),
 });
 
@@ -114,20 +122,16 @@ const vendorSchema = z
     }
   });
 
-export const createAccountSchema = z
-  .discriminatedUnion("accountType", [customerSchema, vendorSchema])
-  .and(personalInfoSchema);
-
 // Manually define the type since the customer branch uses .passthrough()
 // and doesn't include vendor-only fields in its Zod schema.
-export type CreateAccountFormData = z.infer<typeof personalInfoSchema> &
-  (
-    | ({ accountType: "customer" } & Partial<
-        z.infer<typeof businessInfoSchema> &
-          z.infer<typeof addressSchema> &
-          z.infer<typeof bankAccountSchema>
-      >)
-    | ({ accountType: "vendor" } & z.infer<typeof businessInfoSchema> &
-        z.infer<typeof addressSchema> &
-        z.infer<typeof bankAccountSchema>)
-  );
+// export type CreateAccountFormData = z.infer<typeof personalInfoSchema> &
+//   (
+//     | ({ accountType: "customer" } & Partial<
+//         z.infer<typeof businessInfoSchema> &
+//           z.infer<typeof addressSchema> &
+//           z.infer<typeof bankAccountSchema>
+//       >)
+//     | ({ accountType: "vendor" } & z.infer<typeof businessInfoSchema> &
+//         z.infer<typeof addressSchema> &
+//         z.infer<typeof bankAccountSchema>)
+//   );

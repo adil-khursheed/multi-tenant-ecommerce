@@ -17,6 +17,7 @@ import { adminOrPublishedStatus } from "@/access/adminOrPublishedStatus";
 import { customerOnlyFieldAccess } from "@/access/customerOnlyFieldAccess";
 import { isAdmin } from "@/access/isAdmin";
 import { isDocumentOwner } from "@/access/isDocumentOwner";
+import { checkRole } from "@/access/utilities";
 import { ProductsCollection } from "@/collections/Products";
 import { env } from "@/env";
 import type { Config } from "@/payload-types";
@@ -164,7 +165,6 @@ export const plugins: Plugin[] = [
     tenantsArrayField: {
       includeDefaultField: false,
     },
-    userHasAccessToAllTenants: (user) =>
-      Boolean(user?.roles?.includes("admin")),
+    userHasAccessToAllTenants: (user) => checkRole(["admin"], user),
   }),
 ];

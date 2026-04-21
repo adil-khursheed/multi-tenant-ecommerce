@@ -189,7 +189,8 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   name: string;
-  roles?: ('admin' | 'customer')[] | null;
+  phone: string;
+  roles?: ('admin' | 'vendor' | 'customer')[] | null;
   isActive?: boolean | null;
   orders?: {
     docs?: (string | Order)[];
@@ -331,27 +332,42 @@ export interface Product {
  */
 export interface Tenant {
   id: string;
+  owner: string | User;
+  businessName: string;
+  businessType:
+    | 'individual'
+    | 'partnership'
+    | 'proprietorship'
+    | 'llp'
+    | 'private_limited'
+    | 'public_limited'
+    | 'ngo'
+    | 'trust'
+    | 'society'
+    | 'educational_institutes'
+    | 'not_yet_registered'
+    | 'other';
   /**
    * This is the name of the store (e.g. John's Store)
    */
-  name: string;
+  storeName: string;
   /**
    * This is the subdomain of the store (e.g. [slug].localhost:3000)
    */
-  slug: string;
-  logo?: (string | null) | Media;
-  banner?: (string | null) | Media;
+  storeSlug: string;
+  storeLogo?: (string | null) | Media;
+  storeBanner?: (string | null) | Media;
   verificationStatus?: ('pending' | 'under_review' | 'approved' | 'rejected') | null;
+  panNumber: string;
+  gstNumber?: string | null;
   bankDetails: {
     accountNumber: string;
     ifscCode: string;
     bankName: string;
     accountHolderName: string;
+    bankBranch: string;
+    bankAccountType: 'savings' | 'current';
   };
-  /**
-   * You cannot create products until you submit your bank details.
-   */
-  bankDetailsSubmitted?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1217,6 +1233,7 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  phone?: T;
   roles?: T;
   isActive?: T;
   orders?: T;
@@ -1459,11 +1476,16 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "tenants_select".
  */
 export interface TenantsSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  logo?: T;
-  banner?: T;
+  owner?: T;
+  businessName?: T;
+  businessType?: T;
+  storeName?: T;
+  storeSlug?: T;
+  storeLogo?: T;
+  storeBanner?: T;
   verificationStatus?: T;
+  panNumber?: T;
+  gstNumber?: T;
   bankDetails?:
     | T
     | {
@@ -1471,8 +1493,9 @@ export interface TenantsSelect<T extends boolean = true> {
         ifscCode?: T;
         bankName?: T;
         accountHolderName?: T;
+        bankBranch?: T;
+        bankAccountType?: T;
       };
-  bankDetailsSubmitted?: T;
   updatedAt?: T;
   createdAt?: T;
 }
