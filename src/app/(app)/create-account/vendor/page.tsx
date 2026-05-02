@@ -1,29 +1,26 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
-import { CreateAccountForm } from "@/components/forms/CreateAccountForm";
+import VendorMultiStepForm from "@/components/forms/CreateAccountForm/vendor-multi-step-form";
 import { RenderParams } from "@/components/RenderParams";
-import { getUser } from "@/utilities/getUser";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
 
 export default async function CreateVendorAccount() {
-  const user = await getUser();
+  // const user = await getUser();
 
-  if (user) {
-    redirect(
-      `/account?warning=${encodeURIComponent("You are already logged in.")}`,
-    );
-  }
+  // if (user) {
+  //   redirect(
+  //     `/account?warning=${encodeURIComponent("You are already logged in.")}`,
+  //   );
+  // }
 
   return (
-    <div className="flex min-h-[calc(100dvh-80px)] items-center justify-center bg-background">
-      <div className="w-full max-w-2xl">
-        <Suspense fallback={null}>
-          <RenderParams />
-        </Suspense>
-        <CreateAccountForm />
-      </div>
+    <div className="min-h-[calc(100dvh-80px)] bg-background">
+      <Suspense fallback={null}>
+        <RenderParams />
+      </Suspense>
+
+      <VendorMultiStepForm />
     </div>
   );
 }

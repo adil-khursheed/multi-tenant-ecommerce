@@ -192,6 +192,15 @@ export interface User {
   phone: string;
   roles?: ('admin' | 'vendor' | 'customer')[] | null;
   isActive?: boolean | null;
+  /**
+   * Tenants associated with the user
+   */
+  tenants?:
+    | {
+        tenant: string | Tenant;
+        id?: string | null;
+      }[]
+    | null;
   orders?: {
     docs?: (string | Order)[];
     hasNextPage?: boolean;
@@ -227,6 +236,86 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: string;
+  owner: string | User;
+  businessName: string;
+  businessType:
+    | 'individual'
+    | 'partnership'
+    | 'proprietorship'
+    | 'llp'
+    | 'private_limited'
+    | 'public_limited'
+    | 'ngo'
+    | 'trust'
+    | 'society'
+    | 'educational_institutes'
+    | 'not_yet_registered'
+    | 'other';
+  /**
+   * This is the name of the store (e.g. John's Store)
+   */
+  storeName: string;
+  /**
+   * This is the subdomain of the store (e.g. [slug].localhost:3000)
+   */
+  storeSlug: string;
+  storeLogo?: (string | null) | Media;
+  storeBanner?: (string | null) | Media;
+  verificationStatus?: ('pending' | 'under_review' | 'approved' | 'rejected') | null;
+  panNumber: string;
+  gstNumber?: string | null;
+  bankDetails: {
+    accountNumber: string;
+    ifscCode: string;
+    bankName: string;
+    accountHolderName: string;
+    bankBranch: string;
+    bankAccountType: 'savings' | 'current';
+  };
+  isTenantActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -325,85 +414,6 @@ export interface Product {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants".
- */
-export interface Tenant {
-  id: string;
-  owner: string | User;
-  businessName: string;
-  businessType:
-    | 'individual'
-    | 'partnership'
-    | 'proprietorship'
-    | 'llp'
-    | 'private_limited'
-    | 'public_limited'
-    | 'ngo'
-    | 'trust'
-    | 'society'
-    | 'educational_institutes'
-    | 'not_yet_registered'
-    | 'other';
-  /**
-   * This is the name of the store (e.g. John's Store)
-   */
-  storeName: string;
-  /**
-   * This is the subdomain of the store (e.g. [slug].localhost:3000)
-   */
-  storeSlug: string;
-  storeLogo?: (string | null) | Media;
-  storeBanner?: (string | null) | Media;
-  verificationStatus?: ('pending' | 'under_review' | 'approved' | 'rejected') | null;
-  panNumber: string;
-  gstNumber?: string | null;
-  bankDetails: {
-    accountNumber: string;
-    ifscCode: string;
-    bankName: string;
-    accountHolderName: string;
-    bankBranch: string;
-    bankAccountType: 'savings' | 'current';
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1236,6 +1246,12 @@ export interface UsersSelect<T extends boolean = true> {
   phone?: T;
   roles?: T;
   isActive?: T;
+  tenants?:
+    | T
+    | {
+        tenant?: T;
+        id?: T;
+      };
   orders?: T;
   cart?: T;
   addresses?: T;
@@ -1496,6 +1512,7 @@ export interface TenantsSelect<T extends boolean = true> {
         bankBranch?: T;
         bankAccountType?: T;
       };
+  isTenantActive?: T;
   updatedAt?: T;
   createdAt?: T;
 }

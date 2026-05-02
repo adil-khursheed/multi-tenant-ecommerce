@@ -107,7 +107,58 @@ export function HeaderClient({ header, user }: Props) {
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     {user ? (
-                      <></>
+                      <>
+                        <DropdownMenuItem
+                          render={
+                            <Link
+                              href="/orders"
+                              className={cn(
+                                buttonVariants({
+                                  variant: "ghost",
+                                  size: "lg",
+                                }),
+                                "w-full cursor-pointer",
+                              )}
+                            >
+                              Orders
+                            </Link>
+                          }
+                        />
+
+                        <DropdownMenuItem
+                          render={
+                            <Link
+                              href="/account/addresses"
+                              className={cn(
+                                buttonVariants({
+                                  variant: "ghost",
+                                  size: "lg",
+                                }),
+                                "w-full cursor-pointer",
+                              )}
+                            >
+                              Addresses
+                            </Link>
+                          }
+                        />
+
+                        <DropdownMenuItem
+                          render={
+                            <Link
+                              href="/account"
+                              className={cn(
+                                buttonVariants({
+                                  variant: "ghost",
+                                  size: "lg",
+                                }),
+                                "w-full cursor-pointer",
+                              )}
+                            >
+                              Manage Account
+                            </Link>
+                          }
+                        />
+                      </>
                     ) : (
                       <>
                         <DropdownMenuItem

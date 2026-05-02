@@ -177,5 +177,18 @@ export const Tenants: CollectionConfig = {
         },
       ],
     },
+    {
+      name: "isTenantActive",
+      type: "checkbox",
+      defaultValue: false,
+      access: {
+        create: adminOnlyFieldAccess,
+        read: adminOnlyFieldAccess,
+        update: adminOnlyFieldAccess,
+      },
+      admin: {
+        position: "sidebar",
+      },
+    },
   ],
 };

@@ -23,12 +23,10 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePhoneVerification } from "@/hooks/usePhoneVerification";
-import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@/utilities/cn";
 import {
   createAccountSchema,
-  // personalInfoSchema,
   type CreateAccountFormData,
 } from "./createAccountSchema";
 import PersonalInfoForm from "./personal-info-form";
@@ -56,24 +54,12 @@ const accountTypes = [
 ];
 
 export const CreateAccountForm: React.FC = () => {
-  // const [activeStep, setActiveStep] = useState(0);
-  // const steps = [
-  //   { name: "personalInfo", schema: personalInfoSchema },
-  //   { name: "businessInfo", schema: businessInfoSchema },
-  //   { name: "address", schema: addressSchema },
-  //   { name: "bankAccount", schema: bankAccountSchema },
-  // ] as const;
-
-  // const currentStep = steps[activeStep].name;
-
   const [error, setError] = useState<null | string>(null);
 
   const searchParams = useSearchParams();
   const allParams = searchParams.toString()
     ? `?${searchParams.toString()}`
     : "";
-
-  const { login } = useAuth();
 
   const router = useRouter();
 
@@ -206,92 +192,13 @@ export const CreateAccountForm: React.FC = () => {
                 )}
               />
 
-              {/* <Activity
-                mode={currentStep === "personalInfo" ? "visible" : "hidden"}
-              > */}
               <PersonalInfoForm
                 control={control}
                 setValue={setValue}
                 watch={watch}
               />
-              {/* </Activity> */}
-
-              {/* <Activity
-                mode={
-                  watchedAccountType === "vendor" &&
-                  currentStep === "businessInfo"
-                    ? "visible"
-                    : "hidden"
-                }
-              >
-                <BusinessInfoForm
-                  control={control}
-                  setValue={setValue}
-                  watch={watch}
-                />
-              </Activity>
-
-              <Activity
-                mode={
-                  watchedAccountType === "vendor" && currentStep === "address"
-                    ? "visible"
-                    : "hidden"
-                }
-              >
-                <AddressForm
-                  control={control}
-                  watch={watch}
-                  setValue={setValue}
-                />
-              </Activity>
-
-              <Activity
-                mode={
-                  watchedAccountType === "vendor" &&
-                  currentStep === "bankAccount"
-                    ? "visible"
-                    : "hidden"
-                }
-              >
-                <BankAccountInfoForm control={control} />
-              </Activity> */}
 
               <Field orientation={"horizontal"} className="gap-6">
-                {/* {watchedAccountType === "vendor" && activeStep > 0 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 flex-1 text-xs font-semibold uppercase tracking-[0.2em]"
-                    size="lg"
-                    onClick={() => setActiveStep((i) => i - 1)}
-                  >
-                    Back
-                  </Button>
-                )}
-
-                {watchedAccountType === "vendor" &&
-                  activeStep < steps.length - 1 && (
-                    <Button
-                      type="button"
-                      className="h-12 flex-1 w-full text-xs font-semibold uppercase tracking-[0.2em]"
-                      size="lg"
-                      onClick={async () => {
-                        const currentFields = Object.keys(
-                          steps[activeStep].schema.shape,
-                        ) as Array<keyof CreateAccountFormData>;
-
-                        const valid = await trigger(currentFields);
-                        if (!valid) return;
-                        setActiveStep((i) => i + 1);
-                      }}
-                    >
-                      Save & Next
-                    </Button>
-                  )} */}
-
-                {/* {watchedAccountType === "customer" ||
-                (watchedAccountType === "vendor" &&
-                  activeStep === steps.length - 1) ? ( */}
                 <Button
                   type="submit"
                   disabled={isSubmitting}
@@ -300,7 +207,6 @@ export const CreateAccountForm: React.FC = () => {
                 >
                   {isSubmitting ? <Spinner /> : "Create My Account"}
                 </Button>
-                {/* ) : null} */}
               </Field>
             </FieldGroup>
           </form>

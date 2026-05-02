@@ -26,16 +26,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { type CreateAccountFormData } from "./createAccountSchema";
+import { VendorOnboardingFormData } from "./vendor-onboarding-schema";
 
 const AddressForm = ({
   control,
   watch,
   setValue,
 }: {
-  control: Control<CreateAccountFormData>;
-  watch: UseFormWatch<CreateAccountFormData>;
-  setValue: UseFormSetValue<CreateAccountFormData>;
+  control: Control<VendorOnboardingFormData>;
+  watch: UseFormWatch<VendorOnboardingFormData>;
+  setValue: UseFormSetValue<VendorOnboardingFormData>;
 }) => {
   const watchedCountry = watch("country");
   const watchedState = watch("state");

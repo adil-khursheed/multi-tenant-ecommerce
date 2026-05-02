@@ -38,7 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { env } from "@/env";
-import { type CreateAccountFormData } from "./createAccountSchema";
+import { VendorOnboardingFormData } from "./vendor-onboarding-schema";
 
 const businessTypes = [
   { value: "individual", label: "Individual" },
@@ -60,9 +60,9 @@ const BusinessInfoForm = ({
   setValue,
   watch,
 }: {
-  control: Control<CreateAccountFormData>;
-  setValue: UseFormSetValue<CreateAccountFormData>;
-  watch: UseFormWatch<CreateAccountFormData>;
+  control: Control<VendorOnboardingFormData>;
+  setValue: UseFormSetValue<VendorOnboardingFormData>;
+  watch: UseFormWatch<VendorOnboardingFormData>;
 }) => {
   const watchedIsGST = watch("isGST");
   const watchedStoreSlug = watch("storeSlug");

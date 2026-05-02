@@ -21,12 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { type CreateAccountFormData } from "./createAccountSchema";
+import { type VendorOnboardingFormData } from "./vendor-onboarding-schema";
 
 const BankAccountInfoForm = ({
   control,
 }: {
-  control: Control<CreateAccountFormData>;
+  control: Control<VendorOnboardingFormData>;
 }) => {
   return (
     <>

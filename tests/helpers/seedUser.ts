@@ -6,6 +6,8 @@ export const testUser = {
   name: "dev",
   email: "dev@payloadcms.com",
   password: "test",
+  roles: ["vendor"] as ("admin" | "vendor" | "customer")[],
+  phone: "9876543210",
 };
 
 /**

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { tenantsArrayField } from "@payloadcms/plugin-multi-tenant/fields";
 
 import { adminOnly } from "@/access/adminOnly";
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
@@ -8,6 +9,22 @@ import { checkRole } from "@/access/utilities";
 import { forgotPasswordHTML, verifyEmailHTML } from "@/email/templates";
 import { env } from "@/env";
 import { ensureFirstUserIsAdmin } from "./hooks/ensureFirstUserIsAdmin";
+
+const defaultTenantArrayField = tenantsArrayField({
+  tenantsArrayFieldName: "tenants",
+  tenantsCollectionSlug: "tenants",
+  tenantsArrayTenantFieldName: "tenant",
+  arrayFieldAccess: {
+    create: () => true,
+    read: () => true,
+    update: () => true,
+  },
+  tenantFieldAccess: {
+    create: () => true,
+    read: () => true,
+    update: () => true,
+  },
+});
 
 export const Users: CollectionConfig = {
   slug: "users",
@@ -105,6 +122,14 @@ export const Users: CollectionConfig = {
         create: adminOnlyFieldAccess,
         read: adminOnlyFieldAccess,
         update: adminOnlyFieldAccess,
+      },
+    },
+    {
+      ...defaultTenantArrayField,
+      admin: {
+        ...(defaultTenantArrayField.admin || {}),
+        position: "sidebar",
+        description: "Tenants associated with the user",
       },
     },
     {
