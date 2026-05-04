@@ -8,6 +8,7 @@ import { publicAccess } from "@/access/publicAccess";
 import { checkRole } from "@/access/utilities";
 import { forgotPasswordHTML, verifyEmailHTML } from "@/email/templates";
 import { env } from "@/env";
+import { autoVerifyCustomers } from "./hooks/autoVerifyCustomers";
 import { ensureFirstUserIsAdmin } from "./hooks/ensureFirstUserIsAdmin";
 
 const defaultTenantArrayField = tenantsArrayField({
@@ -28,6 +29,9 @@ const defaultTenantArrayField = tenantsArrayField({
 
 export const Users: CollectionConfig = {
   slug: "users",
+  hooks: {
+    beforeChange: [autoVerifyCustomers],
+  },
   access: {
     admin: ({ req: { user } }) => checkRole(["admin"], user),
     create: publicAccess,

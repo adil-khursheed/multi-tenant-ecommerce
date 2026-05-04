@@ -21,11 +21,43 @@ export const authRouter = {
           roles: accountType === "vendor" ? ["vendor"] : ["customer"],
           phone,
         },
+        disableVerificationEmail: accountType === "customer",
       });
+
+      if (accountType === "customer") {
+        const userData = await ctx.payload.login({
+          collection: "users",
+          data: {
+            email,
+            password,
+          },
+        });
+
+        if (!userData.token) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Failed to login",
+          });
+        }
+
+        await generateAuthCookie({
+          prefix: ctx.payload.config.cookiePrefix,
+          value: userData.token,
+        });
+
+        return {
+          success: true,
+          message: "Account created successfully",
+          accountType,
+          data: userData.user,
+        };
+      }
 
       return {
         success: true,
         message: "Please verify your email to login",
+        accountType,
+        data: null,
       };
     }),
 

@@ -4,7 +4,17 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { FavouriteIcon, User02Icon } from "@hugeicons/core-free-icons";
+import {
+  AccountSetting01Icon,
+  AddressBookIcon,
+  FavouriteIcon,
+  LoginSquare02Icon,
+  LogoutSquare02Icon,
+  ShoppingBasketDone01Icon,
+  Store03Icon,
+  User02Icon,
+  UserAdd01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { Header } from "src/payload-types";
 
@@ -21,6 +31,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { MobileMenu } from "./MobileMenu";
@@ -117,9 +128,10 @@ export function HeaderClient({ header, user }: Props) {
                                   variant: "ghost",
                                   size: "lg",
                                 }),
-                                "w-full cursor-pointer",
+                                "w-full cursor-pointer justify-start",
                               )}
                             >
+                              <HugeiconsIcon icon={ShoppingBasketDone01Icon} />
                               Orders
                             </Link>
                           }
@@ -134,9 +146,10 @@ export function HeaderClient({ header, user }: Props) {
                                   variant: "ghost",
                                   size: "lg",
                                 }),
-                                "w-full cursor-pointer",
+                                "w-full cursor-pointer justify-start",
                               )}
                             >
+                              <HugeiconsIcon icon={AddressBookIcon} />
                               Addresses
                             </Link>
                           }
@@ -151,10 +164,29 @@ export function HeaderClient({ header, user }: Props) {
                                   variant: "ghost",
                                   size: "lg",
                                 }),
-                                "w-full cursor-pointer",
+                                "w-full cursor-pointer justify-start",
                               )}
                             >
+                              <HugeiconsIcon icon={AccountSetting01Icon} />
                               Manage Account
+                            </Link>
+                          }
+                        />
+
+                        <DropdownMenuItem
+                          render={
+                            <Link
+                              href="/logout"
+                              className={cn(
+                                buttonVariants({
+                                  variant: "ghost",
+                                  size: "lg",
+                                }),
+                                "w-full cursor-pointer justify-start",
+                              )}
+                            >
+                              <HugeiconsIcon icon={LogoutSquare02Icon} />
+                              Logout
                             </Link>
                           }
                         />
@@ -167,12 +199,13 @@ export function HeaderClient({ header, user }: Props) {
                               href="/login"
                               className={cn(
                                 buttonVariants({
-                                  variant: "outline",
+                                  variant: "ghost",
                                   size: "lg",
                                 }),
-                                "w-full cursor-pointer",
+                                "w-full cursor-pointer justify-start",
                               )}
                             >
+                              <HugeiconsIcon icon={LoginSquare02Icon} />
                               Login
                             </Link>
                           }
@@ -184,12 +217,13 @@ export function HeaderClient({ header, user }: Props) {
                               href="/create-account"
                               className={cn(
                                 buttonVariants({
-                                  variant: "default",
+                                  variant: "ghost",
                                   size: "lg",
                                 }),
-                                "w-full cursor-pointer",
+                                "w-full cursor-pointer justify-start",
                               )}
                             >
+                              <HugeiconsIcon icon={UserAdd01Icon} />
                               Create Account
                             </Link>
                           }
@@ -197,18 +231,24 @@ export function HeaderClient({ header, user }: Props) {
                       </>
                     )}
 
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       render={
                         <Link
-                          href="/create-account/vendor"
+                          href={
+                            !user
+                              ? "/create-account?account-type=vendor"
+                              : "/create-account/vendor"
+                          }
                           className={cn(
                             buttonVariants({
-                              variant: "default",
+                              variant: "ghost",
                               size: "lg",
                             }),
-                            "w-full cursor-pointer",
+                            "w-full cursor-pointer justify-start",
                           )}
                         >
+                          <HugeiconsIcon icon={Store03Icon} />
                           Start Selling
                         </Link>
                       }

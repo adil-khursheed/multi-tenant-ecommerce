@@ -243,7 +243,6 @@ export interface User {
  */
 export interface Tenant {
   id: string;
-  owner: string | User;
   businessName: string;
   businessType:
     | 'individual'
@@ -1492,7 +1491,6 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "tenants_select".
  */
 export interface TenantsSelect<T extends boolean = true> {
-  owner?: T;
   businessName?: T;
   businessType?: T;
   storeName?: T;

@@ -11,15 +11,6 @@ export const Tenants: CollectionConfig = {
   },
   fields: [
     {
-      name: "owner",
-      type: "relationship",
-      relationTo: "users",
-      required: true,
-      admin: {
-        readOnly: true,
-      },
-    },
-    {
       name: "businessName",
       type: "text",
       required: true,

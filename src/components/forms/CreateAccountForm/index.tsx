@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePhoneVerification } from "@/hooks/usePhoneVerification";
+import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@/utilities/cn";
 import {
@@ -61,16 +62,25 @@ export const CreateAccountForm: React.FC = () => {
     ? `?${searchParams.toString()}`
     : "";
 
+  const accountType = searchParams.get("account-type") || "customer";
+
+  const { setUser } = useAuth();
+
   const router = useRouter();
 
   const trpc = useTRPC();
 
   const registrationMutation = useMutation(
     trpc.auth.register.mutationOptions({
-      onSuccess: () => {
-        router.push(
-          `/login?success=${encodeURIComponent("Please verify your email to login with the verification link sent to your inbox")}`,
-        );
+      onSuccess: (data) => {
+        if (data.accountType === "vendor") {
+          router.push(
+            `/login?success=${encodeURIComponent("Please verify your email to login with the verification link sent to your inbox")}`,
+          );
+        } else {
+          setUser(data.data || null);
+          router.push(`/account${allParams}`);
+        }
       },
       onError: (error) => {
         setError(error.message);
@@ -79,7 +89,7 @@ export const CreateAccountForm: React.FC = () => {
   );
 
   const defaultValues: CreateAccountFormData = {
-    accountType: "customer",
+    accountType: accountType as "customer" | "vendor",
     firstName: "",
     lastName: "",
     email: "",
@@ -95,7 +105,7 @@ export const CreateAccountForm: React.FC = () => {
     watch,
     reset,
     setValue,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
     handleSubmit,
   } = useForm<CreateAccountFormData>({
     resolver: zodResolver(createAccountSchema),
@@ -162,9 +172,9 @@ export const CreateAccountForm: React.FC = () => {
                           disabled={isSubmitting}
                           className={cn(
                             "flex flex-col items-center gap-3 whitespace-normal overflow-hidden",
-                            field.value === accountType.id &&
-                              "border-2 border-primary text-primary",
+                            "data-active:border-2 data-active:border-primary data-active:text-primary",
                           )}
+                          data-active={field.value === accountType.id}
                           onClick={() => {
                             field.onChange(accountType.id);
                             reset(

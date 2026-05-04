@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  type ConfirmationResult,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  type ConfirmationResult,
 } from "firebase/auth";
 
 import { auth } from "@/utilities/firebase";
@@ -194,7 +194,7 @@ export function usePhoneVerification(): UsePhoneVerificationReturn {
       // Clean up — sign out from Firebase since we only use it for verification,
       // not as our primary auth system (Payload handles that).
       await auth.signOut();
-
+      recaptchaVerifierRef.current = null;
       return true;
     } catch (err: unknown) {
       const firebaseError = err as { code?: string };
