@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 
 import { buildConfig } from "payload";
 import { mongooseAdapter } from "@payloadcms/db-mongodb";
+import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import {
   BoldFeature,
   ChecklistFeature,
@@ -17,12 +18,15 @@ import {
   UnorderedListFeature,
 } from "@payloadcms/richtext-lexical";
 
+import sharp from "sharp";
+
 import { Categories } from "@/collections/Categories";
 import { Media } from "@/collections/Media";
 import { Pages } from "@/collections/Pages";
 import { Users } from "@/collections/Users";
 import { Footer } from "@/globals/Footer";
 import { Header } from "@/globals/Header";
+import { Tenants } from "./collections/Tenants";
 import { env } from "./env";
 import { textStateConfig } from "./fields/textStateConfig";
 import { plugins } from "./plugins";
@@ -39,6 +43,11 @@ export default buildConfig({
       // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       beforeDashboard: ["@/components/BeforeDashboard#BeforeDashboard"],
+
+      graphics: {
+        Logo: "@/components/Logo/Logo#Logo",
+        Icon: "@/components/icons/logo#LogoIcon",
+      },
     },
     user: Users.slug,
     meta: {
@@ -50,10 +59,12 @@ export default buildConfig({
         },
       ],
     },
+    autoRefresh: true,
   },
-  collections: [Users, Pages, Categories, Media],
+  cookiePrefix: "dtlea",
+  collections: [Users, Pages, Categories, Media, Tenants],
   db: mongooseAdapter({
-    url: env.DATABASE_URL || "",
+    url: env.DATABASE_URL,
   }),
   editor: lexicalEditor({
     features: () => {
@@ -99,16 +110,25 @@ export default buildConfig({
       ];
     },
   }),
-  //email: nodemailerAdapter(),
+  email: nodemailerAdapter({
+    defaultFromAddress: env.SMTP_USER,
+    defaultFromName: env.COMPANY_NAME,
+    transportOptions: {
+      host: env.SMTP_HOST,
+      port: 587,
+      auth: {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
+      },
+    },
+  }),
+  jobs: {},
   endpoints: [],
   globals: [Header, Footer],
   plugins,
-  secret: env.PAYLOAD_SECRET || "",
+  secret: env.PAYLOAD_SECRET,
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  // Sharp is now an optional dependency -
-  // if you want to resize images, crop, set focal point, etc.
-  // make sure to install it and pass it to the config.
-  // sharp,
+  sharp,
 });

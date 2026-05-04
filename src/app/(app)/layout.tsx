@@ -6,7 +6,6 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { LivePreviewListener } from "@/components/LivePreviewListener";
 import { Providers } from "@/providers";
-import { InitTheme } from "@/providers/Theme/InitTheme";
 import { ensureStartsWith } from "@/utilities/ensureStartsWith";
 
 import "./globals.css";
@@ -14,6 +13,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 import { env } from "@/env";
+import { InitTheme } from "@/providers/Theme/InitTheme";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],

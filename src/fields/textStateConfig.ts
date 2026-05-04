@@ -32,14 +32,14 @@ export const textStateConfig = {
     },
   },
   fontSize: {
-    small: {
-      label: "Small",
+    "x-small": {
+      label: "X-Small",
       css: {
         "font-size": "12px",
       },
     },
-    normal: {
-      label: "Normal",
+    small: {
+      label: "Small",
       css: {
         "font-size": "14px",
       },

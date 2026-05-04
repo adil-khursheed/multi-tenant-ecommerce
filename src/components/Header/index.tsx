@@ -1,10 +1,15 @@
-import { getCachedGlobal } from '@/utilities/getGlobals'
+import { getCachedGlobal } from "@/utilities/getGlobals";
 
-import './index.css'
-import { HeaderClient } from './index.client'
+import "./index.css";
+
+import { getUser } from "@/utilities/getUser";
+import { HeaderClient } from "./index.client";
 
 export async function Header() {
-  const header = await getCachedGlobal('header', 1)()
+  const header = getCachedGlobal("header", 1)();
+  const user = getUser();
 
-  return <HeaderClient header={header} />
+  const [headerData, userData] = await Promise.all([header, user]);
+
+  return <HeaderClient header={headerData} user={userData} />;
 }

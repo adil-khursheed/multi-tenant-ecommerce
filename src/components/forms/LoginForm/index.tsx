@@ -1,112 +1,213 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
-import { useForm } from "react-hook-form";
+import React, { useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { FormError } from "@/components/forms/FormError";
-import { FormItem } from "@/components/forms/FormItem";
-import { Message } from "@/components/Message";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/providers/Auth";
-import { cn } from "@/utilities/cn";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Eye,
+  EyeOff,
+  LockPasswordIcon,
+  Mail,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useMutation } from "@tanstack/react-query";
 
-type FormData = {
-  email: string;
-  password: string;
-};
+import { Message } from "@/components/Message";
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
+import { Tenant } from "@/payload-types";
+import { useTRPC } from "@/trpc/client";
+import { loginSchema, type LoginFormData } from "./loginSchema";
 
 export const LoginForm: React.FC = () => {
+  const [togglePassword, setTogglePassword] = useState(false);
+  const [error, setError] = useState<null | string>(null);
+
   const searchParams = useSearchParams();
   const allParams = searchParams.toString()
     ? `?${searchParams.toString()}`
     : "";
   const redirect = useRef(searchParams.get("redirect"));
-  const { login } = useAuth();
+
   const router = useRouter();
-  const [error, setError] = React.useState<null | string>(null);
+
+  const trpc = useTRPC();
 
   const {
-    formState: { errors, isLoading },
+    formState: { errors, isSubmitting },
     handleSubmit,
-    register,
-  } = useForm<FormData>();
+    control,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const onSubmit = useCallback(
-    async (data: FormData) => {
-      try {
-        await login(data);
+  const { mutateAsync: login } = useMutation(
+    trpc.auth.login.mutationOptions({
+      onSuccess: (data) => {
         if (redirect?.current) router.push(redirect.current);
+        else if (
+          (data.data?.roles?.includes("vendor") &&
+            data.data.tenants?.some(
+              (tenant) => (tenant.tenant as Tenant)?.isTenantActive,
+            )) ||
+          data.data?.roles?.includes("admin")
+        )
+          router.push("/admin");
         else router.push("/account");
-      } catch (_) {
+      },
+      onError: () => {
         setError(
           "There was an error with the credentials provided. Please try again.",
         );
-      }
-    },
-    [login, router],
+      },
+    }),
   );
 
+  const onSubmit = async (data: LoginFormData) => {
+    setError(null);
+    await login(data);
+  };
+
   return (
-    <form className="" onSubmit={handleSubmit(onSubmit)}>
-      <Message className="classes.message" error={error} />
-      <div className="flex flex-col gap-8">
-        <FormItem>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            {...register("email", { required: "Email is required." })}
-          />
-          {errors.email && <FormError message={errors.email.message} />}
-        </FormItem>
-
-        <FormItem>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            {...register("password", {
-              required: "Please provide a password.",
-            })}
-          />
-          {errors.password && <FormError message={errors.password.message} />}
-        </FormItem>
-
-        <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
-          <p>
-            Forgot your password?{" "}
-            <Link href={`/forgot-password${allParams}`}>
-              Click here to reset it
+    <div className="flex w-full flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24">
+      <div className="mx-auto w-full max-w-md">
+        {/* Header */}
+        <div className="mb-10">
+          <p className="mb-3 font-sans text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Welcome back
+          </p>
+          <h1 className="font-serif text-3xl font-light tracking-tight text-foreground sm:text-4xl">
+            Sign in to your wardrobe.
+          </h1>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link
+              href={`/create-account${allParams}`}
+              className="font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline"
+            >
+              Create one &rarr;
             </Link>
           </p>
         </div>
-      </div>
 
-      <div className="flex gap-4 justify-between">
-        <Link
-          href={`/create-account${allParams}`}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "lg" }),
-            "grow max-w-[50%]",
-          )}
-        >
-          Create an account
-        </Link>
+        <Separator className="mb-8" />
 
-        <Button
-          className="grow"
-          disabled={isLoading}
-          size="lg"
-          type="submit"
-          variant="default"
-        >
-          {isLoading ? "Processing" : "Continue"}
-        </Button>
+        {/* Error Message */}
+        {error && <Message className="mb-6" error={error} />}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FieldGroup className="gap-6">
+            <Controller
+              control={control}
+              name="email"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel
+                    required
+                    className="text-xs uppercase tracking-[0.15em]"
+                  >
+                    Email Address
+                  </FieldLabel>
+                  <InputGroup
+                    aria-invalid={fieldState.invalid}
+                    className="h-12"
+                  >
+                    <InputGroupInput
+                      {...field}
+                      id="signup-email"
+                      type="email"
+                      placeholder="arjun@editorial.com"
+                    />
+                    <InputGroupAddon align={"inline-start"}>
+                      <HugeiconsIcon icon={Mail} />
+                    </InputGroupAddon>
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="password"
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel
+                    required
+                    className="text-xs uppercase tracking-[0.15em]"
+                  >
+                    Create Password
+                  </FieldLabel>
+                  <InputGroup
+                    aria-invalid={fieldState.invalid}
+                    className="h-12"
+                  >
+                    <InputGroupInput
+                      {...field}
+                      id="signup-password"
+                      type={togglePassword ? "text" : "password"}
+                      placeholder="••••••••"
+                    />
+                    <InputGroupAddon align={"inline-start"}>
+                      <HugeiconsIcon icon={LockPasswordIcon} />
+                    </InputGroupAddon>
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton
+                        aria-label="Show Password"
+                        title="Show Password"
+                        size="icon-xs"
+                        onClick={() => setTogglePassword((prev) => !prev)}
+                      >
+                        {togglePassword ? (
+                          <HugeiconsIcon icon={EyeOff} />
+                        ) : (
+                          <HugeiconsIcon icon={Eye} />
+                        )}
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Sign In Button */}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-2 h-12 w-full text-xs font-semibold uppercase tracking-[0.2em]"
+              size="lg"
+            >
+              {isSubmitting ? <Spinner /> : "Sign In"}
+            </Button>
+          </FieldGroup>
+        </form>
       </div>
-    </form>
+    </div>
   );
 };

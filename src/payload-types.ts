@@ -76,6 +76,7 @@ export interface Config {
     pages: Page;
     categories: Category;
     media: Media;
+    tenants: Tenant;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -109,6 +110,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    tenants: TenantsSelect<false> | TenantsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -186,8 +188,19 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
-  name?: string | null;
-  roles?: ('admin' | 'customer')[] | null;
+  name: string;
+  phone: string;
+  roles?: ('admin' | 'vendor' | 'customer')[] | null;
+  isActive?: boolean | null;
+  /**
+   * Tenants associated with the user
+   */
+  tenants?:
+    | {
+        tenant: string | Tenant;
+        id?: string | null;
+      }[]
+    | null;
   orders?: {
     docs?: (string | Order)[];
     hasNextPage?: boolean;
@@ -210,6 +223,8 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -221,6 +236,85 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: string;
+  businessName: string;
+  businessType:
+    | 'individual'
+    | 'partnership'
+    | 'proprietorship'
+    | 'llp'
+    | 'private_limited'
+    | 'public_limited'
+    | 'ngo'
+    | 'trust'
+    | 'society'
+    | 'educational_institutes'
+    | 'not_yet_registered'
+    | 'other';
+  /**
+   * This is the name of the store (e.g. John's Store)
+   */
+  storeName: string;
+  /**
+   * This is the subdomain of the store (e.g. [slug].localhost:3000)
+   */
+  storeSlug: string;
+  storeLogo?: (string | null) | Media;
+  storeBanner?: (string | null) | Media;
+  verificationStatus?: ('pending' | 'under_review' | 'approved' | 'rejected') | null;
+  panNumber: string;
+  gstNumber?: string | null;
+  bankDetails: {
+    accountNumber: string;
+    ifscCode: string;
+    bankName: string;
+    accountHolderName: string;
+    bankBranch: string;
+    bankAccountType: 'savings' | 'current';
+  };
+  isTenantActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -265,6 +359,7 @@ export interface Order {
  */
 export interface Product {
   id: string;
+  tenant?: (string | null) | Tenant;
   title: string;
   description?: {
     root: {
@@ -318,40 +413,6 @@ export interface Product {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1090,6 +1151,10 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'tenants';
+        value: string | Tenant;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: string | Form;
       } | null)
@@ -1177,7 +1242,15 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  phone?: T;
   roles?: T;
+  isActive?: T;
+  tenants?:
+    | T
+    | {
+        tenant?: T;
+        id?: T;
+      };
   orders?: T;
   cart?: T;
   addresses?: T;
@@ -1188,6 +1261,8 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1413,6 +1488,34 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  businessName?: T;
+  businessType?: T;
+  storeName?: T;
+  storeSlug?: T;
+  storeLogo?: T;
+  storeBanner?: T;
+  verificationStatus?: T;
+  panNumber?: T;
+  gstNumber?: T;
+  bankDetails?:
+    | T
+    | {
+        accountNumber?: T;
+        ifscCode?: T;
+        bankName?: T;
+        accountHolderName?: T;
+        bankBranch?: T;
+        bankAccountType?: T;
+      };
+  isTenantActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
@@ -1626,6 +1729,7 @@ export interface VariantOptionsSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   description?: T;
   gallery?:
