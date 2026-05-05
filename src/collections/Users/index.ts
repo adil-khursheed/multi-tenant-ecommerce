@@ -1,17 +1,39 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from "payload";
+import { tenantsArrayField } from "@payloadcms/plugin-multi-tenant/fields";
 
-import { adminOnly } from '@/access/adminOnly'
-import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
-import { publicAccess } from '@/access/publicAccess'
-import { adminOrSelf } from '@/access/adminOrSelf'
-import { checkRole } from '@/access/utilities'
+import { adminOnly } from "@/access/adminOnly";
+import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
+import { adminOrSelf } from "@/access/adminOrSelf";
+import { publicAccess } from "@/access/publicAccess";
+import { checkRole } from "@/access/utilities";
+import { forgotPasswordHTML, verifyEmailHTML } from "@/email/templates";
+import { env } from "@/env";
+import { autoVerifyCustomers } from "./hooks/autoVerifyCustomers";
+import { ensureFirstUserIsAdmin } from "./hooks/ensureFirstUserIsAdmin";
 
-import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
+const defaultTenantArrayField = tenantsArrayField({
+  tenantsArrayFieldName: "tenants",
+  tenantsCollectionSlug: "tenants",
+  tenantsArrayTenantFieldName: "tenant",
+  arrayFieldAccess: {
+    create: () => true,
+    read: () => true,
+    update: () => true,
+  },
+  tenantFieldAccess: {
+    create: () => true,
+    read: () => true,
+    update: () => true,
+  },
+});
 
 export const Users: CollectionConfig = {
-  slug: 'users',
+  slug: "users",
+  hooks: {
+    beforeChange: [autoVerifyCustomers],
+  },
   access: {
-    admin: ({ req: { user } }) => checkRole(['admin'], user),
+    admin: ({ req: { user } }) => checkRole(["admin"], user),
     create: publicAccess,
     delete: adminOnly,
     read: adminOrSelf,
@@ -19,71 +41,130 @@ export const Users: CollectionConfig = {
     update: adminOrSelf,
   },
   admin: {
-    group: 'Users',
-    defaultColumns: ['name', 'email', 'roles'],
-    useAsTitle: 'name',
+    group: "Users",
+    defaultColumns: ["name", "email", "roles"],
+    useAsTitle: "name",
   },
   auth: {
     tokenExpiration: 1209600,
+    maxLoginAttempts: 5,
+    lockTime: 600000,
+    verify: {
+      generateEmailHTML: ({ token, user }) => {
+        const verificationUrl = `${env.NEXT_PUBLIC_SERVER_URL}/verify-email?token=${token}`;
+        return verifyEmailHTML({
+          userName: user.name,
+          verificationUrl,
+        });
+      },
+      generateEmailSubject: () => {
+        return "Verify your email – DTLEA";
+      },
+    },
+    forgotPassword: {
+      generateEmailHTML(args) {
+        const resetUrl = `${env.NEXT_PUBLIC_SERVER_URL}/reset-password?token=${args?.token}`;
+        return forgotPasswordHTML({
+          userName: args?.user?.name,
+          resetUrl,
+        });
+      },
+      generateEmailSubject: () => {
+        return "Reset your password – DTLEA";
+      },
+    },
   },
   fields: [
     {
-      name: 'name',
-      type: 'text',
+      name: "name",
+      label: "Full Name",
+      type: "text",
+      required: true,
     },
     {
-      name: 'roles',
-      type: 'select',
+      name: "phone",
+      label: "Phone Number",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "roles",
+      type: "select",
+      defaultValue: ["customer"],
+      hasMany: true,
       access: {
         create: adminOnlyFieldAccess,
         read: adminOnlyFieldAccess,
         update: adminOnlyFieldAccess,
       },
-      defaultValue: ['customer'],
-      hasMany: true,
+      admin: {
+        position: "sidebar",
+      },
       hooks: {
         beforeChange: [ensureFirstUserIsAdmin],
       },
       options: [
         {
-          label: 'admin',
-          value: 'admin',
+          label: "admin",
+          value: "admin",
         },
         {
-          label: 'customer',
-          value: 'customer',
+          label: "vendor",
+          value: "vendor",
+        },
+        {
+          label: "customer",
+          value: "customer",
         },
       ],
     },
     {
-      name: 'orders',
-      type: 'join',
-      collection: 'orders',
-      on: 'customer',
-      admin: {
-        allowCreate: false,
-        defaultColumns: ['id', 'createdAt', 'total', 'currency', 'items'],
+      name: "isActive",
+      type: "checkbox",
+      defaultValue: true,
+      access: {
+        create: adminOnlyFieldAccess,
+        read: adminOnlyFieldAccess,
+        update: adminOnlyFieldAccess,
       },
     },
     {
-      name: 'cart',
-      type: 'join',
-      collection: 'carts',
-      on: 'customer',
+      ...defaultTenantArrayField,
       admin: {
-        allowCreate: false,
-        defaultColumns: ['id', 'createdAt', 'total', 'currency', 'items'],
+        ...(defaultTenantArrayField.admin || {}),
+        position: "sidebar",
+        description: "Tenants associated with the user",
       },
     },
     {
-      name: 'addresses',
-      type: 'join',
-      collection: 'addresses',
-      on: 'customer',
+      name: "orders",
+      type: "join",
+      collection: "orders",
+      on: "customer",
       admin: {
         allowCreate: false,
-        defaultColumns: ['id'],
+        defaultColumns: ["id", "createdAt", "total", "currency", "items"],
+      },
+    },
+    {
+      name: "cart",
+      type: "join",
+      collection: "carts",
+      on: "customer",
+      admin: {
+        allowCreate: false,
+        defaultColumns: ["id", "createdAt", "total", "currency", "items"],
+      },
+    },
+    {
+      name: "addresses",
+      type: "join",
+      collection: "addresses",
+      on: "customer",
+      admin: {
+        allowCreate: false,
+        defaultColumns: ["id"],
       },
     },
   ],
-}
+};

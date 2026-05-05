@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers as getHeaders } from "next/headers.js";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -11,12 +10,13 @@ import { AccountForm } from "@/components/forms/AccountForm";
 import { OrderItem } from "@/components/OrderItem";
 import { buttonVariants } from "@/components/ui/button";
 import { Order } from "@/payload-types";
+import { getUser } from "@/utilities/getUser";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
 
 export default async function AccountPage() {
-  const headers = await getHeaders();
   const payload = await getPayload({ config: configPromise });
-  const { user } = await payload.auth({ headers });
+
+  const user = await getUser();
 
   let orders: Order[] | null = null;
 

@@ -1,3 +1,7 @@
+export const PAN_REGEX = /^[a-zA-z]{5}\d{4}[a-zA-Z]{1}$/;
+export const GST_REGEX =
+  /^[0123][0-9][a-z]{5}[0-9]{4}[a-z][0-9][a-z0-9][a-z0-9]$/gi;
+
 export type SortFilterItem = {
   reverse: boolean;
   slug: null | string;
