@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { env } from "@/env";
+import { formatSlug } from "@/utilities/formatSlug";
 import { VendorOnboardingFormData } from "./vendor-onboarding-schema";
 
 const businessTypes = [
@@ -68,12 +69,7 @@ const BusinessInfoForm = ({
   const watchedStoreSlug = watch("storeSlug");
 
   const slugTransform = useCallback((value?: string) => {
-    if (value && typeof value === "string")
-      return value
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-zA-Z\d\s]+/g, "-")
-        .replace(/\s/g, "-");
+    if (value && typeof value === "string") return formatSlug(value);
 
     return "";
   }, []);

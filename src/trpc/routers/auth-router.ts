@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { createAccountSchema } from "@/components/forms/CreateAccountForm/createAccountSchema";
 import { loginSchema } from "@/components/forms/LoginForm/loginSchema";
@@ -88,4 +89,31 @@ export const authRouter = {
       data: userData.user,
     };
   }),
+
+  verifyEmail: baseProcedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!input.token)
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Please provide a verification token",
+        });
+
+      const result = await ctx.payload.verifyEmail({
+        collection: "users",
+        token: input.token,
+      });
+
+      if (!result) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid verification token",
+        });
+      }
+
+      return {
+        success: true,
+        message: "Email verified successfully",
+      };
+    }),
 };

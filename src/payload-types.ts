@@ -243,6 +243,16 @@ export interface User {
  */
 export interface Tenant {
   id: string;
+  /**
+   * This is the name of the store (e.g. John's Store)
+   */
+  storeName: string;
+  /**
+   * This is the subdomain of the store (e.g. [slug].localhost:3000)
+   */
+  storeSlug: string;
+  storeLogo?: (string | null) | Media;
+  storeBanner?: (string | null) | Media;
   businessName: string;
   businessType:
     | 'individual'
@@ -257,16 +267,6 @@ export interface Tenant {
     | 'educational_institutes'
     | 'not_yet_registered'
     | 'other';
-  /**
-   * This is the name of the store (e.g. John's Store)
-   */
-  storeName: string;
-  /**
-   * This is the subdomain of the store (e.g. [slug].localhost:3000)
-   */
-  storeSlug: string;
-  storeLogo?: (string | null) | Media;
-  storeBanner?: (string | null) | Media;
   verificationStatus?: ('pending' | 'under_review' | 'approved' | 'rejected') | null;
   panNumber: string;
   gstNumber?: string | null;
@@ -278,9 +278,85 @@ export interface Tenant {
     bankBranch: string;
     bankAccountType: 'savings' | 'current';
   };
+  privacyPolicy?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  termsAndConditions?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  refundAndCancellationPolicy?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  shippingPolicy?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  returnAndExchangePolicy?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   isTenantActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1491,12 +1567,12 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "tenants_select".
  */
 export interface TenantsSelect<T extends boolean = true> {
-  businessName?: T;
-  businessType?: T;
   storeName?: T;
   storeSlug?: T;
   storeLogo?: T;
   storeBanner?: T;
+  businessName?: T;
+  businessType?: T;
   verificationStatus?: T;
   panNumber?: T;
   gstNumber?: T;
@@ -1510,9 +1586,15 @@ export interface TenantsSelect<T extends boolean = true> {
         bankBranch?: T;
         bankAccountType?: T;
       };
+  privacyPolicy?: T;
+  termsAndConditions?: T;
+  refundAndCancellationPolicy?: T;
+  shippingPolicy?: T;
+  returnAndExchangePolicy?: T;
   isTenantActive?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

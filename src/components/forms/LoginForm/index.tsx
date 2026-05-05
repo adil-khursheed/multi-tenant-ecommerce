@@ -50,7 +50,7 @@ export const LoginForm: React.FC = () => {
   const trpc = useTRPC();
 
   const {
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
     handleSubmit,
     control,
   } = useForm<LoginFormData>({
@@ -66,7 +66,16 @@ export const LoginForm: React.FC = () => {
       onSuccess: (data) => {
         if (redirect?.current) router.push(redirect.current);
         else if (
+          data &&
+          data.data &&
+          data.data.roles?.includes("vendor") &&
+          (!data.data.tenants || data.data.tenants.length === 0)
+        )
+          router.push("/create-account/vendor");
+        else if (
           (data.data?.roles?.includes("vendor") &&
+            data.data.tenants &&
+            data.data.tenants?.length > 0 &&
             data.data.tenants?.some(
               (tenant) => (tenant.tenant as Tenant)?.isTenantActive,
             )) ||
