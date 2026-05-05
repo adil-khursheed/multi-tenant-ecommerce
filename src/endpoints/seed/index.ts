@@ -167,6 +167,7 @@ export const seed = async ({
         email: "customer@example.com",
         password: "password",
         roles: ["customer"],
+        phone: "+919874561230",
       },
     }),
     payload.create({
