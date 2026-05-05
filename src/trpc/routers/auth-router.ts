@@ -1,3 +1,6 @@
+import { logout as payloadLogout } from "@payloadcms/next/auth";
+
+import config from "@payload-config";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -87,6 +90,15 @@ export const authRouter = {
       success: true,
       message: "User logged in successfully",
       data: userData.user,
+    };
+  }),
+
+  logout: baseProcedure.mutation(async ({ ctx }) => {
+    await payloadLogout({ allSessions: true, config });
+
+    return {
+      success: true,
+      message: "User logged out successfully",
     };
   }),
 

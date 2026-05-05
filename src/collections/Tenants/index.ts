@@ -124,10 +124,11 @@ export const Tenants: CollectionConfig = {
                 beforeChange: [
                   ({ value }) => {
                     if (!value) return value;
-                    if (!PAN_REGEX.test(value)) {
+                    const normalizedValue = value.trim().toUpperCase();
+                    if (!PAN_REGEX.test(normalizedValue)) {
                       throw new Error("Invalid PAN");
                     }
-                    return value.toUpperCase().trim();
+                    return normalizedValue;
                   },
                 ],
               },
@@ -142,10 +143,11 @@ export const Tenants: CollectionConfig = {
                 beforeChange: [
                   ({ value }) => {
                     if (!value) return value;
-                    if (!GST_REGEX.test(value)) {
+                    const normalizedValue = value.trim().toUpperCase();
+                    if (!GST_REGEX.test(normalizedValue)) {
                       throw new Error("Invalid GST");
                     }
-                    return value.toUpperCase().trim();
+                    return normalizedValue;
                   },
                 ],
               },

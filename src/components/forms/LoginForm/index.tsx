@@ -32,6 +32,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tenant } from "@/payload-types";
+import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/trpc/client";
 import { loginSchema, type LoginFormData } from "./loginSchema";
 
@@ -49,6 +50,8 @@ export const LoginForm: React.FC = () => {
 
   const trpc = useTRPC();
 
+  const { setUser } = useAuth();
+
   const {
     formState: { isSubmitting },
     handleSubmit,
@@ -64,6 +67,8 @@ export const LoginForm: React.FC = () => {
   const { mutateAsync: login } = useMutation(
     trpc.auth.login.mutationOptions({
       onSuccess: (data) => {
+        setUser(data.data || null);
+
         if (redirect?.current) router.push(redirect.current);
         else if (
           data &&

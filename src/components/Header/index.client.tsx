@@ -9,7 +9,6 @@ import {
   AddressBookIcon,
   FavouriteIcon,
   LoginSquare02Icon,
-  LogoutSquare02Icon,
   ShoppingBasketDone01Icon,
   Store03Icon,
   User02Icon,
@@ -23,7 +22,9 @@ import { OpenCartButton } from "@/components/Cart/OpenCart";
 import { LogoIcon } from "@/components/icons/logo";
 import { CMSLink } from "@/components/Link";
 import { User } from "@/payload-types";
+import { useAuth } from "@/providers/Auth";
 import { cn } from "@/utilities/cn";
+import { Logout } from "../Logout";
 import { Button, buttonVariants } from "../ui/button";
 import {
   DropdownMenu,
@@ -41,9 +42,13 @@ type Props = {
   user: User | null;
 };
 
-export function HeaderClient({ header, user }: Props) {
+export function HeaderClient({ header, user: serverUser }: Props) {
   const menu = header.navItems || [];
   const pathname = usePathname();
+  const { user: clientUser } = useAuth();
+  
+  // Use client user if it's been initialized (either User object or null), otherwise fallback to server user
+  const user = clientUser !== undefined ? clientUser : serverUser;
 
   return (
     <div className="relative z-20 border-b border-border bg-background">
@@ -175,19 +180,10 @@ export function HeaderClient({ header, user }: Props) {
 
                         <DropdownMenuItem
                           render={
-                            <Link
-                              href="/logout"
-                              className={cn(
-                                buttonVariants({
-                                  variant: "ghost",
-                                  size: "lg",
-                                }),
-                                "w-full cursor-pointer justify-start",
-                              )}
-                            >
-                              <HugeiconsIcon icon={LogoutSquare02Icon} />
-                              Logout
-                            </Link>
+                            <Logout
+                              label="Logout"
+                              className="w-full cursor-pointer justify-start"
+                            />
                           }
                         />
                       </>
