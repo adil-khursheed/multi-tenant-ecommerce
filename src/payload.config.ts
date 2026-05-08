@@ -26,6 +26,7 @@ import { Pages } from "@/collections/Pages";
 import { Users } from "@/collections/Users";
 import { Footer } from "@/globals/Footer";
 import { Header } from "@/globals/Header";
+import { Commissions } from "./collections/Commissions";
 import { Tenants } from "./collections/Tenants";
 import { env } from "./env";
 import { textStateConfig } from "./fields/textStateConfig";
@@ -62,7 +63,7 @@ export default buildConfig({
     autoRefresh: true,
   },
   cookiePrefix: "dtlea",
-  collections: [Users, Pages, Categories, Media, Tenants],
+  collections: [Users, Pages, Categories, Media, Tenants, Commissions],
   db: mongooseAdapter({
     url: env.DATABASE_URL,
   }),

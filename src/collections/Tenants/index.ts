@@ -10,12 +10,13 @@ import {
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
 import { env } from "@/env";
 import { GST_REGEX, PAN_REGEX } from "@/lib/constants";
-import { formatSlug } from "@/utilities/formatSlug";
+import { decryptField, encryptField, isEncrypted } from "@/lib/crypto";
 
 export const Tenants: CollectionConfig = {
   slug: "tenants",
   admin: {
     useAsTitle: "storeName",
+    group: "Users",
   },
   fields: [
     {
@@ -38,22 +39,22 @@ export const Tenants: CollectionConfig = {
         position: "sidebar",
         description: `This is the subdomain of the store (e.g. [slug].${env.NEXT_PUBLIC_SERVER_URL.split("//")[1]})`,
       },
-      hooks: {
-        beforeValidate: [
-          ({ value, data }) => {
-            // If the user manually provided a custom slug, format and use it
-            if (value) {
-              return formatSlug(value);
-            }
+      // hooks: {
+      //   beforeValidate: [
+      //     ({ value, data }) => {
+      //       // If the user manually provided a custom slug, format and use it
+      //       if (value) {
+      //         return formatSlug(value);
+      //       }
 
-            // If the slug is empty, generate it from the storeName
-            if (data?.storeName) {
-              return formatSlug(data.storeName);
-            }
-            return value;
-          },
-        ],
-      },
+      //       // If the slug is empty, generate it from the storeName
+      //       if (data?.storeName) {
+      //         return formatSlug(data.storeName);
+      //       }
+      //       return value;
+      //     },
+      //   ],
+      // },
     },
     {
       name: "storeLogo",
@@ -162,6 +163,29 @@ export const Tenants: CollectionConfig = {
                   label: "Account Number",
                   type: "text",
                   required: true,
+                  admin: {
+                    description:
+                      "Stored encrypted. Used to set up Razorpay settlements.",
+                  },
+                  hooks: {
+                    beforeChange: [
+                      ({ value }) => {
+                        if (!value) return value;
+                        if (isEncrypted(value)) return value; // prevent double-encryption
+                        return encryptField(value);
+                      },
+                    ],
+                    afterRead: [
+                      ({ value }) => {
+                        if (!value) return value;
+                        try {
+                          return decryptField(value);
+                        } catch {
+                          return "••••••••";
+                        }
+                      },
+                    ],
+                  },
                 },
                 {
                   name: "ifscCode",
@@ -293,9 +317,84 @@ export const Tenants: CollectionConfig = {
             },
           ],
         },
+
+        // ── Section: Razorpay (read-only — set programmatically) ──────────────
+        {
+          label: "Razorpay Status",
+          fields: [
+            {
+              type: "row",
+              fields: [
+                {
+                  name: "razorpayAccountId",
+                  label: "Razorpay Account ID",
+                  type: "text",
+                  admin: {
+                    readOnly: true,
+                    description: "Set automatically after onboarding.",
+                  },
+                },
+                {
+                  name: "razorpayActivationStatus",
+                  label: "Activation Status",
+                  type: "select",
+                  options: [
+                    { label: "Pending", value: "pending" },
+                    { label: "Under Review", value: "under_review" },
+                    { label: "Activated", value: "activated" },
+                    {
+                      label: "Needs Clarification",
+                      value: "needs_clarification",
+                    },
+                    {
+                      label: "Missing Bank Details",
+                      value: "missing_bank_details",
+                    },
+                    { label: "Onboarding Failed", value: "onboarding_failed" },
+                  ],
+                  admin: { readOnly: true },
+                },
+              ],
+            },
+            {
+              type: "row",
+              fields: [
+                {
+                  name: "razorpayStakeholderId",
+                  label: "Stakeholder ID",
+                  type: "text",
+                  admin: { readOnly: true },
+                },
+                {
+                  name: "razorpayProductId",
+                  label: "Product ID",
+                  type: "text",
+                  admin: { readOnly: true },
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
 
+    // ── Section: Commission ───────────────────────────────────────────────
+    {
+      name: "commissionRate",
+      label: "Commission Rate (%)",
+      type: "number",
+      defaultValue: 15,
+      required: true,
+      min: 0,
+      max: 100,
+      admin: {
+        position: "sidebar",
+        description:
+          "Platform commission percentage deducted per sale. Default is 15%.",
+      },
+    },
+
+    // ── Section: Activation ───────────────────────────────────────────────
     {
       name: "isTenantActive",
       type: "checkbox",
@@ -307,13 +406,10 @@ export const Tenants: CollectionConfig = {
       },
       admin: {
         position: "sidebar",
+        description:
+          "Toggle to true only after manually verifying the vendor. This triggers Razorpay onboarding automatically.",
+        condition: (_, siblingData) => true,
       },
     },
   ],
-  versions: {
-    drafts: {
-      autosave: true,
-    },
-    maxPerDoc: 50,
-  },
 };

@@ -1,17 +1,31 @@
-import { Control, Controller } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  UseFormSetValue,
+  UseFormWatch,
+} from "react-hook-form";
 
 import {
   BankIcon,
+  CheckmarkCircle01Icon,
   GlobalSearchIcon,
   Location01Icon,
   User02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
 import {
@@ -21,13 +35,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { useTRPC } from "@/trpc/client";
 import { type VendorOnboardingFormData } from "./vendor-onboarding-schema";
 
 const BankAccountInfoForm = ({
   control,
+  setValue,
+  watch,
 }: {
   control: Control<VendorOnboardingFormData>;
+  setValue: UseFormSetValue<VendorOnboardingFormData>;
+  watch: UseFormWatch<VendorOnboardingFormData>;
 }) => {
+  const bankBranchAddress = watch("bankBranchAddress");
+  const isIFSCVerified = watch("isIFSCVerified");
+
+  const trpc = useTRPC();
+
+  const { mutateAsync: verifyIFSC, isPending } = useMutation(
+    trpc.vendor.verifyIFSC.mutationOptions({
+      onSuccess: async (data) => {
+        if (data) {
+          setValue("bankName", data.BANK);
+          setValue("bankBranch", data.BRANCH);
+          setValue("bankBranchAddress", data.ADDRESS);
+          setValue("isIFSCVerified", true);
+        }
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    }),
+  );
+
   return (
     <>
       <Controller
@@ -35,7 +76,10 @@ const BankAccountInfoForm = ({
         name="bankAccountHolderName"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel className="text-xs uppercase tracking-[0.15em]">
+            <FieldLabel
+              required
+              className="text-xs uppercase tracking-[0.15em]"
+            >
               Bank Account Holder Name
             </FieldLabel>
             <InputGroup aria-invalid={fieldState.invalid} className="h-12">
@@ -58,7 +102,10 @@ const BankAccountInfoForm = ({
         name="bankAccountNumber"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel className="text-xs uppercase tracking-[0.15em]">
+            <FieldLabel
+              required
+              className="text-xs uppercase tracking-[0.15em]"
+            >
               Bank Account Number
             </FieldLabel>
             <InputGroup aria-invalid={fieldState.invalid} className="h-12">
@@ -81,19 +128,64 @@ const BankAccountInfoForm = ({
         name="bankIfscCode"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel className="text-xs uppercase tracking-[0.15em]">
+            <FieldLabel
+              required
+              className="text-xs uppercase tracking-[0.15em]"
+            >
               IFSC Code
             </FieldLabel>
-            <InputGroup aria-invalid={fieldState.invalid} className="h-12">
+            <InputGroup
+              aria-disabled={isPending}
+              aria-invalid={fieldState.invalid}
+              className="h-12"
+            >
               <InputGroupInput
                 {...field}
                 id="signup-bank-ifsc-code"
                 placeholder="IFSC Code"
+                disabled={isPending}
+                autoCapitalize="characters"
+                onChange={(e) => {
+                  if (isIFSCVerified) {
+                    setValue("bankName", "");
+                    setValue("bankBranch", "");
+                    setValue("bankBranchAddress", "");
+                    setValue("isIFSCVerified", false);
+                  }
+                  field.onChange(e.target.value.toUpperCase());
+                }}
               />
               <InputGroupAddon>
                 <HugeiconsIcon icon={GlobalSearchIcon} />
               </InputGroupAddon>
+
+              <InputGroupAddon align={"inline-end"}>
+                <InputGroupButton
+                  variant={"link"}
+                  size={"sm"}
+                  disabled={isPending || isIFSCVerified}
+                  onClick={async () =>
+                    await verifyIFSC({ ifsc: field.value.toUpperCase() })
+                  }
+                >
+                  {isPending ? (
+                    <Spinner />
+                  ) : isIFSCVerified ? (
+                    <HugeiconsIcon
+                      icon={CheckmarkCircle01Icon}
+                      className="text-green-500"
+                    />
+                  ) : (
+                    "Verify"
+                  )}
+                </InputGroupButton>
+              </InputGroupAddon>
             </InputGroup>
+            {bankBranchAddress && (
+              <FieldDescription className="text-[10px] font-medium text-green-500">
+                {bankBranchAddress}
+              </FieldDescription>
+            )}
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
         )}
@@ -104,10 +196,17 @@ const BankAccountInfoForm = ({
         name="bankName"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel className="text-xs uppercase tracking-[0.15em]">
+            <FieldLabel
+              required
+              className="text-xs uppercase tracking-[0.15em]"
+            >
               Bank Name
             </FieldLabel>
-            <InputGroup aria-invalid={fieldState.invalid} className="h-12">
+            <InputGroup
+              aria-disabled={true}
+              aria-invalid={fieldState.invalid}
+              className="h-12"
+            >
               <InputGroupInput
                 {...field}
                 id="signup-bank-name"
@@ -127,10 +226,17 @@ const BankAccountInfoForm = ({
         name="bankBranch"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel className="text-xs uppercase tracking-[0.15em]">
+            <FieldLabel
+              required
+              className="text-xs uppercase tracking-[0.15em]"
+            >
               Bank Branch
             </FieldLabel>
-            <InputGroup aria-invalid={fieldState.invalid} className="h-12">
+            <InputGroup
+              aria-disabled={true}
+              aria-invalid={fieldState.invalid}
+              className="h-12"
+            >
               <InputGroupInput
                 {...field}
                 id="signup-bank-branch"
@@ -150,7 +256,10 @@ const BankAccountInfoForm = ({
         name="bankAccountType"
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel className="text-xs uppercase tracking-[0.15em]">
+            <FieldLabel
+              required
+              className="text-xs uppercase tracking-[0.15em]"
+            >
               Bank Account Type
             </FieldLabel>
             <Select

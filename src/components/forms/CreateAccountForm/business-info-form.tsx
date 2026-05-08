@@ -252,6 +252,9 @@ const BusinessInfoForm = ({
                 {...field}
                 id="signup-panNumber"
                 placeholder="Personal or Business PAN"
+                onChange={(e) => {
+                  field.onChange(e.target.value.toUpperCase());
+                }}
               />
               <InputGroupAddon>
                 <HugeiconsIcon icon={PassportIcon} />
@@ -309,6 +312,9 @@ const BusinessInfoForm = ({
                   id="signup-gst"
                   placeholder="Goods & Services Tax Identification Number"
                   autoCapitalize="characters"
+                  onChange={(e) => {
+                    field.onChange(e.target.value.toUpperCase());
+                  }}
                 />
                 <InputGroupAddon>
                   <HugeiconsIcon icon={TaxesIcon} />

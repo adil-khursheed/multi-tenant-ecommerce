@@ -30,6 +30,7 @@ export const env = createEnv({
     SMTP_HOST: z.string().min(1, "SMTP host is required"),
     SMTP_USER: z.string().min(1, "SMTP user is required"),
     SMTP_PASS: z.string().min(1, "SMTP pass is required"),
+    ENCRYPTION_KEY: z.string().min(1, "Encryption key is required"),
   },
   client: {
     NEXT_PUBLIC_SERVER_URL: z

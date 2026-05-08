@@ -133,11 +133,13 @@ const VendorMultiStepForm = () => {
       state: { name: "", isoCode: "" },
       country: { name: "", isoCode: "" },
       pincode: "",
+      bankAccountHolderName: "",
       bankAccountNumber: "",
       bankIfscCode: "",
+      isIFSCVerified: false,
+      bankBranchAddress: "",
       bankName: "",
       bankBranch: "",
-      bankAccountHolderName: "",
       bankAccountType: "savings",
     },
   });
@@ -145,6 +147,8 @@ const VendorMultiStepForm = () => {
   const currentStep = steps[activeStep];
 
   const handleNext = async () => {
+    console.log(getValues());
+
     if (activeStep >= steps.length - 1) return;
 
     const currentFields = steps[activeStep]
@@ -322,7 +326,13 @@ const VendorMultiStepForm = () => {
                 />
               )}
 
-              {activeStep === 2 && <BankAccountInfoForm control={control} />}
+              {activeStep === 2 && (
+                <BankAccountInfoForm
+                  control={control}
+                  setValue={setValue}
+                  watch={watch}
+                />
+              )}
 
               {activeStep === 3 && (
                 <ReviewStep getValues={getValues} onEditStep={setActiveStep} />

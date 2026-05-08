@@ -77,6 +77,7 @@ export interface Config {
     categories: Category;
     media: Media;
     tenants: Tenant;
+    commissions: Commission;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -111,6 +112,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
+    commissions: CommissionsSelect<false> | CommissionsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -271,6 +273,9 @@ export interface Tenant {
   panNumber: string;
   gstNumber?: string | null;
   bankDetails: {
+    /**
+     * Stored encrypted. Used to set up Razorpay settlements.
+     */
     accountNumber: string;
     ifscCode: string;
     bankName: string;
@@ -353,10 +358,25 @@ export interface Tenant {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Set automatically after onboarding.
+   */
+  razorpayAccountId?: string | null;
+  razorpayActivationStatus?:
+    | ('pending' | 'under_review' | 'activated' | 'needs_clarification' | 'missing_bank_details' | 'onboarding_failed')
+    | null;
+  razorpayStakeholderId?: string | null;
+  razorpayProductId?: string | null;
+  /**
+   * Platform commission percentage deducted per sale. Default is 15%.
+   */
+  commissionRate: number;
+  /**
+   * Toggle to true only after manually verifying the vendor. This triggers Razorpay onboarding automatically.
+   */
   isTenantActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1170,6 +1190,47 @@ export interface Address {
   createdAt: string;
 }
 /**
+ * Immutable financial ledger. One record per order.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "commissions".
+ */
+export interface Commission {
+  id: string;
+  tenant: string | Tenant;
+  order: string | Order;
+  /**
+   * Gross sale amount at time of order.
+   */
+  orderAmount: number;
+  /**
+   * Rate snapshotted at time of sale — not affected by future rate changes.
+   */
+  commissionRate: number;
+  commissionAmount: number;
+  vendorPayout: number;
+  /**
+   * Set after Route transfer is initiated.
+   */
+  razorpayTransferId?: string | null;
+  razorpayPaymentId?: string | null;
+  status: 'pending' | 'cleared' | 'transfer_initiated' | 'paid_out' | 'refunded' | 'disputed';
+  /**
+   * When the return window closed.
+   */
+  clearedAt?: string | null;
+  /**
+   * When the vendor payout was settled.
+   */
+  paidOutAt?: string | null;
+  /**
+   * Required for disputes and refunds — explain the reason.
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
@@ -1229,6 +1290,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tenants';
         value: string | Tenant;
+      } | null)
+    | ({
+        relationTo: 'commissions';
+        value: string | Commission;
       } | null)
     | ({
         relationTo: 'forms';
@@ -1591,10 +1656,34 @@ export interface TenantsSelect<T extends boolean = true> {
   refundAndCancellationPolicy?: T;
   shippingPolicy?: T;
   returnAndExchangePolicy?: T;
+  razorpayAccountId?: T;
+  razorpayActivationStatus?: T;
+  razorpayStakeholderId?: T;
+  razorpayProductId?: T;
+  commissionRate?: T;
   isTenantActive?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "commissions_select".
+ */
+export interface CommissionsSelect<T extends boolean = true> {
+  tenant?: T;
+  order?: T;
+  orderAmount?: T;
+  commissionRate?: T;
+  commissionAmount?: T;
+  vendorPayout?: T;
+  razorpayTransferId?: T;
+  razorpayPaymentId?: T;
+  status?: T;
+  clearedAt?: T;
+  paidOutAt?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
