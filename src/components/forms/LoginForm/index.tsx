@@ -76,7 +76,7 @@ export const LoginForm: React.FC = () => {
           data.data.roles?.includes("vendor") &&
           (!data.data.tenants || data.data.tenants.length === 0)
         )
-          router.push("/create-account/vendor");
+          router.push("/create-account/seller");
         else if (
           (data.data?.roles?.includes("vendor") &&
             data.data.tenants &&

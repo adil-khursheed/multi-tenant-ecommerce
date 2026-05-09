@@ -156,11 +156,12 @@ export const plugins: Plugin[] = [
     collections: {
       media: true,
     },
-    token: process.env.BLOB_READ_WRITE_TOKEN,
+    token: env.BLOB_READ_WRITE_TOKEN,
   }),
   multiTenantPlugin<Config>({
     collections: {
       products: {},
+      orders: {},
     },
     tenantsArrayField: {
       includeDefaultField: false,

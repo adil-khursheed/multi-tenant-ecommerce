@@ -30,6 +30,9 @@ import { Commissions } from "./collections/Commissions";
 import { Tenants } from "./collections/Tenants";
 import { env } from "./env";
 import { textStateConfig } from "./fields/textStateConfig";
+import { createRazorpayLinkedAccountTask } from "./jobs/tasks/createRazorpayLinkedAccountTask";
+import { sendEmailTask } from "./jobs/tasks/sendEmailTask";
+import { vendorActivationWorkflow } from "./jobs/workflows/vendorActivationWorkflow";
 import { plugins } from "./plugins";
 
 const filename = fileURLToPath(import.meta.url);
@@ -123,7 +126,28 @@ export default buildConfig({
       },
     },
   }),
-  jobs: {},
+  jobs: {
+    enableConcurrencyControl: true,
+    tasks: [sendEmailTask, createRazorpayLinkedAccountTask],
+    workflows: [vendorActivationWorkflow],
+    autoRun: [
+      {
+        // General purpose queue (non-urgent tasks)
+        queue: "default",
+        cron: "*/5 * * * *", // every 5 minutes
+      },
+      {
+        // Vendor onboarding queue — runs frequently so vendor approval feels instant
+        queue: "vendor-onboarding",
+        cron: "*/2 * * * *", // every 2 minutes
+      },
+      {
+        // Email queue — runs every minute for fast transactional emails
+        queue: "emails",
+        cron: "* * * * *", // every minute
+      },
+    ],
+  },
   endpoints: [],
   globals: [Header, Footer],
   plugins,

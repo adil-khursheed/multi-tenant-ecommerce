@@ -443,6 +443,7 @@ export const CheckoutPage: React.FC = () => {
                           fill
                           imgClassName="rounded-lg"
                           resource={image}
+                          size="(max-width: 640px) 100vw, 40vw"
                         />
                       )}
                     </div>

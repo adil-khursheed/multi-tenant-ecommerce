@@ -23,6 +23,7 @@ export const FourItemGridItem: React.FC<{
             src={item.image.url as string}
             alt={item.image.alt as string}
             className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         )}
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/50 flex items-end p-8">

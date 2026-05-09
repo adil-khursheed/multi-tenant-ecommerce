@@ -35,8 +35,7 @@ const brand = {
   },
   fonts: {
     sans: "'DM Sans', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif:
-      "'Cormorant Garamond', 'Georgia', 'Times New Roman', Times, serif",
+    serif: "'Cormorant Garamond', 'Georgia', 'Times New Roman', Times, serif",
   },
 } as const;
 
@@ -255,6 +254,126 @@ export function forgotPasswordHTML({
       Stay safe,<br />
       <strong style="color:${brand.colors.primary};">The ${brand.name} Team</strong>
     </p>
+  `;
+
+  return emailLayout(content);
+}
+
+/**
+ * Email templates for vendor onboarding lifecycle emails.
+ * Keeping templates here (rather than inline in tasks/hooks) makes
+ * them easy to update, preview, and hand off to a designer.
+ */
+
+export function vendorApprovalEmail(
+  ownerName: string,
+  storeName: string,
+): string {
+  const greeting = ownerName ? `Dear ${ownerName},` : "Hi there,";
+
+  const content = `
+    <p style="margin:0 0 16px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      ${greeting}
+    </p>
+    <p style="margin:0 0 16px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      We are delighted to inform you that your vendor application for <strong style="color:${brand.colors.primary};">${storeName}</strong> has been approved. Your store is now live on <strong style="color:${brand.colors.primary};">${brand.name}</strong>.
+    </p>
+    <p style="margin:0 0 28px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      Your Razorpay account is being set up in the background. Once activated, you will be able to receive payments directly to your registered bank account after a 15% platform commission per sale.
+    </p>
+
+    <!-- CTA Button -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr>
+        <td align="center" style="padding: 0 0 28px;">
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin"
+            target="_blank"
+            style="display:inline-block; padding:14px 40px; background-color:${brand.colors.primary}; color:${brand.colors.primaryForeground}; font-family:${brand.fonts.sans}; font-size:14px; font-weight:600; text-decoration:none; letter-spacing:1.2px; text-transform:uppercase;">
+            Go to Dashboard
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 16px; font-size:14px; line-height:22px; color:${brand.colors.mutedForeground};">
+      If you have any questions, reply to this email or contact us at <a href="mailto:support@${brand.name.toLowerCase()}.com" style="color:${brand.colors.primary}; text-decoration:underline;">support@${brand.name.toLowerCase()}.com</a>.
+    </p>
+
+    <p style="margin:16px 0 0; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      Welcome aboard,<br />
+      <strong style="color:${brand.colors.primary};">The ${brand.name} Team</strong>
+    </p>
+  `;
+
+  return emailLayout(content);
+}
+
+export function vendorRazorpayActivatedEmail(
+  ownerName: string,
+  storeName: string,
+): string {
+  const greeting = ownerName ? `Dear ${ownerName},` : "Hi there,";
+
+  const content = `
+    <p style="margin:0 0 16px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      ${greeting}
+    </p>
+    <p style="margin:0 0 16px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      Your payment account for <strong style="color:${brand.colors.primary};">${storeName}</strong> has been fully activated on Razorpay. You are now set up to receive payouts for your sales.
+    </p>
+    <p style="margin:0 0 28px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      Settlements will be transferred to your registered bank account as per the standard Razorpay settlement cycle, after the platform commission is deducted.
+    </p>
+    <p style="margin:16px 0 0; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      Best regards,<br />
+      <strong style="color:${brand.colors.primary};">The ${brand.name} Team</strong>
+    </p>
+  `;
+
+  return emailLayout(content);
+}
+
+export function adminVendorOnboardedEmail(
+  storeName: string,
+  tenantId: string,
+  activationStatus: string,
+): string {
+  const content = `
+    <p style="margin:0 0 16px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
+      <strong>New Vendor Onboarded — ${brand.name} Admin</strong>
+    </p>
+    
+    <table style="border-collapse: collapse; width: 100%; margin-bottom: 28px;">
+      <tr>
+        <td style="padding: 12px 8px; border-bottom: 1px solid ${brand.colors.border}; font-weight: 600; color:${brand.colors.foreground}; width: 140px;">Brand</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid ${brand.colors.border}; color:${brand.colors.foreground};">${storeName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 8px; border-bottom: 1px solid ${brand.colors.border}; font-weight: 600; color:${brand.colors.foreground};">Tenant ID</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid ${brand.colors.border}; color:${brand.colors.foreground};">${tenantId}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 8px; border-bottom: 1px solid ${brand.colors.border}; font-weight: 600; color:${brand.colors.foreground};">Razorpay Status</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid ${brand.colors.border}; color:${brand.colors.foreground};">${activationStatus}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 8px; border-bottom: 1px solid ${brand.colors.border}; font-weight: 600; color:${brand.colors.foreground};">Time</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid ${brand.colors.border}; color:${brand.colors.foreground};">${new Date().toISOString()}</td>
+      </tr>
+    </table>
+
+    <!-- CTA Button -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr>
+        <td align="center" style="padding: 0 0 28px;">
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/collections/tenants/${tenantId}"
+            target="_blank"
+            style="display:inline-block; padding:14px 40px; background-color:${brand.colors.primary}; color:${brand.colors.primaryForeground}; font-family:${brand.fonts.sans}; font-size:14px; font-weight:600; text-decoration:none; letter-spacing:1.2px; text-transform:uppercase;">
+            View in Admin Panel
+          </a>
+        </td>
+      </tr>
+    </table>
   `;
 
   return emailLayout(content);

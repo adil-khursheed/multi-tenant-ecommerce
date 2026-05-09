@@ -7,7 +7,9 @@ import {
   lexicalEditor,
 } from "@payloadcms/richtext-lexical";
 
+import { adminOnly } from "@/access/adminOnly";
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
+import { adminOrTenant } from "@/access/adminOrTenant";
 import { env } from "@/env";
 import { GST_REGEX, PAN_REGEX } from "@/lib/constants";
 import { decryptField, encryptField, isEncrypted } from "@/lib/crypto";
@@ -17,8 +19,79 @@ export const Tenants: CollectionConfig = {
   admin: {
     useAsTitle: "storeName",
     group: "Users",
+    defaultColumns: [
+      "storeName",
+      "email",
+      "isTenantActive",
+      "razorpayActivationStatus",
+    ],
+    description: "Seller accounts on the DTlea platform",
+  },
+  access: {
+    read: adminOrTenant,
+    create: adminOnly,
+    update: adminOrTenant,
+    delete: adminOnly,
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        const justActivated =
+          operation === "update" &&
+          previousDoc.isTenantActive === false &&
+          doc.isTenantActive === true &&
+          !doc.razorpayAccountId;
+
+        if (!justActivated) return;
+
+        req.payload.logger.info({
+          message: "Tenant activated - queuing vendor activation workflow",
+          tenantId: doc.id,
+          storeName: doc.storeName,
+        });
+
+        await req.payload.jobs.queue({
+          workflow: "vendorActivation",
+          input: {
+            tenantId: doc.id,
+            storeName: doc.storeName,
+            ownerEmail: doc.email,
+            ownerName: doc.ownerName,
+          },
+          queue: "vendor-onboarding",
+        });
+      },
+    ],
   },
   fields: [
+    {
+      name: "ownerName",
+      type: "text",
+      label: "Owner Name",
+      required: true,
+      admin: {
+        readOnly: true,
+      },
+    },
+    {
+      name: "email",
+      type: "email",
+      label: "Business Email",
+      required: true,
+      unique: true,
+      admin: {
+        readOnly: true,
+      },
+    },
+    {
+      name: "phone",
+      type: "text",
+      label: "Phone Number",
+      required: true,
+      admin: {
+        readOnly: true,
+      },
+    },
     {
       name: "storeName",
       type: "text",
@@ -104,16 +177,6 @@ export const Tenants: CollectionConfig = {
               label: "Business Type",
             },
 
-            // KYC / Verification
-            {
-              name: "verificationStatus",
-              type: "select",
-              options: ["pending", "under_review", "approved", "rejected"],
-              defaultValue: "pending",
-              access: {
-                update: adminOnlyFieldAccess,
-              },
-            },
             {
               name: "panNumber",
               type: "text",
@@ -152,6 +215,48 @@ export const Tenants: CollectionConfig = {
                   },
                 ],
               },
+            },
+            {
+              type: "group",
+              name: "address",
+              label: "Business Address",
+              fields: [
+                {
+                  name: "street1",
+                  label: "Street Address",
+                  type: "text",
+                  required: true,
+                },
+                {
+                  name: "street2",
+                  label: "Street Address (Line 2)",
+                  type: "text",
+                },
+                {
+                  name: "city",
+                  label: "City",
+                  type: "text",
+                  required: true,
+                },
+                {
+                  name: "state",
+                  label: "State",
+                  type: "text",
+                  required: true,
+                },
+                {
+                  name: "postalCode",
+                  label: "Postal Code",
+                  type: "text",
+                  required: true,
+                },
+                {
+                  name: "country",
+                  label: "Country",
+                  type: "text",
+                  required: true,
+                },
+              ],
             },
             {
               name: "bankDetails",
@@ -391,6 +496,20 @@ export const Tenants: CollectionConfig = {
         position: "sidebar",
         description:
           "Platform commission percentage deducted per sale. Default is 15%.",
+      },
+    },
+
+    // KYC / Verification
+    {
+      name: "verificationStatus",
+      type: "select",
+      options: ["pending", "under_review", "approved", "rejected"],
+      defaultValue: "pending",
+      access: {
+        update: adminOnlyFieldAccess,
+      },
+      admin: {
+        position: "sidebar",
       },
     },
 

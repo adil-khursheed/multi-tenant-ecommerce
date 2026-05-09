@@ -72,6 +72,7 @@ export const ProductItem: React.FC<Props> = ({
               fill
               imgClassName="rounded-lg object-cover"
               resource={image}
+              size="94px"
             />
           )}
         </div>

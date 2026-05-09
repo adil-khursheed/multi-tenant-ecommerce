@@ -31,6 +31,11 @@ export const env = createEnv({
     SMTP_USER: z.string().min(1, "SMTP user is required"),
     SMTP_PASS: z.string().min(1, "SMTP pass is required"),
     ENCRYPTION_KEY: z.string().min(1, "Encryption key is required"),
+    RAZORPAY_KEY_ID: z.string().min(1, "Razorpay key ID is required"),
+    RAZORPAY_KEY_SECRET: z.string().min(1, "Razorpay key secret is required"),
+    RAZORPAY_WEBHOOK_SECRET: z
+      .string()
+      .min(1, "Razorpay webhook secret is required"),
   },
   client: {
     NEXT_PUBLIC_SERVER_URL: z
@@ -60,6 +65,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: z
       .string()
       .min(1, "Firebase measurement ID is required"),
+    NEXT_PUBLIC_SUPPORT_EMAIL: z.email("Invalid email"),
   },
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
@@ -78,5 +84,6 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID:
       process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+    NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
   },
 });

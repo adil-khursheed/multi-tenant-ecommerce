@@ -46,7 +46,7 @@ export function HeaderClient({ header, user: serverUser }: Props) {
   const menu = header.navItems || [];
   const pathname = usePathname();
   const { user: clientUser } = useAuth();
-  
+
   // Use client user if it's been initialized (either User object or null), otherwise fallback to server user
   const user = clientUser !== undefined ? clientUser : serverUser;
 
@@ -234,7 +234,7 @@ export function HeaderClient({ header, user: serverUser }: Props) {
                           href={
                             !user
                               ? "/create-account?account-type=vendor"
-                              : "/create-account/vendor"
+                              : "/create-account/seller"
                           }
                           className={cn(
                             buttonVariants({

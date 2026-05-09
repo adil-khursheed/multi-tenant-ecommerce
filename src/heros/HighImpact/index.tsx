@@ -42,6 +42,7 @@ export const HighImpactHero: React.FC<Page["hero"]> = ({
             className="relative w-full h-full"
             priority
             resource={media}
+            size="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 50vw"
           />
         )}
       </div>
