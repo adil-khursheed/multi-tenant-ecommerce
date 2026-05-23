@@ -65,7 +65,7 @@ export default async function Page({ params }: Args) {
   return (
     <article>
       <RenderHero {...hero} />
-      <div className="bg-border">
+      <div>
         <TrustBar />
       </div>
       <RenderBlocks blocks={layout} />

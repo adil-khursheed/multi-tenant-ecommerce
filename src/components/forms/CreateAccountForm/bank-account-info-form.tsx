@@ -1,6 +1,8 @@
 import {
   Control,
   Controller,
+  UseFormClearErrors,
+  UseFormSetError,
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
@@ -14,7 +16,6 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 import {
   Field,
@@ -43,10 +44,14 @@ const BankAccountInfoForm = ({
   control,
   setValue,
   watch,
+  clearErrors,
+  setError,
 }: {
   control: Control<VendorOnboardingFormData>;
   setValue: UseFormSetValue<VendorOnboardingFormData>;
   watch: UseFormWatch<VendorOnboardingFormData>;
+  clearErrors: UseFormClearErrors<VendorOnboardingFormData>;
+  setError: UseFormSetError<VendorOnboardingFormData>;
 }) => {
   const bankBranchAddress = watch("bankBranchAddress");
   const isIFSCVerified = watch("isIFSCVerified");
@@ -64,7 +69,31 @@ const BankAccountInfoForm = ({
         }
       },
       onError: (error) => {
-        toast.error(error.message);
+        try {
+          // TRPC often stringifies Zod errors into an array of issue objects in error.message
+          const parsedError = JSON.parse(error.message);
+          if (
+            Array.isArray(parsedError) &&
+            parsedError.length > 0 &&
+            parsedError[0].message
+          ) {
+            setError("bankIfscCode", {
+              type: "manual",
+              message: parsedError[0].message,
+            });
+          } else {
+            setError("bankIfscCode", {
+              type: "manual",
+              message: error.message,
+            });
+          }
+        } catch (e) {
+          // Fallback to the raw string if it's not JSON
+          setError("bankIfscCode", {
+            type: "manual",
+            message: error.message,
+          });
+        }
       },
     }),
   );
@@ -146,6 +175,7 @@ const BankAccountInfoForm = ({
                 disabled={isPending}
                 autoCapitalize="characters"
                 onChange={(e) => {
+                  clearErrors("bankIfscCode");
                   if (isIFSCVerified) {
                     setValue("bankName", "");
                     setValue("bankBranch", "");

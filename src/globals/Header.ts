@@ -1,18 +1,22 @@
-import type { GlobalConfig } from 'payload'
+import type { GlobalConfig } from "payload";
 
-import { adminOnly } from '@/access/adminOnly'
-import { link } from '@/fields/link'
+import { adminOnly } from "@/access/adminOnly";
+import { checkRole } from "@/access/utilities";
+import { link } from "@/fields/link";
 
 export const Header: GlobalConfig = {
-  slug: 'header',
+  slug: "header",
   access: {
     read: () => true,
     update: adminOnly,
   },
+  admin: {
+    hidden: ({ user }) => !checkRole(["admin"], user),
+  },
   fields: [
     {
-      name: 'navItems',
-      type: 'array',
+      name: "navItems",
+      type: "array",
       fields: [
         link({
           appearances: false,
@@ -21,4 +25,4 @@ export const Header: GlobalConfig = {
       maxRows: 6,
     },
   ],
-}
+};

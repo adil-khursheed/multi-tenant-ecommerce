@@ -1,23 +1,24 @@
-import type { CollectionConfig } from 'payload'
+import path from "path";
+import { fileURLToPath } from "url";
 
+import type { CollectionConfig } from "payload";
 import {
   FixedToolbarFeature,
   InlineToolbarFeature,
   lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-import path from 'path'
-import { fileURLToPath } from 'url'
+} from "@payloadcms/richtext-lexical";
 
-import { adminOnly } from '@/access/adminOnly'
+import { adminOnly } from "@/access/adminOnly";
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 export const Media: CollectionConfig = {
   admin: {
-    group: 'Content',
+    group: "Content",
+    hidden: ({ user }) => !user.roles.includes("admin"),
   },
-  slug: 'media',
+  slug: "media",
   access: {
     create: adminOnly,
     delete: adminOnly,
@@ -26,21 +27,25 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
-      name: 'alt',
-      type: 'text',
+      name: "alt",
+      type: "text",
       required: true,
     },
     {
-      name: 'caption',
-      type: 'richText',
+      name: "caption",
+      type: "richText",
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
+          return [
+            ...rootFeatures,
+            FixedToolbarFeature(),
+            InlineToolbarFeature(),
+          ];
         },
       }),
     },
   ],
   upload: {
-    staticDir: path.resolve(dirname, '../../public/media'),
+    staticDir: path.resolve(dirname, "../../public/media"),
   },
-}
+};

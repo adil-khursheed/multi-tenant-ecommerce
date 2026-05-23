@@ -4,7 +4,6 @@ import { tenantsArrayField } from "@payloadcms/plugin-multi-tenant/fields";
 import { adminOnly } from "@/access/adminOnly";
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
 import { adminOrSelf } from "@/access/adminOrSelf";
-import { publicAccess } from "@/access/publicAccess";
 import { checkRole } from "@/access/utilities";
 import { forgotPasswordHTML, verifyEmailHTML } from "@/email/templates";
 import { env } from "@/env";
@@ -16,14 +15,14 @@ const defaultTenantArrayField = tenantsArrayField({
   tenantsCollectionSlug: "tenants",
   tenantsArrayTenantFieldName: "tenant",
   arrayFieldAccess: {
-    create: () => true,
     read: () => true,
-    update: () => true,
+    create: adminOnlyFieldAccess,
+    update: adminOnlyFieldAccess,
   },
   tenantFieldAccess: {
-    create: () => true,
     read: () => true,
-    update: () => true,
+    create: adminOnlyFieldAccess,
+    update: adminOnlyFieldAccess,
   },
 });
 
@@ -33,8 +32,8 @@ export const Users: CollectionConfig = {
     beforeChange: [autoVerifyCustomers],
   },
   access: {
-    admin: ({ req: { user } }) => checkRole(["admin"], user),
-    create: publicAccess,
+    admin: ({ req: { user } }) => checkRole(["admin", "vendor"], user),
+    create: adminOnly,
     delete: adminOnly,
     read: adminOrSelf,
     unlock: adminOnly,
@@ -44,6 +43,7 @@ export const Users: CollectionConfig = {
     group: "Users",
     defaultColumns: ["name", "email", "roles"],
     useAsTitle: "name",
+    hidden: ({ user }) => !user.roles.includes("admin"),
   },
   auth: {
     tokenExpiration: 1209600,

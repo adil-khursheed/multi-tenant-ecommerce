@@ -138,6 +138,15 @@ export const plugins: Plugin[] = [
         ],
       }),
     },
+    carts: {
+      cartsCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        admin: {
+          ...defaultCollection.admin,
+          hidden: ({ user }) => !user.roles.includes("admin"),
+        },
+      }),
+    },
     payments: {
       paymentMethods: [
         stripeAdapter({

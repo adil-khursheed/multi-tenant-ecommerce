@@ -28,7 +28,7 @@ export const FourItemGridItem: React.FC<{
         )}
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/50 flex items-end p-8">
           <span className="text-white text-2xl md:text-3xl font-serif capitalize drop-shadow-xs">
-            {item.title}
+            {item.name}
           </span>
         </div>
       </Link>

@@ -276,7 +276,7 @@ export function vendorApprovalEmail(
       ${greeting}
     </p>
     <p style="margin:0 0 16px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
-      We are delighted to inform you that your vendor application for <strong style="color:${brand.colors.primary};">${storeName}</strong> has been approved. Your store is now live on <strong style="color:${brand.colors.primary};">${brand.name}</strong>.
+      We are delighted to inform you that your seller application for <strong style="color:${brand.colors.primary};">${storeName}</strong> has been approved. Your store is now live on <strong style="color:${brand.colors.primary};">${brand.name}</strong>.
     </p>
     <p style="margin:0 0 28px; font-size:16px; line-height:26px; color:${brand.colors.foreground};">
       Your Razorpay account is being set up in the background. Once activated, you will be able to receive payments directly to your registered bank account after a 15% platform commission per sale.

@@ -7,6 +7,7 @@ import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import {
   BoldFeature,
   ChecklistFeature,
+  defaultColors,
   EXPERIMENTAL_TableFeature,
   IndentFeature,
   ItalicFeature,
@@ -26,7 +27,10 @@ import { Pages } from "@/collections/Pages";
 import { Users } from "@/collections/Users";
 import { Footer } from "@/globals/Footer";
 import { Header } from "@/globals/Header";
+import { Collections } from "./collections/Collections";
 import { Commissions } from "./collections/Commissions";
+import { Designs } from "./collections/Designs";
+import { Materials } from "./collections/Materials";
 import { Tenants } from "./collections/Tenants";
 import { env } from "./env";
 import { textStateConfig } from "./fields/textStateConfig";
@@ -66,7 +70,17 @@ export default buildConfig({
     autoRefresh: true,
   },
   cookiePrefix: "dtlea",
-  collections: [Users, Pages, Categories, Media, Tenants, Commissions],
+  collections: [
+    Users,
+    Pages,
+    Media,
+    Tenants,
+    Commissions,
+    Categories,
+    Collections,
+    Materials,
+    Designs,
+  ],
   db: mongooseAdapter({
     url: env.DATABASE_URL,
   }),
@@ -81,7 +95,11 @@ export default buildConfig({
         ChecklistFeature(),
         TextStateFeature({
           state: {
-            color: textStateConfig.color,
+            color: {
+              ...defaultColors.text,
+              ...defaultColors.background,
+              ...textStateConfig.color,
+            },
             letterSpacing: textStateConfig.letterSpacing,
             fontSize: textStateConfig.fontSize,
             fontFamily: textStateConfig.fontFamily,

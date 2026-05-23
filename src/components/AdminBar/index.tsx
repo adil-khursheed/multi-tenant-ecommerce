@@ -43,7 +43,7 @@ export const AdminBar: React.FC<{
     const canSeeAdmin =
       user?.roles &&
       Array.isArray(user?.roles) &&
-      user?.roles?.includes("admin");
+      (user?.roles?.includes("admin") || user?.roles?.includes("vendor"));
 
     setShow(Boolean(canSeeAdmin));
   }, []);

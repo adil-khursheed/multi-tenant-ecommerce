@@ -16,6 +16,7 @@ export const Commissions: CollectionConfig = {
       "createdAt",
     ],
     description: "Immutable financial ledger. One record per order.",
+    hidden: ({ user }) => !user.roles.includes("admin"),
   },
   access: {
     read: adminOrTenant,

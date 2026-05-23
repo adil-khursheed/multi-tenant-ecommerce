@@ -9,7 +9,7 @@ import {
 
 import { adminOnly } from "@/access/adminOnly";
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
-import { adminOrTenant } from "@/access/adminOrTenant";
+import { adminOrTenantByField } from "@/access/adminOrTenant";
 import { env } from "@/env";
 import { GST_REGEX, PAN_REGEX } from "@/lib/constants";
 import { decryptField, encryptField, isEncrypted } from "@/lib/crypto";
@@ -28,9 +28,9 @@ export const Tenants: CollectionConfig = {
     description: "Seller accounts on the DTlea platform",
   },
   access: {
-    read: adminOrTenant,
+    read: adminOrTenantByField("id"),
     create: adminOnly,
-    update: adminOrTenant,
+    update: adminOnly,
     delete: adminOnly,
   },
   hooks: {
@@ -69,9 +69,6 @@ export const Tenants: CollectionConfig = {
       type: "text",
       label: "Owner Name",
       required: true,
-      admin: {
-        readOnly: true,
-      },
     },
     {
       name: "email",
@@ -79,18 +76,12 @@ export const Tenants: CollectionConfig = {
       label: "Business Email",
       required: true,
       unique: true,
-      admin: {
-        readOnly: true,
-      },
     },
     {
       name: "phone",
       type: "text",
       label: "Phone Number",
       required: true,
-      admin: {
-        readOnly: true,
-      },
     },
     {
       name: "storeName",
@@ -262,6 +253,10 @@ export const Tenants: CollectionConfig = {
               name: "bankDetails",
               label: "Bank Details",
               type: "group",
+              access: {
+                // read: tenantOnlyFieldAccess,
+                update: () => false,
+              },
               fields: [
                 {
                   name: "accountNumber",
@@ -281,12 +276,15 @@ export const Tenants: CollectionConfig = {
                       },
                     ],
                     afterRead: [
-                      ({ value }) => {
+                      ({ value, req: { user } }) => {
                         if (!value) return value;
                         try {
+                          if (user && !user.roles?.includes("vendor")) {
+                            return "••••••••••";
+                          }
                           return decryptField(value);
                         } catch {
-                          return "••••••••";
+                          return "••••••••••";
                         }
                       },
                     ],
@@ -510,6 +508,7 @@ export const Tenants: CollectionConfig = {
       },
       admin: {
         position: "sidebar",
+        description: "Verification status of the tenant.",
       },
     },
 

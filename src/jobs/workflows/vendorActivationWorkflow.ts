@@ -25,7 +25,7 @@ export const vendorActivationWorkflow: WorkflowConfig<"vendorActivation"> = {
     await tasks.sendEmail("1-vendor-approval-email", {
       input: {
         to: ownerEmail,
-        subject: `Your ${env.COMPANY_NAME} vendor account is approved — ${storeName}`,
+        subject: `Your ${env.COMPANY_NAME} seller account is approved — ${storeName}`,
         html: vendorApprovalEmail(ownerName, storeName),
       },
     });
@@ -33,10 +33,10 @@ export const vendorActivationWorkflow: WorkflowConfig<"vendorActivation"> = {
     // ── Step 2: Create Razorpay Linked Account ────────────────────────────
     // Runs after the email so a failure here doesn't prevent the vendor
     // from knowing they were approved.
-    const razorpayOutput = await tasks.createRazorpayLinkedAccount(
-      "2-create-razorpay-account",
-      { input: { tenantId } },
-    );
+    // const razorpayOutput = await tasks.createRazorpayLinkedAccount(
+    //   "2-create-razorpay-account",
+    //   { input: { tenantId } },
+    // );
 
     // ── Step 3: Notify admin ─────────────────────────────────────────
     await tasks.sendEmail("3-admin-notification", {
@@ -46,7 +46,8 @@ export const vendorActivationWorkflow: WorkflowConfig<"vendorActivation"> = {
         html: adminVendorOnboardedEmail(
           storeName,
           tenantId,
-          razorpayOutput.activationStatus ?? "",
+          // razorpayOutput.activationStatus ?? "",
+          "activated",
         ),
       },
     });

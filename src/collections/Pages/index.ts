@@ -49,6 +49,7 @@ export const Pages: CollectionConfig = {
         req,
       }),
     useAsTitle: "title",
+    hidden: ({ user }) => !user.roles.includes("admin"),
   },
   fields: [
     {

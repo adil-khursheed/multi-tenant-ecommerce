@@ -74,10 +74,13 @@ export interface Config {
   collections: {
     users: User;
     pages: Page;
-    categories: Category;
     media: Media;
     tenants: Tenant;
     commissions: Commission;
+    categories: Category;
+    collections: Collection;
+    materials: Material;
+    designs: Design;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -110,10 +113,13 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     commissions: CommissionsSelect<false> | CommissionsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    collections: CollectionsSelect<false> | CollectionsSelect<true>;
+    materials: MaterialsSelect<false> | MaterialsSelect<true>;
+    designs: DesignsSelect<false> | DesignsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -394,6 +400,9 @@ export interface Tenant {
    * Platform commission percentage deducted per sale. Default is 15%.
    */
   commissionRate: number;
+  /**
+   * Verification status of the tenant.
+   */
   verificationStatus?: ('pending' | 'under_review' | 'approved' | 'rejected') | null;
   /**
    * Toggle to true only after manually verifying the vendor. This triggers Razorpay onboarding automatically.
@@ -515,7 +524,25 @@ export interface Product {
   };
   priceInINREnabled?: boolean | null;
   priceInINR?: number | null;
+  sku?: string | null;
   relatedProducts?: (string | Product)[] | null;
+  /**
+   * Maps to the sleeve filter: Margie / Half / 3/4 / Full.
+   */
+  sleeve?: ('margie' | 'half-sleeve' | 'three-quarter-sleeve' | 'full-sleeve') | null;
+  season?: ('summer' | 'winter' | 'festive' | 'all-season') | null;
+  /**
+   * Select all occasions this product suits.
+   */
+  occasion?: ('casual' | 'festive' | 'wedding' | 'office' | 'party' | 'outdoor')[] | null;
+  /**
+   * Washing and care instructions. Overrides the default for the selected fabric.
+   */
+  careInstructions?: string | null;
+  /**
+   * Required for shipping label compliance.
+   */
+  countryOfOrigin?: string | null;
   meta?: {
     title?: string | null;
     /**
@@ -524,12 +551,64 @@ export interface Product {
     image?: (string | null) | Media;
     description?: string | null;
   };
-  categories?: (string | Category)[] | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
   slug: string;
+  /**
+   * Product type categories (Kurtas, Tops, Bottoms, Co-ord Set…).
+   */
+  categories: (string | Category)[];
+  /**
+   * Occasion / seasonal collections (Festive, Wedding, etc.).
+   */
+  collections?: (string | Collection)[] | null;
+  /**
+   * Fabric composition (Pure Cotton, Silk, Georgette…). Drives the By Materials nav and filter.
+   */
+  materials?: (string | Material)[] | null;
+  /**
+   * Silhouette / cut (Anarkali, A-Line, Flared…). Drives the By Design nav and filter.
+   */
+  designs?: (string | Design)[] | null;
+  /**
+   * Discount % applied on top of the base price (priceInINR). 0 = no discount.
+   */
+  discountPercent?: number | null;
+  /**
+   * Auto-calculated: priceInINR × (1 − discountPercent ÷ 100). Used for price-range filter queries. Do not edit manually.
+   */
+  effectivePrice?: number | null;
+  /**
+   * Tag as Flash Sale. Always pair with a discountPercent.
+   */
+  isFlashSale?: boolean | null;
+  /**
+   * Controls placement in special homepage / nav sections.
+   */
+  flags?: {
+    /**
+     * Shown in the New Arrivals nav section.
+     */
+    isNewArrival?: boolean | null;
+    /**
+     * Pin to homepage featured strip.
+     */
+    isFeatured?: boolean | null;
+    isBestseller?: boolean | null;
+    /**
+     * Marks as a platform-exclusive listing.
+     */
+    isExclusive?: boolean | null;
+  };
+  /**
+   * Denormalised from reviews. Updated automatically — do not edit.
+   */
+  ratings?: {
+    average?: number | null;
+    count?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -781,13 +860,40 @@ export interface ArchiveBlock {
  */
 export interface Category {
   id: string;
-  title: string;
+  name: string;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
   slug: string;
-  image: string | Media;
+  /**
+   * Leave empty to make this a top-level nav item.
+   */
+  parent?: (string | null) | Category;
+  /**
+   * Controls display order within siblings. Lower = first.
+   */
+  order?: number | null;
+  /**
+   * Category card image shown on listing pages.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Full-width banner shown at top of the category PLP.
+   */
+  bannerImage?: (string | null) | Media;
+  /**
+   * Uncheck to hide this category from navigation without deleting it.
+   */
+  active?: boolean | null;
+  /**
+   * Pin to homepage / featured sections.
+   */
+  isFeatured?: boolean | null;
+  /**
+   * Populated by a scheduled job. Do not edit manually.
+   */
+  productCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1087,6 +1193,132 @@ export interface Variant {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Curated product groupings (Festive, Wedding, Autumn/Winter, etc.). Appear under the Collections nav item.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections".
+ */
+export interface Collection {
+  id: string;
+  name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  season?: ('autumn-winter' | 'spring-summer' | 'festive' | 'year-round') | null;
+  /**
+   * Collection becomes visible on this date. Leave blank to show immediately.
+   */
+  startDate?: string | null;
+  /**
+   * Collection is hidden after this date. Leave blank for no expiry.
+   */
+  endDate?: string | null;
+  /**
+   * Hero / card image for the collection.
+   */
+  coverImage?: (string | null) | Media;
+  /**
+   * Optional mood-board images shown in the collection header.
+   */
+  moodboard?:
+    | {
+        image: string | Media;
+        altText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  active?: boolean | null;
+  /**
+   * Show on homepage featured collections strip.
+   */
+  isFeatured?: boolean | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Fabric/textile types. Drives the "By Materials" nav item and the fabric filter on PLPs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "materials".
+ */
+export interface Material {
+  id: string;
+  name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * Optional short description shown on /by-material/[slug] landing pages.
+   */
+  description?: string | null;
+  /**
+   * Mark premium fabrics (Silk, Georgette, Tissue, etc.) for badging on PDPs.
+   */
+  isPremium?: boolean | null;
+  /**
+   * Natural / organic fabrics (Cotton, Linen, Wool, Organic, etc.).
+   */
+  isNatural?: boolean | null;
+  /**
+   * Default care instructions for this fabric. Can be overridden per product.
+   */
+  careInstructions?: string | null;
+  /**
+   * Small icon/swatch image used in filter chips.
+   */
+  icon?: (string | null) | Media;
+  active?: boolean | null;
+  /**
+   * Display order in filter lists. Lower = first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Silhouette / cut styles. Drives the "By Design" nav item and design filter on PLPs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "designs".
+ */
+export interface Design {
+  id: string;
+  name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * Short description shown on /by-design/[slug] landing pages.
+   */
+  description?: string | null;
+  /**
+   * Broad grouping used for filter UI hierarchy.
+   */
+  designFamily?: ('kurta-cut' | 'dress-gown' | 'neckline' | 'ethnic-fusion' | 'silhouette' | 'embroidery-craft') | null;
+  /**
+   * Line-art illustration or reference image for this silhouette.
+   */
+  illustration?: (string | null) | Media;
+  /**
+   * Small icon used in filter chips and nav.
+   */
+  icon?: (string | null) | Media;
+  active?: boolean | null;
+  /**
+   * Display order in filter panels. Lower = first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1402,10 +1634,6 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
-        relationTo: 'categories';
-        value: string | Category;
-      } | null)
-    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -1416,6 +1644,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'commissions';
         value: string | Commission;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'collections';
+        value: string | Collection;
+      } | null)
+    | ({
+        relationTo: 'materials';
+        value: string | Material;
+      } | null)
+    | ({
+        relationTo: 'designs';
+        value: string | Design;
       } | null)
     | ({
         relationTo: 'forms';
@@ -1720,18 +1964,6 @@ export interface FormBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  generateSlug?: T;
-  slug?: T;
-  image?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1817,6 +2049,84 @@ export interface CommissionsSelect<T extends boolean = true> {
   clearedAt?: T;
   paidOutAt?: T;
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  generateSlug?: T;
+  slug?: T;
+  parent?: T;
+  order?: T;
+  image?: T;
+  bannerImage?: T;
+  active?: T;
+  isFeatured?: T;
+  productCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_select".
+ */
+export interface CollectionsSelect<T extends boolean = true> {
+  name?: T;
+  generateSlug?: T;
+  slug?: T;
+  season?: T;
+  startDate?: T;
+  endDate?: T;
+  coverImage?: T;
+  moodboard?:
+    | T
+    | {
+        image?: T;
+        altText?: T;
+        id?: T;
+      };
+  active?: T;
+  isFeatured?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "materials_select".
+ */
+export interface MaterialsSelect<T extends boolean = true> {
+  name?: T;
+  generateSlug?: T;
+  slug?: T;
+  description?: T;
+  isPremium?: T;
+  isNatural?: T;
+  careInstructions?: T;
+  icon?: T;
+  active?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "designs_select".
+ */
+export interface DesignsSelect<T extends boolean = true> {
+  name?: T;
+  generateSlug?: T;
+  slug?: T;
+  description?: T;
+  designFamily?: T;
+  illustration?: T;
+  icon?: T;
+  active?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2058,7 +2368,13 @@ export interface ProductsSelect<T extends boolean = true> {
   variants?: T;
   priceInINREnabled?: T;
   priceInINR?: T;
+  sku?: T;
   relatedProducts?: T;
+  sleeve?: T;
+  season?: T;
+  occasion?: T;
+  careInstructions?: T;
+  countryOfOrigin?: T;
   meta?:
     | T
     | {
@@ -2066,9 +2382,29 @@ export interface ProductsSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
-  categories?: T;
   generateSlug?: T;
   slug?: T;
+  categories?: T;
+  collections?: T;
+  materials?: T;
+  designs?: T;
+  discountPercent?: T;
+  effectivePrice?: T;
+  isFlashSale?: T;
+  flags?:
+    | T
+    | {
+        isNewArrival?: T;
+        isFeatured?: T;
+        isBestseller?: T;
+        isExclusive?: T;
+      };
+  ratings?:
+    | T
+    | {
+        average?: T;
+        count?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;

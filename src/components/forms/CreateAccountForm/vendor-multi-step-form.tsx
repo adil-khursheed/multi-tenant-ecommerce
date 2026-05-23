@@ -90,20 +90,18 @@ const steps: StepConfig[] = [
 
 const VendorMultiStepForm = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const router = useRouter();
   const trpc = useTRPC();
 
-  const registrationMutation = useMutation(
-    trpc.auth.register.mutationOptions({
+  const vendorCreateMutation = useMutation(
+    trpc.vendor.create.mutationOptions({
       onSuccess: () => {
-        router.push(
-          `/login?success=${encodeURIComponent("Your vendor application has been submitted. Please check your email for further instructions.")}`,
-        );
+        router.push(`/seller/thank-you`);
       },
       onError: (err) => {
-        setError(err.message);
+        setFormError(err.message);
       },
     }),
   );
@@ -116,6 +114,8 @@ const VendorMultiStepForm = () => {
     trigger,
     formState: { isSubmitting },
     handleSubmit,
+    setError,
+    clearErrors,
   } = useForm<VendorOnboardingFormData>({
     resolver: zodResolver(vendorOnboardingSchema),
     defaultValues: {
@@ -124,6 +124,7 @@ const VendorMultiStepForm = () => {
       storeName: "",
       storeSlug: "",
       storeLogo: "",
+      storeBanner: "",
       panNumber: "",
       isGST: false,
       gst: "",
@@ -147,8 +148,6 @@ const VendorMultiStepForm = () => {
   const currentStep = steps[activeStep];
 
   const handleNext = async () => {
-    console.log(getValues());
-
     if (activeStep >= steps.length - 1) return;
 
     const currentFields = steps[activeStep]
@@ -168,12 +167,8 @@ const VendorMultiStepForm = () => {
   };
 
   const onSubmit = async (data: VendorOnboardingFormData) => {
-    setError(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await registrationMutation.mutateAsync({
-      ...data,
-      accountType: "vendor",
-    } as any);
+    setFormError(null);
+    await vendorCreateMutation.mutateAsync(data);
   };
 
   return (
@@ -303,7 +298,7 @@ const VendorMultiStepForm = () => {
         </div>
 
         {/* Error Message */}
-        {error && <Message className="mb-6" error={error} />}
+        {formError && <Message className="mb-6" error={formError} />}
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -315,6 +310,8 @@ const VendorMultiStepForm = () => {
                   control={control}
                   setValue={setValue}
                   watch={watch}
+                  setError={setError}
+                  clearErrors={clearErrors}
                 />
               )}
 
@@ -331,6 +328,8 @@ const VendorMultiStepForm = () => {
                   control={control}
                   setValue={setValue}
                   watch={watch}
+                  clearErrors={clearErrors}
+                  setError={setError}
                 />
               )}
 
