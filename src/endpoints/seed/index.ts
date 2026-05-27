@@ -117,7 +117,7 @@ function toSlug(name: string) {
 
 // ─── Seed functions ──────────────────────────────────────────────────────────
 async function seedCategories() {
-  console.log("Seeding categories…");
+  payload.logger.info("Seeding categories…");
 
   // First pass: top-level
   const slugToId: Record<string, string> = {};
@@ -137,7 +137,7 @@ async function seedCategories() {
       data: { name: cat.name, slug, order: cat.order, active: true },
     });
     slugToId[slug] = doc.id as string;
-    console.log(`  ✓ ${cat.name}`);
+    payload.logger.info(`  ✓ ${cat.name}`);
   }
 
   // Second pass: children
@@ -146,7 +146,7 @@ async function seedCategories() {
     const parentSlug = toSlug(cat.parent!);
     const parentId = slugToId[parentSlug];
     if (!parentId) {
-      console.warn(`  ✗ Parent not found for ${cat.name}`);
+      payload.logger.warn(`  ✗ Parent not found for ${cat.name}`);
       continue;
     }
 
@@ -155,7 +155,7 @@ async function seedCategories() {
       where: { slug: { equals: slug } },
     });
     if (existing.totalDocs > 0) {
-      console.log(`  — skipped (exists): ${cat.name}`);
+      payload.logger.info(`  — skipped (exists): ${cat.name}`);
       continue;
     }
 
@@ -169,12 +169,12 @@ async function seedCategories() {
         active: true,
       },
     });
-    console.log(`  ✓ ${cat.name} (under ${cat.parent})`);
+    payload.logger.info(`  ✓ ${cat.name} (under ${cat.parent})`);
   }
 }
 
 async function seedCollections() {
-  console.log("Seeding collections…");
+  payload.logger.info("Seeding collections…");
   for (const col of COLLECTIONS) {
     const slug = toSlug(col.name);
     const existing = await payload.find({
@@ -182,19 +182,19 @@ async function seedCollections() {
       where: { slug: { equals: slug } },
     });
     if (existing.totalDocs > 0) {
-      console.log(`  — skipped: ${col.name}`);
+      payload.logger.info(`  — skipped: ${col.name}`);
       continue;
     }
     await payload.create({
       collection: "collections",
       data: { name: col.name, slug, season: col.season as any, active: true },
     });
-    console.log(`  ✓ ${col.name}`);
+    payload.logger.info(`  ✓ ${col.name}`);
   }
 }
 
 async function seedMaterials() {
-  console.log("Seeding materials…");
+  payload.logger.info("Seeding materials…");
   for (const [i, mat] of MATERIALS.entries()) {
     const slug = toSlug(mat.name);
     const existing = await payload.find({
@@ -202,7 +202,7 @@ async function seedMaterials() {
       where: { slug: { equals: slug } },
     });
     if (existing.totalDocs > 0) {
-      console.log(`  — skipped: ${mat.name}`);
+      payload.logger.info(`  — skipped: ${mat.name}`);
       continue;
     }
     await payload.create({
@@ -216,12 +216,12 @@ async function seedMaterials() {
         order: i,
       },
     });
-    console.log(`  ✓ ${mat.name}`);
+    payload.logger.info(`  ✓ ${mat.name}`);
   }
 }
 
 async function seedDesigns() {
-  console.log("Seeding designs…");
+  payload.logger.info("Seeding designs…");
   for (const [i, design] of DESIGNS.entries()) {
     const slug = toSlug(design.name);
     const existing = await payload.find({
@@ -229,7 +229,7 @@ async function seedDesigns() {
       where: { slug: { equals: slug } },
     });
     if (existing.totalDocs > 0) {
-      console.log(`  — skipped: ${design.name}`);
+      payload.logger.info(`  — skipped: ${design.name}`);
       continue;
     }
     await payload.create({
@@ -242,7 +242,7 @@ async function seedDesigns() {
         order: i,
       },
     });
-    console.log(`  ✓ ${design.name}`);
+    payload.logger.info(`  ✓ ${design.name}`);
   }
 }
 
@@ -255,6 +255,6 @@ export async function seed() {
   await seedMaterials();
   await seedDesigns();
 
-  console.log("\n✅ Seed complete.");
+  payload.logger.info("\n✅ Seed complete.");
   process.exit(0);
 }

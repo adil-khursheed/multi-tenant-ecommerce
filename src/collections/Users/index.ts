@@ -41,7 +41,7 @@ export const Users: CollectionConfig = {
   },
   admin: {
     group: "Users",
-    defaultColumns: ["name", "email", "roles"],
+    defaultColumns: ["name", "email", "roles", "isActive"],
     useAsTitle: "name",
     hidden: ({ user }) => !user.roles.includes("admin"),
   },
@@ -86,7 +86,11 @@ export const Users: CollectionConfig = {
       label: "Phone Number",
       type: "text",
       required: true,
+      access: {
+        update: adminOnlyFieldAccess,
+      },
     },
+
     {
       name: "roles",
       type: "select",

@@ -15,7 +15,11 @@ import {
   lexicalEditor,
 } from "@payloadcms/richtext-lexical";
 
-import { adminOrTenant } from "@/access/adminOrTenant";
+import {
+  productsCreateAccess,
+  productsReadAccess,
+  productsUpdateDeleteAccess,
+} from "@/access/products";
 import { CallToAction } from "@/blocks/CallToAction/config";
 import { Content } from "@/blocks/Content/config";
 import { MediaBlock } from "@/blocks/MediaBlock/config";
@@ -45,10 +49,11 @@ export const ProductsCollection: CollectionOverride = ({
     useAsTitle: "title",
   },
   access: {
-    read: () => true,
-    create: adminOrTenant,
-    update: adminOrTenant,
-    delete: adminOrTenant,
+    ...defaultCollection.access,
+    read: productsReadAccess,
+    create: productsCreateAccess,
+    update: productsUpdateDeleteAccess,
+    delete: productsUpdateDeleteAccess,
   },
   defaultPopulate: {
     ...defaultCollection?.defaultPopulate,

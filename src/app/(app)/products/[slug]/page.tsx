@@ -69,6 +69,7 @@ export default async function ProductPage({ params }: Args) {
   const product = await queryProductBySlug({ slug });
 
   if (!product) return notFound();
+  console.log(JSON.stringify(product, null, 2));
 
   const gallery =
     product.gallery

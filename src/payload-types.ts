@@ -81,6 +81,7 @@ export interface Config {
     collections: Collection;
     materials: Material;
     designs: Design;
+    reviews: Review;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -120,6 +121,7 @@ export interface Config {
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
     materials: MaterialsSelect<false> | MaterialsSelect<true>;
     designs: DesignsSelect<false> | DesignsSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -621,6 +623,7 @@ export interface Product {
 export interface VariantOption {
   id: string;
   _variantOptions_options_order?: string | null;
+  tenant?: (string | null) | Tenant;
   variantType: string | VariantType;
   label: string;
   /**
@@ -637,6 +640,7 @@ export interface VariantOption {
  */
 export interface VariantType {
   id: string;
+  tenant?: (string | null) | Tenant;
   label: string;
   name: string;
   options?: {
@@ -1180,6 +1184,7 @@ export interface Form {
  */
 export interface Variant {
   id: string;
+  tenant?: (string | null) | Tenant;
   /**
    * Used for administrative purposes, not shown to customers. This is populated by default.
    */
@@ -1489,6 +1494,20 @@ export interface Commission {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: string;
+  title: string;
+  description: string;
+  rating: number;
+  product: string | Product;
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
@@ -1660,6 +1679,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'designs';
         value: string | Design;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: string | Review;
       } | null)
     | ({
         relationTo: 'forms';
@@ -2132,6 +2155,19 @@ export interface DesignsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  rating?: T;
+  product?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
@@ -2304,6 +2340,7 @@ export interface AddressesSelect<T extends boolean = true> {
  * via the `definition` "variants_select".
  */
 export interface VariantsSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   product?: T;
   options?: T;
@@ -2320,6 +2357,7 @@ export interface VariantsSelect<T extends boolean = true> {
  * via the `definition` "variantTypes_select".
  */
 export interface VariantTypesSelect<T extends boolean = true> {
+  tenant?: T;
   label?: T;
   name?: T;
   options?: T;
@@ -2333,6 +2371,7 @@ export interface VariantTypesSelect<T extends boolean = true> {
  */
 export interface VariantOptionsSelect<T extends boolean = true> {
   _variantOptions_options_order?: T;
+  tenant?: T;
   variantType?: T;
   label?: T;
   value?: T;

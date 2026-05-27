@@ -11,7 +11,7 @@ import { adminOnly } from "@/access/adminOnly";
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
 import { adminOrTenantByField } from "@/access/adminOrTenant";
 import { env } from "@/env";
-import { GST_REGEX, PAN_REGEX } from "@/lib/constants";
+import { businessTypes, GST_REGEX, PAN_REGEX } from "@/lib/constants";
 import { decryptField, encryptField, isEncrypted } from "@/lib/crypto";
 
 export const Tenants: CollectionConfig = {
@@ -147,23 +147,7 @@ export const Tenants: CollectionConfig = {
             {
               name: "businessType",
               type: "select",
-              options: [
-                { value: "individual", label: "Individual" },
-                { value: "partnership", label: "Partnership" },
-                { value: "proprietorship", label: "Proprietorship" },
-                { value: "llp", label: "LLP" },
-                { value: "private_limited", label: "Private Limited" },
-                { value: "public_limited", label: "Public Limited" },
-                { value: "ngo", label: "NGO" },
-                { value: "trust", label: "Trust" },
-                { value: "society", label: "Society" },
-                {
-                  value: "educational_institutes",
-                  label: "Educational Institutes",
-                },
-                { value: "not_yet_registered", label: "Not Yet Registered" },
-                { value: "other", label: "Other" },
-              ],
+              options: businessTypes,
               required: true,
               label: "Business Type",
             },
@@ -501,7 +485,12 @@ export const Tenants: CollectionConfig = {
     {
       name: "verificationStatus",
       type: "select",
-      options: ["pending", "under_review", "approved", "rejected"],
+      options: [
+        { value: "pending", label: "Pending" },
+        { value: "under_review", label: "Under Review" },
+        { value: "approved", label: "Approved" },
+        { value: "rejected", label: "Rejected" },
+      ],
       defaultValue: "pending",
       access: {
         update: adminOnlyFieldAccess,
@@ -526,7 +515,6 @@ export const Tenants: CollectionConfig = {
         position: "sidebar",
         description:
           "Toggle to true only after manually verifying the vendor. This triggers Razorpay onboarding automatically.",
-        condition: (_, siblingData) => true,
       },
     },
   ],

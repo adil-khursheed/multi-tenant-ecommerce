@@ -19,6 +19,9 @@ import { isAdmin } from "@/access/isAdmin";
 import { isDocumentOwner } from "@/access/isDocumentOwner";
 import { checkRole } from "@/access/utilities";
 import { ProductsCollection } from "@/collections/Products";
+import { VariantOptionsCollection } from "@/collections/VariantOptions";
+import { VariantsCollection } from "@/collections/Variants";
+import { VariantTypesCollection } from "@/collections/VariantTypes";
 import { env } from "@/env";
 import type { Config } from "@/payload-types";
 import { Page, Product } from "@/payload-types";
@@ -158,6 +161,11 @@ export const plugins: Plugin[] = [
     },
     products: {
       productsCollectionOverride: ProductsCollection,
+      variants: {
+        variantsCollectionOverride: VariantsCollection,
+        variantOptionsCollectionOverride: VariantOptionsCollection,
+        variantTypesCollectionOverride: VariantTypesCollection,
+      },
     },
   }),
   vercelBlobStorage({
@@ -171,6 +179,9 @@ export const plugins: Plugin[] = [
     collections: {
       products: {},
       orders: {},
+      variants: {},
+      variantTypes: {},
+      variantOptions: {},
     },
     tenantsArrayField: {
       includeDefaultField: false,

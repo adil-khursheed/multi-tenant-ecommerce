@@ -21,7 +21,7 @@ export const Message: React.FC<{
   warning?: React.ReactNode;
 }> = ({ className, error, message, success, warning }) => {
   const messageToRender = message || error || success || warning;
-  console.log({ message, error, success, warning });
+
   if (messageToRender) {
     return (
       <div

@@ -109,7 +109,7 @@ export const vendorRouter = {
             businessName: input.businessName,
             businessType: input.businessType as BusinessType,
             panNumber: input.panNumber,
-            gstNumber: input.gst || "",
+            ...(input.gst ? { gstNumber: input.gst.trim().toUpperCase() } : {}),
             storeLogo: uploadedLogoId || undefined,
             storeBanner: uploadedBannerId || undefined,
             bankDetails: {

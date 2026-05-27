@@ -45,24 +45,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { env } from "@/env";
+import { businessTypes } from "@/lib/constants";
 import { useTRPC } from "@/trpc/client";
 import { formatSlug } from "@/utilities/formatSlug";
 import { VendorOnboardingFormData } from "./vendor-onboarding-schema";
-
-const businessTypes = [
-  { value: "individual", label: "Individual" },
-  { value: "partnership", label: "Partnership" },
-  { value: "proprietorship", label: "Proprietorship" },
-  { value: "llp", label: "LLP" },
-  { value: "private_limited", label: "Private Limited" },
-  { value: "public_limited", label: "Public Limited" },
-  { value: "ngo", label: "NGO" },
-  { value: "trust", label: "Trust" },
-  { value: "society", label: "Society" },
-  { value: "educational_institutes", label: "Educational Institutes" },
-  { value: "not_yet_registered", label: "Not Yet Registered" },
-  { value: "other", label: "Other" },
-];
 
 const BusinessInfoForm = ({
   control,
@@ -370,15 +356,13 @@ const BusinessInfoForm = ({
               Business Type
             </FieldLabel>
             <Select
-              onValueChange={field.onChange}
+              items={businessTypes}
+              name={field.name}
               value={field.value}
-              aria-invalid={fieldState.invalid}
+              onValueChange={field.onChange}
             >
-              <SelectTrigger className="py-6">
-                <SelectValue
-                  placeholder="Select Business Type"
-                  className={"capitalize"}
-                />
+              <SelectTrigger className="py-6" aria-invalid={fieldState.invalid}>
+                <SelectValue placeholder="Select Business Type" />
               </SelectTrigger>
               <SelectContent>
                 {businessTypes.map((businessType) => (

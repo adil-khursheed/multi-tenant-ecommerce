@@ -368,6 +368,7 @@ const VendorMultiStepForm = () => {
 
               {activeStep < steps.length - 1 ? (
                 <Button
+                  key="btn-continue"
                   type="button"
                   className="h-11 gap-2 px-6 text-xs font-semibold uppercase tracking-[0.15em] sm:h-12 sm:px-8"
                   onClick={handleNext}
@@ -377,6 +378,7 @@ const VendorMultiStepForm = () => {
                 </Button>
               ) : (
                 <Button
+                  key="btn-submit"
                   type="submit"
                   disabled={isSubmitting}
                   className="h-11 gap-2 px-6 text-xs font-semibold uppercase tracking-[0.15em] sm:h-12 sm:px-8"

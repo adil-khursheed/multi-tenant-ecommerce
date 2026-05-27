@@ -16,7 +16,7 @@ export function OpenCartButton({
     <Button
       variant="ghost"
       size="icon"
-      className="items-center hover:bg-transparent [&_svg:not([class*='size-'])]:size-5"
+      className="relative items-center hover:bg-transparent [&_svg:not([class*='size-'])]:size-5"
       {...rest}
     >
       <HugeiconsIcon icon={ShoppingBag01Icon} />

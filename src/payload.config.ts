@@ -31,6 +31,7 @@ import { Collections } from "./collections/Collections";
 import { Commissions } from "./collections/Commissions";
 import { Designs } from "./collections/Designs";
 import { Materials } from "./collections/Materials";
+import { Reviews } from "./collections/Reviews";
 import { Tenants } from "./collections/Tenants";
 import { env } from "./env";
 import { textStateConfig } from "./fields/textStateConfig";
@@ -80,6 +81,7 @@ export default buildConfig({
     Collections,
     Materials,
     Designs,
+    Reviews,
   ],
   db: mongooseAdapter({
     url: env.DATABASE_URL,
