@@ -8,7 +8,13 @@ import {
   lexicalEditor,
 } from "@payloadcms/richtext-lexical";
 
-import { adminOnly } from "@/access/adminOnly";
+import {
+  mediaCreateAccess,
+  mediaReadAccess,
+  mediaUpdateDeleteAccess,
+} from "@/access/media";
+import { getUserTenantIds } from "@/access/products";
+import { checkRole } from "@/access/utilities";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -16,14 +22,31 @@ const dirname = path.dirname(filename);
 export const Media: CollectionConfig = {
   admin: {
     group: "Content",
-    hidden: ({ user }) => !user.roles.includes("admin"),
   },
   slug: "media",
   access: {
-    create: adminOnly,
-    delete: adminOnly,
-    read: () => true,
-    update: adminOnly,
+    create: mediaCreateAccess,
+    delete: mediaUpdateDeleteAccess,
+    read: mediaReadAccess,
+    update: mediaUpdateDeleteAccess,
+  },
+  hooks: {
+    beforeChange: [
+      async ({ data, req, operation }) => {
+        // Auto-set tenant for vendors on create
+        if (
+          operation === "create" &&
+          req.user &&
+          !checkRole(["admin"], req.user)
+        ) {
+          const tenantIds = getUserTenantIds(req.user);
+          if (tenantIds.length > 0 && !data.tenant) {
+            data.tenant = tenantIds[0];
+          }
+        }
+        return data;
+      },
+    ],
   },
   fields: [
     {
@@ -43,6 +66,17 @@ export const Media: CollectionConfig = {
           ];
         },
       }),
+    },
+    {
+      name: "tenant",
+      type: "relationship",
+      relationTo: "tenants",
+      index: true,
+      admin: {
+        position: "sidebar",
+        description:
+          "The tenant (vendor) who owns this media. Left empty for platform-wide assets.",
+      },
     },
   ],
   upload: {

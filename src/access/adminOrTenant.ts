@@ -3,7 +3,11 @@ import { Access } from "payload";
 import { checkRole } from "./utilities";
 
 export const adminOrTenantByField = (fieldName: string): Access => {
-  return ({ req: { user } }) => {
+  return ({ req: { user, context } }) => {
+    if (context?.isStorefront) {
+      return { isTenantActive: { equals: true } };
+    }
+
     if (!user) return false;
 
     if (checkRole(["admin"], user)) return true;

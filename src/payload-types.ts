@@ -435,6 +435,10 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * The tenant (vendor) who owns this media. Left empty for platform-wide assets.
+   */
+  tenant?: (string | null) | Tenant;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -582,6 +586,14 @@ export interface Product {
    * Auto-calculated: priceInINR × (1 − discountPercent ÷ 100). Used for price-range filter queries. Do not edit manually.
    */
   effectivePrice?: number | null;
+  /**
+   * Auto-calculated: lowest effective price among the base product and all its variants.
+   */
+  minEffectivePrice?: number | null;
+  /**
+   * Auto-calculated: highest effective price among the base product and all its variants.
+   */
+  maxEffectivePrice?: number | null;
   /**
    * Tag as Flash Sale. Always pair with a discountPercent.
    */
@@ -906,7 +918,30 @@ export interface Category {
  * via the `definition` "CarouselBlock".
  */
 export interface CarouselBlock {
+  /**
+   * Optional title shown above the carousel.
+   */
+  heading?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  contentType?: ('products' | 'categories' | 'collections') | null;
   populateBy?: ('collection' | 'selection') | null;
+  /**
+   * Auto-filter products by flag. Stacks with category filter.
+   */
+  productFilter?: ('none' | 'newArrivals' | 'featured' | 'bestsellers' | 'flashSale') | null;
   relationTo?: 'products' | null;
   categories?: (string | Category)[] | null;
   limit?: number | null;
@@ -1194,6 +1229,7 @@ export interface Variant {
   inventory?: number | null;
   priceInINREnabled?: boolean | null;
   priceInINR?: number | null;
+  effectivePrice?: number | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -1936,7 +1972,10 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
  * via the `definition` "CarouselBlock_select".
  */
 export interface CarouselBlockSelect<T extends boolean = true> {
+  heading?: T;
+  contentType?: T;
   populateBy?: T;
+  productFilter?: T;
   relationTo?: T;
   categories?: T;
   limit?: T;
@@ -1992,6 +2031,7 @@ export interface FormBlockSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  tenant?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2347,6 +2387,7 @@ export interface VariantsSelect<T extends boolean = true> {
   inventory?: T;
   priceInINREnabled?: T;
   priceInINR?: T;
+  effectivePrice?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -2429,6 +2470,8 @@ export interface ProductsSelect<T extends boolean = true> {
   designs?: T;
   discountPercent?: T;
   effectivePrice?: T;
+  minEffectivePrice?: T;
+  maxEffectivePrice?: T;
   isFlashSale?: T;
   flags?:
     | T

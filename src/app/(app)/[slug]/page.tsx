@@ -11,7 +11,6 @@ import { homeStaticData } from "@/endpoints/seed/home-static";
 import { RenderHero } from "@/heros/RenderHero";
 import type { Page } from "@/payload-types";
 import { generateMeta } from "@/utilities/generateMeta";
-import TrustBar from "./components/trust-bar";
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise });
@@ -65,9 +64,7 @@ export default async function Page({ params }: Args) {
   return (
     <article>
       <RenderHero {...hero} />
-      <div>
-        <TrustBar />
-      </div>
+
       <RenderBlocks blocks={layout} />
     </article>
   );

@@ -14,6 +14,7 @@ import type { Metadata } from "next";
 
 import { env } from "@/env";
 import { InitTheme } from "@/providers/Theme/InitTheme";
+import TrustBar from "./[slug]/components/trust-bar";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -82,6 +83,9 @@ export default async function RootLayout({
 
           <Header />
           <main>{children}</main>
+
+          <TrustBar />
+
           <Footer />
         </Providers>
       </body>

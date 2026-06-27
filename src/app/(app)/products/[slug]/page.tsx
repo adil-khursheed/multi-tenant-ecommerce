@@ -233,6 +233,7 @@ const queryProductBySlug = async ({ slug }: { slug: string }) => {
       variants: {
         title: true,
         priceInINR: true,
+        effectivePrice: true,
         inventory: true,
         options: true,
       },

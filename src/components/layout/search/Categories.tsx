@@ -1,22 +1,25 @@
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import clsx from 'clsx'
-import React, { Suspense } from 'react'
+import { Suspense } from "react";
 
-import { FilterList } from './filter'
-import { CategoryItem } from './Categories.client'
+import { getPayload } from "payload";
+
+import configPromise from "@payload-config";
+import clsx from "clsx";
+
+import { CategoryItem } from "./Categories.client";
 
 async function CategoryList() {
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise });
 
   const categories = await payload.find({
-    collection: 'categories',
-    sort: 'title',
-  })
+    collection: "categories",
+    sort: "name",
+  });
 
   return (
     <div>
-      <h3 className="text-xs mb-2 text-neutral-500 dark:text-neutral-400">Category</h3>
+      <h3 className="text-xs mb-2 text-neutral-500 dark:text-neutral-400">
+        Category
+      </h3>
 
       <ul>
         {categories.docs.map((category) => {
@@ -24,16 +27,16 @@ async function CategoryList() {
             <li key={category.id}>
               <CategoryItem category={category} />
             </li>
-          )
+          );
         })}
       </ul>
     </div>
-  )
+  );
 }
 
-const skeleton = 'mb-3 h-4 w-5/6 animate-pulse rounded'
-const activeAndTitles = 'bg-neutral-800 dark:bg-neutral-300'
-const items = 'bg-neutral-400 dark:bg-neutral-700'
+const skeleton = "mb-3 h-4 w-5/6 animate-pulse rounded";
+const activeAndTitles = "bg-neutral-800 dark:bg-neutral-300";
+const items = "bg-neutral-400 dark:bg-neutral-700";
 
 export function Categories() {
   return (
@@ -55,5 +58,5 @@ export function Categories() {
     >
       <CategoryList />
     </Suspense>
-  )
+  );
 }

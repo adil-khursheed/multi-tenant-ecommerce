@@ -55,6 +55,71 @@ export const ProductsCollection: CollectionOverride = ({
     update: productsUpdateDeleteAccess,
     delete: productsUpdateDeleteAccess,
   },
+  hooks: {
+    ...defaultCollection.hooks,
+    beforeChange: [
+      ...(defaultCollection.hooks?.beforeChange || []),
+      ({ data, originalDoc }) => {
+        const basePrice = data.priceInINR ?? originalDoc?.priceInINR ?? 0;
+        const discount = data.discountPercent ?? originalDoc?.discountPercent ?? 0;
+        data.effectivePrice = Math.max(0, basePrice * (1 - discount / 100));
+        return data;
+      },
+    ],
+    afterChange: [
+      ...(defaultCollection.hooks?.afterChange || []),
+      async ({ doc, req, context }) => {
+        if (!context.skipProductAfterChange) {
+          const variants = await req.payload.find({
+            collection: "variants",
+            where: { product: { equals: doc.id } },
+            select: { priceInINR: true, effectivePrice: true },
+            pagination: false,
+            req,
+          });
+
+          const discount = doc.discountPercent || 0;
+          let minPrice = doc.effectivePrice || 0;
+          let maxPrice = doc.effectivePrice || 0;
+
+          for (const variant of variants.docs) {
+            const vPrice = variant.priceInINR ?? doc.priceInINR ?? 0;
+
+            const vEffPrice = Math.max(0, vPrice * (1 - discount / 100));
+
+            if (vEffPrice !== variant.effectivePrice) {
+              await req.payload.update({
+                collection: "variants",
+                id: variant.id,
+                data: { effectivePrice: vEffPrice },
+                req,
+                context: { skipVariantAfterChange: true },
+              });
+            }
+
+            if (vEffPrice < minPrice) minPrice = vEffPrice;
+            if (vEffPrice > maxPrice) maxPrice = vEffPrice;
+          }
+
+          if (
+            minPrice !== doc.minEffectivePrice ||
+            maxPrice !== doc.maxEffectivePrice
+          ) {
+            await req.payload.update({
+              collection: "products",
+              id: doc.id,
+              data: {
+                minEffectivePrice: minPrice,
+                maxEffectivePrice: maxPrice,
+              },
+              req,
+              context: { skipProductAfterChange: true },
+            });
+          }
+        }
+      },
+    ],
+  },
   defaultPopulate: {
     ...defaultCollection?.defaultPopulate,
     title: true,
@@ -393,6 +458,28 @@ export const ProductsCollection: CollectionOverride = ({
         readOnly: true,
         description:
           "Auto-calculated: priceInINR × (1 − discountPercent ÷ 100). Used for price-range filter queries. Do not edit manually.",
+      },
+    },
+    {
+      name: "minEffectivePrice",
+      type: "number",
+      index: true,
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        description:
+          "Auto-calculated: lowest effective price among the base product and all its variants.",
+      },
+    },
+    {
+      name: "maxEffectivePrice",
+      type: "number",
+      index: true,
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        description:
+          "Auto-calculated: highest effective price among the base product and all its variants.",
       },
     },
     {

@@ -26,12 +26,26 @@ export default async function ShopPage({ searchParams }: Props) {
     collection: "products",
     draft: false,
     overrideAccess: false,
+    context: {
+      isStorefront: true,
+    },
     select: {
       title: true,
       slug: true,
       gallery: true,
       categories: true,
       priceInINR: true,
+      tenant: true,
+      ratings: true,
+      discountPercent: true,
+      effectivePrice: true,
+      flags: true,
+    },
+    populate: {
+      tenants: {
+        storeName: true,
+        storeSlug: true,
+      },
     },
     ...(sort ? { sort } : { sort: "title" }),
     ...(searchValue || category
@@ -78,6 +92,7 @@ export default async function ShopPage({ searchParams }: Props) {
 
   const resultsText = products.docs.length > 1 ? "results" : "result";
 
+  console.log(JSON.stringify(products, null, 2));
   return (
     <div>
       {searchValue ? (
@@ -94,7 +109,7 @@ export default async function ShopPage({ searchParams }: Props) {
       )}
 
       {products?.docs.length > 0 ? (
-        <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Grid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {products.docs.map((product) => {
             return <ProductGridItem key={product.id} product={product} />;
           })}

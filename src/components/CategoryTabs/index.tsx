@@ -1,27 +1,29 @@
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import clsx from 'clsx'
-import React, { Suspense } from 'react'
+import React, { Suspense } from "react";
 
-import { Item } from './Item'
+import { getPayload } from "payload";
+
+import configPromise from "@payload-config";
+import clsx from "clsx";
+
+import { Item } from "./Item";
 
 async function List() {
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({ config: configPromise });
   const categoriesData = await payload.find({
-    collection: 'categories',
-    sort: 'title',
+    collection: "categories",
+    sort: "name",
     select: {
-      title: true,
+      name: true,
       slug: true,
     },
-  })
+  });
 
   const categories = categoriesData.docs?.map((category) => {
     return {
       href: `/shop/${category.slug}`,
-      title: category.title,
-    }
-  })
+      title: category.name,
+    };
+  });
 
   return (
     <React.Fragment>
@@ -30,18 +32,18 @@ async function List() {
           <Item title="All" href="/shop" />
           <Suspense fallback={null}>
             {categories.map((category) => {
-              return <Item {...category} key={category.href} />
+              return <Item {...category} key={category.href} />;
             })}
           </Suspense>
         </ul>
       </nav>
     </React.Fragment>
-  )
+  );
 }
 
-const skeleton = 'mb-3 h-4 w-5/6 animate-pulse rounded'
-const activeAndTitles = 'bg-neutral-800 dark:bg-neutral-300'
-const items = 'bg-neutral-400 dark:bg-neutral-700'
+const skeleton = "mb-3 h-4 w-5/6 animate-pulse rounded";
+const activeAndTitles = "bg-neutral-800 dark:bg-neutral-300";
+const items = "bg-neutral-400 dark:bg-neutral-700";
 
 export function CategoryTabs() {
   return (
@@ -63,5 +65,5 @@ export function CategoryTabs() {
     >
       <List />
     </Suspense>
-  )
+  );
 }
