@@ -1,11 +1,9 @@
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import type { Metadata } from "next";
 
-import { getPayload } from "payload";
-
-import configPromise from "@payload-config";
-
-import { Grid } from "@/components/Grid";
-import { ProductGridItem } from "@/components/ProductGridItem";
+import ShopProducts, { ShopProductsSkeleton } from "@/components/Shop";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export const metadata: Metadata = {
   description: "Search for products in the store.",
@@ -19,101 +17,58 @@ type Props = {
 };
 
 export default async function ShopPage({ searchParams }: Props) {
-  const { q: searchValue, sort, category } = await searchParams;
-  const payload = await getPayload({ config: configPromise });
+  const {
+    q: searchValue,
+    sort,
+    category,
+    priceRange,
+    size,
+    color,
+    brand,
+    rating,
+    occasion,
+    material,
+  } = (await searchParams) as {
+    q?: string;
+    sort?: string;
+    category?: string;
+    priceRange?: string;
+    size?: string;
+    color?: string;
+    brand?: string;
+    rating?: string;
+    occasion?: string;
+    material?: string;
+  };
 
-  const products = await payload.find({
-    collection: "products",
-    draft: false,
-    overrideAccess: false,
-    context: {
-      isStorefront: true,
-    },
-    select: {
-      title: true,
-      slug: true,
-      gallery: true,
-      categories: true,
-      priceInINR: true,
-      tenant: true,
-      ratings: true,
-      discountPercent: true,
-      effectivePrice: true,
-      flags: true,
-    },
-    populate: {
-      tenants: {
-        storeName: true,
-        storeSlug: true,
+  void prefetch(
+    trpc.product.getAllProducts.infiniteQueryOptions(
+      {
+        category,
+        sort,
+        searchValue,
+        priceRange,
+        size,
+        color,
+        brand,
+        rating,
+        occasion,
+        material,
       },
-    },
-    ...(sort ? { sort } : { sort: "title" }),
-    ...(searchValue || category
-      ? {
-          where: {
-            and: [
-              {
-                _status: {
-                  equals: "published",
-                },
-              },
-              ...(searchValue
-                ? [
-                    {
-                      or: [
-                        {
-                          title: {
-                            like: searchValue,
-                          },
-                        },
-                        {
-                          description: {
-                            like: searchValue,
-                          },
-                        },
-                      ],
-                    },
-                  ]
-                : []),
-              ...(category
-                ? [
-                    {
-                      categories: {
-                        contains: category,
-                      },
-                    },
-                  ]
-                : []),
-            ],
-          },
-        }
-      : {}),
-  });
-
-  const resultsText = products.docs.length > 1 ? "results" : "result";
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        initialCursor: 1,
+      },
+    ),
+  );
 
   return (
-    <div>
-      {searchValue ? (
-        <p className="mb-4">
-          {products.docs?.length === 0
-            ? "There are no products that match "
-            : `Showing ${products.docs.length} ${resultsText} for `}
-          <span className="font-bold">&quot;{searchValue}&quot;</span>
-        </p>
-      ) : null}
-
-      {!searchValue && products.docs?.length === 0 && (
-        <p className="mb-4">No products found. Please try different filters.</p>
-      )}
-
-      {products?.docs.length > 0 ? (
-        <Grid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {products.docs.map((product) => {
-            return <ProductGridItem key={product.id} product={product} />;
-          })}
-        </Grid>
-      ) : null}
-    </div>
+    <HydrateClient>
+      <ErrorBoundary fallback={<div>Something went wrong!</div>}>
+        <Suspense fallback={<ShopProductsSkeleton />}>
+          <ShopProducts />
+        </Suspense>
+      </ErrorBoundary>
+    </HydrateClient>
   );
 }

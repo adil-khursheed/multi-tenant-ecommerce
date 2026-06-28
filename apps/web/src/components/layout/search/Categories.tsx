@@ -35,8 +35,8 @@ async function CategoryList() {
 }
 
 const skeleton = "mb-3 h-4 w-5/6 animate-pulse rounded";
-const activeAndTitles = "bg-neutral-800 dark:bg-neutral-300";
-const items = "bg-neutral-400 dark:bg-neutral-700";
+const activeAndTitles = "bg-muted";
+const items = "bg-muted";
 
 export function Categories() {
   return (
