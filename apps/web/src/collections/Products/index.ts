@@ -61,7 +61,8 @@ export const ProductsCollection: CollectionOverride = ({
       ...(defaultCollection.hooks?.beforeChange || []),
       ({ data, originalDoc }) => {
         const basePrice = data.priceInINR ?? originalDoc?.priceInINR ?? 0;
-        const discount = data.discountPercent ?? originalDoc?.discountPercent ?? 0;
+        const discount =
+          data.discountPercent ?? originalDoc?.discountPercent ?? 0;
         data.effectivePrice = Math.max(0, basePrice * (1 - discount / 100));
         return data;
       },
@@ -140,6 +141,14 @@ export const ProductsCollection: CollectionOverride = ({
         {
           fields: [
             {
+              name: "shortDescription",
+              type: "textarea",
+              maxLength: 150,
+              admin: {
+                description: "Short description about the product",
+              },
+            },
+            {
               name: "description",
               type: "richText",
               editor: lexicalEditor({
@@ -155,7 +164,6 @@ export const ProductsCollection: CollectionOverride = ({
                   ];
                 },
               }),
-              label: false,
               required: false,
             },
             {

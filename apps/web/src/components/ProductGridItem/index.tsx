@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 
@@ -37,7 +39,7 @@ export const ProductGridItem: React.FC<Props> = ({
     discountPercent,
     flags,
     categories,
-    description,
+    shortDescription,
   } = product;
 
   const image =
@@ -89,10 +91,11 @@ export const ProductGridItem: React.FC<Props> = ({
               {title}
             </h3>
           </Link>
-          <p className="font-sans text-[14px] text-secondary-foreground mb-4 max-w-xl line-clamp-2">
-            Experience timeless elegance with this handcrafted piece. Made from
-            premium quality materials with meticulous attention to detail.
-          </p>
+          {shortDescription && (
+            <p className="font-sans text-[14px] text-secondary-foreground mb-4 max-w-xl line-clamp-2">
+              {shortDescription}
+            </p>
+          )}
           <div className="flex items-center gap-6 mb-4">
             {/* Color swatches placeholder */}
             <div className="flex gap-2">

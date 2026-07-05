@@ -10,12 +10,15 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import type { Product, Variant } from "@/payload-types";
+import { cn } from "@/utilities/cn";
 
 type Props = {
   product: Product;
+  className?: string;
+  'data-main-add-to-cart'?: boolean;
 };
 
-export function AddToCart({ product }: Props) {
+export function AddToCart({ product, className, 'data-main-add-to-cart': dataMainAddToCart }: Props) {
   const { addItem, cart, isLoading } = useCart();
   const searchParams = useSearchParams();
 
@@ -101,16 +104,15 @@ export function AddToCart({ product }: Props) {
   return (
     <Button
       aria-label="Add to cart"
-      // variant={"outline"}
       size={"lg"}
-      className={clsx("w-full", {
-        "hover:opacity-90": true,
-      })}
+      className={cn("w-full hover:opacity-90", className)}
       disabled={disabled || isLoading}
       onClick={addToCart}
       type="submit"
+      data-main-add-to-cart={dataMainAddToCart}
     >
       Add To Cart
     </Button>
   );
 }
+

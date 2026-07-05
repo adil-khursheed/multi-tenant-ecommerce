@@ -1,12 +1,13 @@
 import type { CollectionConfig } from "payload";
 
 import { adminOnly } from "@/access/adminOnly";
+import { reviewsCreateAccess, reviewsReadAccess } from "@/access/reviewsAccess";
 
 export const Reviews: CollectionConfig = {
   slug: "reviews",
   access: {
-    read: adminOnly,
-    create: adminOnly,
+    read: reviewsReadAccess,
+    create: reviewsCreateAccess,
     update: adminOnly,
     delete: adminOnly,
   },

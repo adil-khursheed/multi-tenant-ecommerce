@@ -274,6 +274,10 @@ export interface Tenant {
    */
   storeName: string;
   /**
+   * This is the description of the store (e.g. Welcome to John's Store. We provide high quality products.)
+   */
+  storeDescription?: string | null;
+  /**
    * This is the subdomain of the store (e.g. [slug].localhost:3000)
    */
   storeSlug: string;
@@ -497,6 +501,10 @@ export interface Product {
   id: string;
   tenant?: (string | null) | Tenant;
   title: string;
+  /**
+   * Short description about the product
+   */
+  shortDescription?: string | null;
   description?: {
     root: {
       type: string;
@@ -2053,6 +2061,7 @@ export interface TenantsSelect<T extends boolean = true> {
   email?: T;
   phone?: T;
   storeName?: T;
+  storeDescription?: T;
   storeSlug?: T;
   storeLogo?: T;
   storeBanner?: T;
@@ -2427,6 +2436,7 @@ export interface VariantOptionsSelect<T extends boolean = true> {
 export interface ProductsSelect<T extends boolean = true> {
   tenant?: T;
   title?: T;
+  shortDescription?: T;
   description?: T;
   gallery?:
     | T

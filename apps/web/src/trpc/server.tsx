@@ -10,7 +10,7 @@ import {
 } from "@trpc/tanstack-react-query";
 
 import { makeQueryClient } from "./query-client";
-import { AppRouter, appRouter } from "@repo/api";
+import { AppRouter, appRouter, createCallerFactory } from "@repo/api";
 import { createTRPCContext } from "./context";
 
 const createContext = cache(async () => {
@@ -50,3 +50,11 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
     void queryClient.prefetchQuery(queryOptions);
   }
 }
+
+/**
+ * Direct server-side caller for use in RSCs (e.g. generateMetadata, server components).
+ * Uses the same cached context as the options proxy.
+ */
+const createCaller = createCallerFactory(appRouter);
+export const serverCaller = cache(() => createCaller(createContext));
+

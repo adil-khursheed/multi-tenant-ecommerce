@@ -1,20 +1,18 @@
 import React, { Suspense } from "react";
 import { Metadata } from "next";
 import { draftMode } from "next/headers";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { getPayload } from "payload";
-
-import configPromise from "@payload-config";
-import { ChevronLeftIcon } from "lucide-react";
-
 import { RenderBlocks } from "@/blocks/RenderBlocks";
-import { GridTileImage } from "@/components/Grid/tile";
+import { CustomerReviews } from "@/components/product/CustomerReviews";
 import { Gallery } from "@/components/product/Gallery";
-import { ProductDescription } from "@/components/product/ProductDescription";
-import { buttonVariants } from "@/components/ui/button";
+import { ProductDetailsAccordion } from "@/components/product/ProductDetailsAccordion";
+import { ProductInfo } from "@/components/product/ProductInfo";
+import { RelatedProductsGrid } from "@/components/product/RelatedProductsGrid";
+import { StickyBottomBar } from "@/components/product/StickyBottomBar";
+import { VendorCard } from "@/components/product/VendorCard";
 import type { Media, Product } from "@/payload-types";
+import { serverCaller } from "@/trpc/server";
 
 type Args = {
   params: Promise<{
@@ -24,7 +22,12 @@ type Args = {
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug } = await params;
-  const product = await queryProductBySlug({ slug });
+  const { isEnabled: draft } = await draftMode();
+  const caller = await serverCaller();
+  const { product } = await caller.product.getProductBySlug({
+    slug,
+    draft: draft || undefined,
+  });
 
   if (!product) return notFound();
 
@@ -66,10 +69,14 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Args) {
   const { slug } = await params;
-  const product = await queryProductBySlug({ slug });
+  const { isEnabled: draft } = await draftMode();
+  const caller = await serverCaller();
+  const { product, reviews } = await caller.product.getProductBySlug({
+    slug,
+    draft: draft || undefined,
+  });
 
   if (!product) return notFound();
-  console.log(JSON.stringify(product, null, 2));
 
   const gallery =
     product.gallery
@@ -81,6 +88,7 @@ export default async function ProductPage({ params }: Args) {
 
   const metaImage =
     typeof product.meta?.image === "object" ? product.meta?.image : undefined;
+
   const hasStock = product.enableVariants
     ? product?.variants?.docs?.some((variant) => {
         if (typeof variant !== "object") return false;
@@ -116,7 +124,7 @@ export default async function ProductPage({ params }: Args) {
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
       price: price,
-      priceCurrency: "inr",
+      priceCurrency: "INR",
     },
   };
 
@@ -124,6 +132,9 @@ export default async function ProductPage({ params }: Args) {
     product.relatedProducts?.filter(
       (relatedProduct) => typeof relatedProduct === "object",
     ) ?? [];
+
+  const averageRating = product.ratings?.average || 0;
+  const reviewCount = product.ratings?.count || 0;
 
   return (
     <React.Fragment>
@@ -133,30 +144,46 @@ export default async function ProductPage({ params }: Args) {
         }}
         type="application/ld+json"
       />
-      <div className="container pt-8 pb-8">
-        <Link
-          href="/shop"
-          className={buttonVariants({ variant: "ghost", className: "mb-4" })}
-        >
-          <ChevronLeftIcon />
-          All products
-        </Link>
-
-        <div className="flex flex-col gap-12 rounded-lg border p-8 md:py-12 lg:flex-row lg:gap-8 bg-primary-foreground">
-          <div className="h-full w-full basis-full lg:basis-1/2">
+      <div className="container max-w-7xl pt-8 pb-16 px-4 md:px-8">
+        {/* 2-column Hero section */}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 w-full">
+          {/* Left Column: Gallery */}
+          <div className="w-full lg:w-[55%]">
             <Suspense
               fallback={
-                <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
+                <div className="relative aspect-9/16 max-h-[650px] w-full overflow-hidden bg-muted rounded-lg animate-pulse" />
               }
             >
-              {Boolean(gallery?.length) && <Gallery gallery={gallery} />}
+              {Boolean(gallery?.length) && (
+                <Gallery
+                  gallery={gallery}
+                  isBestseller={product.flags?.isBestseller}
+                />
+              )}
             </Suspense>
           </div>
 
-          <div className="basis-full lg:basis-1/2">
-            <ProductDescription product={product} />
+          {/* Right Column: Product Info */}
+          <div className="w-full lg:w-[45%]">
+            <ProductInfo product={product} />
           </div>
         </div>
+
+        {/* Product Details Accordion */}
+        <ProductDetailsAccordion product={product} />
+
+        {/* Vendor Card */}
+        <VendorCard product={product} />
+
+        {/* Customer Reviews */}
+        <CustomerReviews
+          reviews={reviews.docs}
+          averageRating={averageRating}
+          reviewCount={reviewCount}
+        />
+
+        {/* Related Products */}
+        <RelatedProductsGrid relatedProducts={relatedProducts as Product[]} />
       </div>
 
       {product.layout?.length ? (
@@ -165,80 +192,8 @@ export default async function ProductPage({ params }: Args) {
         <></>
       )}
 
-      {relatedProducts.length ? (
-        <div className="container">
-          <RelatedProducts products={relatedProducts as Product[]} />
-        </div>
-      ) : (
-        <></>
-      )}
+      {/* Sticky Bottom Bar */}
+      <StickyBottomBar product={product} />
     </React.Fragment>
   );
 }
-
-function RelatedProducts({ products }: { products: Product[] }) {
-  if (!products.length) return null;
-
-  return (
-    <div className="py-8">
-      <h2 className="mb-4 text-2xl font-bold">Related Products</h2>
-      <ul className="flex w-full gap-4 overflow-x-auto pt-1">
-        {products.map((product) => (
-          <li
-            className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
-            key={product.id}
-          >
-            <Link
-              className="relative h-full w-full"
-              href={`/products/${product.slug}`}
-            >
-              <GridTileImage
-                label={{
-                  amount: product.priceInINR!,
-                  title: product.title,
-                }}
-                media={product.meta?.image as Media}
-              />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-const queryProductBySlug = async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = await draftMode();
-
-  const payload = await getPayload({ config: configPromise });
-
-  const result = await payload.find({
-    collection: "products",
-    depth: 3,
-    draft,
-    limit: 1,
-    overrideAccess: draft,
-    pagination: false,
-    where: {
-      and: [
-        {
-          slug: {
-            equals: slug,
-          },
-        },
-        ...(draft ? [] : [{ _status: { equals: "published" } }]),
-      ],
-    },
-    populate: {
-      variants: {
-        title: true,
-        priceInINR: true,
-        effectivePrice: true,
-        inventory: true,
-        options: true,
-      },
-    },
-  });
-
-  return result.docs?.[0] || null;
-};

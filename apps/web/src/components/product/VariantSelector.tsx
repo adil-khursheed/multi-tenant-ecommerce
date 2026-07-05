@@ -1,122 +1,198 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
-import type { Product } from '@/payload-types'
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { createUrl } from '@/utilities/createUrl'
-import clsx from 'clsx'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React from 'react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import type { Product } from "@/payload-types";
+import { cn } from "@/utilities/cn";
+import { createUrl } from "@/utilities/createUrl";
+import { Button } from "../ui/button";
 
 export function VariantSelector({ product }: { product: Product }) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const variants = product.variants?.docs
-  const variantTypes = product.variantTypes
-  const hasVariants = Boolean(product.enableVariants && variants?.length && variantTypes?.length)
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const variants = product.variants?.docs;
+  const variantTypes = product.variantTypes;
+  const hasVariants = Boolean(
+    product.enableVariants && variants?.length && variantTypes?.length,
+  );
 
   if (!hasVariants) {
-    return null
+    return null;
   }
 
-  return variantTypes?.map((type) => {
-    if (!type || typeof type !== 'object') {
-      return <></>
-    }
+  return (
+    <div className="space-y-5">
+      {variantTypes?.map((type) => {
+        if (!type || typeof type !== "object") {
+          return null;
+        }
 
-    const options = type.options?.docs
+        const options = type.options?.docs;
 
-    if (!options || !Array.isArray(options) || !options.length) {
-      return <></>
-    }
+        if (!options || !Array.isArray(options) || !options.length) {
+          return null;
+        }
 
-    return (
-      <dl className="" key={type.id}>
-        <dt className="mb-4 text-sm">{type.label}</dt>
-        <dd className="flex flex-wrap gap-3">
-          <React.Fragment>
-            {options?.map((option) => {
-              if (!option || typeof option !== 'object') {
-                return <></>
-              }
+        const isColorType = type.name.toLowerCase() === "color";
 
-              const optionID = option.id
-              const optionKeyLowerCase = type.name
+        return (
+          <div className="space-y-3" key={type.id}>
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-medium tracking-[0.08em] uppercase">
+                {type.label}
+              </span>
+              {isColorType && (
+                <span className="text-[12px] text-muted-foreground">
+                  {(
+                    options.find(
+                      (opt) =>
+                        typeof opt === "object" &&
+                        searchParams.get(type.name) === String(opt.id),
+                    ) as any
+                  )?.label || "Select color"}
+                </span>
+              )}
+            </div>
 
-              // Base option params on current params so we can preserve any other param state in the url.
-              const optionSearchParams = new URLSearchParams(searchParams.toString())
-
-              // Remove image and variant ID from this search params so we can loop over it safely.
-              optionSearchParams.delete('variant')
-              optionSearchParams.delete('image')
-
-              // Update the option params using the current option to reflect how the url *would* change,
-              // if the option was clicked.
-              optionSearchParams.set(optionKeyLowerCase, String(optionID))
-
-              const currentOptions = Array.from(optionSearchParams.values())
-
-              let isAvailableForSale = true
-
-              // Find a matching variant
-              if (variants) {
-                const matchingVariant = variants
-                  .filter((variant) => typeof variant === 'object')
-                  .find((variant) => {
-                    if (!variant.options || !Array.isArray(variant.options)) return false
-
-                    // Check if all variant options match the current options in the URL
-                    return variant.options.every((variantOption) => {
-                      if (typeof variantOption !== 'object')
-                        return currentOptions.includes(String(variantOption))
-
-                      return currentOptions.includes(String(variantOption.id))
-                    })
-                  })
-
-                if (matchingVariant) {
-                  // If we found a matching variant, set the variant ID in the search params.
-                  optionSearchParams.set('variant', String(matchingVariant.id))
-
-                  if (matchingVariant.inventory && matchingVariant.inventory > 0) {
-                    isAvailableForSale = true
-                  } else {
-                    isAvailableForSale = false
+            <div className="flex flex-wrap gap-2">
+              <TooltipProvider delay={100}>
+                {options?.map((option) => {
+                  if (!option || typeof option !== "object") {
+                    return null;
                   }
-                }
-              }
 
-              const optionUrl = createUrl(pathname, optionSearchParams)
+                  const optionID = option.id;
+                  const optionKeyLowerCase = type.name;
 
-              // The option is active if it's in the url params.
-              const isActive =
-                Boolean(isAvailableForSale) &&
-                searchParams.get(optionKeyLowerCase) === String(optionID)
+                  const optionSearchParams = new URLSearchParams(
+                    searchParams.toString(),
+                  );
 
-              return (
-                <Button
-                  variant={'ghost'}
-                  aria-disabled={!isAvailableForSale}
-                  className={clsx('px-2', {
-                    'bg-primary/5 text-primary': isActive,
-                  })}
-                  disabled={!isAvailableForSale}
-                  key={option.id}
-                  onClick={() => {
-                    router.replace(`${optionUrl}`, {
-                      scroll: false,
-                    })
-                  }}
-                  title={`${option.label} ${!isAvailableForSale ? ' (Out of Stock)' : ''}`}
-                >
-                  {option.label}
-                </Button>
-              )
-            })}
-          </React.Fragment>
-        </dd>
-      </dl>
-    )
-  })
+                  optionSearchParams.delete("variant");
+                  optionSearchParams.delete("image");
+                  optionSearchParams.set(optionKeyLowerCase, String(optionID));
+
+                  const currentOptions = Array.from(
+                    optionSearchParams.values(),
+                  );
+                  let isAvailableForSale = true;
+
+                  if (variants) {
+                    const matchingVariant = variants
+                      .filter((variant) => typeof variant === "object")
+                      .find((variant) => {
+                        if (!variant.options || !Array.isArray(variant.options))
+                          return false;
+
+                        return variant.options.every((variantOption) => {
+                          if (typeof variantOption !== "object")
+                            return currentOptions.includes(
+                              String(variantOption),
+                            );
+                          return currentOptions.includes(
+                            String(variantOption.id),
+                          );
+                        });
+                      });
+
+                    if (matchingVariant) {
+                      optionSearchParams.set(
+                        "variant",
+                        String(matchingVariant.id),
+                      );
+                      if (
+                        matchingVariant.inventory &&
+                        matchingVariant.inventory > 0
+                      ) {
+                        isAvailableForSale = true;
+                      } else {
+                        isAvailableForSale = false;
+                      }
+                    }
+                  }
+
+                  const optionUrl = createUrl(pathname, optionSearchParams);
+                  const isActive =
+                    searchParams.get(optionKeyLowerCase) === String(optionID);
+
+                  if (isColorType) {
+                    return (
+                      <Tooltip key={option.id}>
+                        <TooltipTrigger
+                          render={
+                            <button
+                              onClick={() => {
+                                router.replace(`${optionUrl}`, {
+                                  scroll: false,
+                                });
+                              }}
+                              className={cn(
+                                "w-8 h-8 rounded-full border transition-all duration-200 relative shrink-0",
+                                !isAvailableForSale
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : "cursor-pointer hover:scale-110",
+                                isActive
+                                  ? "outline-2 outline-primary outline-offset-2 border-transparent"
+                                  : "border-border hover:border-foreground",
+                              )}
+                              style={{ backgroundColor: option.value }} // Assuming value holds the hex color
+                              title={option.label}
+                            >
+                              {!isAvailableForSale && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <div className="w-px h-full bg-destructive rotate-45" />
+                                </div>
+                              )}
+                            </button>
+                          }
+                        />
+                        <TooltipContent>
+                          <p>
+                            {option.label}{" "}
+                            {!isAvailableForSale && "(Out of Stock)"}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  }
+
+                  // Default text buttons for sizes, materials etc
+                  return (
+                    <Button
+                      variant={isActive ? "default" : "outline"}
+                      key={option.id}
+                      onClick={() => {
+                        if (isAvailableForSale) {
+                          router.replace(`${optionUrl}`, { scroll: false });
+                        }
+                      }}
+                      disabled={!isAvailableForSale}
+                      className={cn(
+                        "relative h-10 px-4 min-w-[52px] text-[13px] font-medium flex items-center justify-center transition-all duration-200 rounded-md overflow-hidden",
+                        !isAvailableForSale
+                          ? "bg-muted text-muted-foreground border-border cursor-not-allowed opacity-50"
+                          : "cursor-pointer hover:border-primary hover:text-primary",
+                      )}
+                    >
+                      {!isAvailableForSale && (
+                        <div className="absolute inset-x-0 w-full h-px bg-border top-1/2 -translate-y-1/2 -rotate-25" />
+                      )}
+                      {option.label}
+                    </Button>
+                  );
+                })}
+              </TooltipProvider>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }

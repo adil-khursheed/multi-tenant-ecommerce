@@ -56,7 +56,6 @@ const ShopProducts = () => {
 
   // Flatten all pages into a single array of products
   const products = data.pages.flatMap((page) => page.products.docs);
-  console.log(JSON.stringify(products, null, 2));
 
   const totalDocs = data.pages[0]?.products.totalDocs ?? 0;
 

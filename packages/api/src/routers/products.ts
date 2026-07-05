@@ -209,6 +209,7 @@ export const productsRouter = {
         select: {
           title: true,
           slug: true,
+          shortDescription: true,
           gallery: true,
           categories: true,
           priceInINR: true,
@@ -238,6 +239,92 @@ export const productsRouter = {
       return {
         products,
         nextCursor: products.hasNextPage ? products.nextPage : null,
+      };
+    }),
+
+  getProductBySlug: baseProcedure
+    .input(
+      z.object({
+        slug: z.string(),
+        draft: z.boolean().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { slug, draft } = input;
+
+      const result = await ctx.payload.find({
+        collection: "products",
+        depth: 3,
+        draft,
+        limit: 1,
+        overrideAccess: draft,
+        pagination: false,
+        context: {
+          isStorefront: true,
+        },
+        where: {
+          and: [
+            {
+              slug: {
+                equals: slug,
+              },
+            },
+            ...(draft ? [] : [{ _status: { equals: "published" } }]),
+          ],
+        },
+        populate: {
+          tenants: {
+            storeName: true,
+            storeDescription: true,
+            storeSlug: true,
+            storeLogo: true,
+            verificationStatus: true,
+            shippingPolicy: true,
+            returnAndExchangePolicy: true,
+          },
+          variants: {
+            title: true,
+            priceInINR: true,
+            effectivePrice: true,
+            inventory: true,
+            options: true,
+          },
+        },
+      });
+
+      const product = result.docs?.[0] || null;
+
+      if (!product) {
+        return {
+          product: null,
+          reviews: { docs: [], totalDocs: 0, hasNextPage: false },
+        };
+      }
+
+      // Fetch first page of reviews for this product
+      const reviewsResult = await ctx.payload.find({
+        collection: "reviews",
+        where: {
+          product: {
+            equals: product.id,
+          },
+        },
+        sort: "-createdAt",
+        limit: 10,
+        depth: 1, // populate user
+        overrideAccess: false,
+        context: {
+          isStorefront: true,
+        },
+      });
+
+      return {
+        product,
+        reviews: {
+          docs: reviewsResult.docs,
+          totalDocs: reviewsResult.totalDocs,
+          hasNextPage: reviewsResult.hasNextPage,
+        },
       };
     }),
 };

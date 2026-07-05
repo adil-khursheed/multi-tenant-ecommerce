@@ -7,11 +7,11 @@ import {
   lexicalEditor,
 } from "@payloadcms/richtext-lexical";
 
+import { businessTypes, GST_REGEX, PAN_REGEX } from "@repo/types";
 import { adminOnly } from "@/access/adminOnly";
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
 import { adminOrTenantByField } from "@/access/adminOrTenant";
 import { env } from "@/env";
-import { businessTypes, GST_REGEX, PAN_REGEX } from "@repo/types";
 import { decryptField, encryptField, isEncrypted } from "@/lib/crypto";
 
 export const Tenants: CollectionConfig = {
@@ -90,6 +90,15 @@ export const Tenants: CollectionConfig = {
       label: "Store Name",
       admin: {
         description: "This is the name of the store (e.g. John's Store)",
+      },
+    },
+    {
+      name: "storeDescription",
+      type: "textarea",
+      label: "Store Description",
+      admin: {
+        description:
+          "This is the description of the store (e.g. Welcome to John's Store. We provide high quality products.)",
       },
     },
     {
