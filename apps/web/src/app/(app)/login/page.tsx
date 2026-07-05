@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/forms/LoginForm";
 import { RenderParams } from "@/components/RenderParams";
+import { env } from "@/env";
 import { getUser } from "@/utilities/getUser";
 
 export default async function Login() {
@@ -30,14 +31,14 @@ export default async function Login() {
         />
         <div className="absolute inset-0 bg-linear-to-t from-[rgba(28,28,25,0.85)] via-[rgba(28,28,25,0.4)] via-70% to-transparent" />
         <div className="relative z-10 flex flex-col p-12 text-muted">
-          <h2 className="mb-3 font-serif text-[2.5rem] font-light tracking-[0.25em]">
-            VASTRA
+          <h2 className="mb-3 font-serif text-[2.5rem] font-light tracking-[0.25em] uppercase">
+            {env.SITE_NAME}
           </h2>
           <p className="mb-6 font-serif text-xl font-light italic opacity-90">
             Where every weave has a name.
           </p>
           <p className="font-sans text-[0.65rem] font-medium uppercase tracking-[0.2em] opacity-70">
-            200+ Artisan Vendors · Handcrafted in India
+            Crafted with love, in India
           </p>
         </div>
       </div>

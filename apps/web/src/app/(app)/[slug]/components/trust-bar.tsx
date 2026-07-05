@@ -137,7 +137,7 @@ export function InfiniteMovingCards({
           pauseOnHover && "hover:paused",
         )}
       >
-        {items.map((item, idx) => (
+        {items.map((item) => (
           <li
             className="relative w-fit max-w-full shrink-0 flex items-center gap-3 bg-transparent px-8 py-4 text-sm font-medium uppercase tracking-widest"
             key={item.id}

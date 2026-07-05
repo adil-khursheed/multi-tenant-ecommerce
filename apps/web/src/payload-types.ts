@@ -760,6 +760,7 @@ export interface Page {
         }[]
       | null;
     media?: (string | null) | Media;
+    featuredProduct?: (string | null) | Product;
   };
   layout: (
     | CallToActionBlock
@@ -1875,6 +1876,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         media?: T;
+        featuredProduct?: T;
       };
   layout?:
     | T
