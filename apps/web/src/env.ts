@@ -67,6 +67,10 @@ export const env = createEnv({
       .min(1, "Firebase measurement ID is required"),
     NEXT_PUBLIC_SUPPORT_EMAIL: z.email("Invalid email"),
   },
+  skipValidation:
+    !!process.env.CI ||
+    !!process.env.SKIP_ENV_VALIDATION ||
+    process.env.npm_lifecycle_event === "lint",
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,

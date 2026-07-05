@@ -1,9 +1,49 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "PAYLOAD_SECRET",
+    "DATABASE_URL",
+    "COMPANY_NAME",
+    "TWITTER_CREATOR",
+    "TWITTER_SITE",
+    "SITE_NAME",
+    "PAYLOAD_PUBLIC_SERVER_URL",
+    "PREVIEW_SECRET",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOKS_SIGNING_SECRET",
+    "BLOB_READ_WRITE_TOKEN",
+    "SMTP_HOST",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "ENCRYPTION_KEY",
+    "RAZORPAY_KEY_ID",
+    "RAZORPAY_KEY_SECRET",
+    "RAZORPAY_WEBHOOK_SECRET",
+    "VERCEL",
+    "VERCEL_ENV",
+    "VERCEL_URL",
+    "VERCEL_PROJECT_PRODUCTION_URL",
+    "VERCEL_BRANCH_URL",
+    "VERCEL_AUTOMATION_BYPASS_SECRET",
+    "NODE_ENV",
+    "CI"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "generate:types"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": [
+        "NEXT_PUBLIC_SERVER_URL",
+        "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_FIREBASE_API_KEY",
+        "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
+        "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+        "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+        "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+        "NEXT_PUBLIC_FIREBASE_APP_ID",
+        "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID",
+        "NEXT_PUBLIC_SUPPORT_EMAIL"
+      ],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
@@ -21,7 +61,7 @@
       "cache": false
     },
     "generate:types": {
-      "cache": false
+      "outputs": ["src/payload-types.ts", "src/payload-generated-schema.ts"]
     }
   }
 }

@@ -45,7 +45,6 @@ export const CarouselBlock: React.FC<
   } else if (contentType === "collections") {
     items = await fetchCollections({ limit });
   }
-  console.log(JSON.stringify(items, null, 2));
 
   if (!items?.length) return null;
 
