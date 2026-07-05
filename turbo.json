@@ -61,7 +61,7 @@
       "cache": false
     },
     "generate:types": {
-      "cache": false
+      "outputs": ["src/payload-types.ts", "src/payload-generated-schema.ts"]
     }
   }
 }
