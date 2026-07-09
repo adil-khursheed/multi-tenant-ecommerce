@@ -770,8 +770,10 @@ export interface Page {
     | CarouselBlock
     | ThreeItemGridBlock
     | FourItemGridBlock
+    | FiveItemGridBlock
     | BannerBlock
     | FormBlock
+    | TabsBlock
   )[];
   meta?: {
     title?: string | null;
@@ -999,6 +1001,37 @@ export interface FourItemGridBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FiveItemGridBlock".
+ */
+export interface FiveItemGridBlock {
+  /**
+   * Optional title shown above the grid.
+   */
+  heading?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  populateBy?: ('collection' | 'selection') | null;
+  productFilter?: ('none' | 'featured' | 'newArrivals' | 'bestsellers' | 'flashSale') | null;
+  categories?: (string | Category)[] | null;
+  selectedDocs?: (string | Product)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'fiveItemGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BannerBlock".
  */
 export interface BannerBlock {
@@ -1221,6 +1254,59 @@ export interface Form {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabsBlock".
+ */
+export interface TabsBlock {
+  /**
+   * Optional title shown above the tabs.
+   */
+  heading?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  contentType?: ('categories' | 'custom') | null;
+  /**
+   * Pick specific parent categories to show as tabs, or leave empty for all.
+   */
+  parentCategories?: (string | Category)[] | null;
+  tabs?:
+    | {
+        tab?: string | null;
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'tabs';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1888,8 +1974,10 @@ export interface PagesSelect<T extends boolean = true> {
         carousel?: T | CarouselBlockSelect<T>;
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         fourItemGrid?: T | FourItemGridBlockSelect<T>;
+        fiveItemGrid?: T | FiveItemGridBlockSelect<T>;
         banner?: T | BannerBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        tabs?: T | TabsBlockSelect<T>;
       };
   meta?:
     | T
@@ -2015,6 +2103,19 @@ export interface FourItemGridBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FiveItemGridBlock_select".
+ */
+export interface FiveItemGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  populateBy?: T;
+  productFilter?: T;
+  categories?: T;
+  selectedDocs?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BannerBlock_select".
  */
 export interface BannerBlockSelect<T extends boolean = true> {
@@ -2031,6 +2132,24 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabsBlock_select".
+ */
+export interface TabsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  contentType?: T;
+  parentCategories?: T;
+  tabs?:
+    | T
+    | {
+        tab?: T;
+        content?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }

@@ -32,6 +32,11 @@ export const Categories: CollectionConfig = {
       relationTo: "categories",
       hasMany: false,
       index: true,
+      filterOptions: () => {
+        return {
+          parent: { exists: false },
+        };
+      },
       admin: {
         description: "Leave empty to make this a top-level nav item.",
         position: "sidebar",

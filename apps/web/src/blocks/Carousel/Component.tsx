@@ -51,7 +51,7 @@ export const CarouselBlock: React.FC<
   return (
     <div className="w-full pb-6 pt-1">
       {heading && (
-        <div className="container mb-4">
+        <div className="container mb-20">
           <RichText data={heading} enableGutter={false} />
         </div>
       )}

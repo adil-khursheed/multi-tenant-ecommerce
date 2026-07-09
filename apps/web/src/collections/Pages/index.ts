@@ -15,9 +15,11 @@ import { Banner } from "@/blocks/Banner/config";
 import { CallToAction } from "@/blocks/CallToAction/config";
 import { Carousel } from "@/blocks/Carousel/config";
 import { Content } from "@/blocks/Content/config";
+import { FiveItemGrid } from "@/blocks/FiveItemGrid/config";
 import { FormBlock } from "@/blocks/Form/config";
 import { FourItemGrid } from "@/blocks/FourItemGrid/config";
 import { MediaBlock } from "@/blocks/MediaBlock/config";
+import { Tabs } from "@/blocks/Tabs/config";
 import { ThreeItemGrid } from "@/blocks/ThreeItemGrid/config";
 import { hero } from "@/fields/hero";
 import { generatePreviewPath } from "@/utilities/generatePreviewPath";
@@ -97,8 +99,10 @@ export const Pages: CollectionConfig = {
                 Carousel,
                 ThreeItemGrid,
                 FourItemGrid,
+                FiveItemGrid,
                 Banner,
                 FormBlock,
+                Tabs,
               ],
               required: true,
             },

@@ -11,6 +11,8 @@ import { MediaBlock } from "@/blocks/MediaBlock/Component";
 import { ThreeItemGridBlock } from "@/blocks/ThreeItemGrid/Component";
 import { toKebabCase } from "@/utilities/toKebabCase";
 import type { Page } from "../payload-types";
+import { FiveItemGridBlock } from "./FiveItemGrid/Component";
+import { TabsBlock } from "./Tabs/Component";
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -22,6 +24,8 @@ const blockComponents = {
   mediaBlock: MediaBlock,
   threeItemGrid: ThreeItemGridBlock,
   fourItemGrid: FourItemGridBlock,
+  fiveItemGrid: FiveItemGridBlock,
+  tabs: TabsBlock,
 };
 
 export const RenderBlocks: React.FC<{

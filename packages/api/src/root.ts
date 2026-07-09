@@ -4,6 +4,7 @@ import { authRouter } from "./routers/auth";
 import { categoriesRouter } from "./routers/categories";
 import { productsRouter } from "./routers/products";
 import { vendorRouter } from "./routers/vendor";
+import { blocksRouter } from "./routers/blocks";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
@@ -11,6 +12,7 @@ export const appRouter = createTRPCRouter({
   vendor: vendorRouter,
   product: productsRouter,
   category: categoriesRouter,
+  blocks: blocksRouter,
 });
 
 // export type definition of API
