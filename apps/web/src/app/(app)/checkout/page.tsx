@@ -8,26 +8,18 @@ import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
 export default function Checkout() {
   return (
     <div className="container min-h-[90vh] flex">
-      {!env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && (
+      {!env.NEXT_PUBLIC_RAZORPAY_KEY_ID && (
         <div>
           <Fragment>
-            {"To enable checkout, you must "}
+            {"To enable online checkout, you must configure "}
             <a
-              href="https://dashboard.stripe.com/test/apikeys"
+              href="https://dashboard.razorpay.com/app/keys"
               rel="noopener noreferrer"
               target="_blank"
             >
-              obtain your Stripe API Keys
+              Razorpay API Keys
             </a>
-            {" then set them as environment variables. See the "}
-            <a
-              href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              README
-            </a>
-            {" for more details."}
+            {" and set NEXT_PUBLIC_RAZORPAY_KEY_ID as an environment variable."}
           </Fragment>
         </div>
       )}

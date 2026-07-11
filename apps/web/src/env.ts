@@ -20,10 +20,6 @@ export const env = createEnv({
       .url()
       .min(1, "Payload public server URL is required"),
     PREVIEW_SECRET: z.string().min(1, "Preview secret is required"),
-    STRIPE_SECRET_KEY: z.string().min(1, "Stripe secret key is required"),
-    STRIPE_WEBHOOKS_SIGNING_SECRET: z
-      .string()
-      .min(1, "Stripe webhooks signing secret is required"),
     BLOB_READ_WRITE_TOKEN: z
       .string()
       .min(1, "Blob read write token is required"),
@@ -31,7 +27,6 @@ export const env = createEnv({
     SMTP_USER: z.string().min(1, "SMTP user is required"),
     SMTP_PASS: z.string().min(1, "SMTP pass is required"),
     ENCRYPTION_KEY: z.string().min(1, "Encryption key is required"),
-    RAZORPAY_KEY_ID: z.string().min(1, "Razorpay key ID is required"),
     RAZORPAY_KEY_SECRET: z.string().min(1, "Razorpay key secret is required"),
     RAZORPAY_WEBHOOK_SECRET: z
       .string()
@@ -41,9 +36,9 @@ export const env = createEnv({
     NEXT_PUBLIC_SERVER_URL: z
       .url()
       .min(1, "Next public server URL is required"),
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z
+    NEXT_PUBLIC_RAZORPAY_KEY_ID: z
       .string()
-      .min(1, "Next public stripe publishable key is required"),
+      .min(1, "Razorpay publishable key is required"),
     NEXT_PUBLIC_FIREBASE_API_KEY: z
       .string()
       .min(1, "Firebase API key is required"),
@@ -74,8 +69,7 @@ export const env = createEnv({
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
-      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:
       process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

@@ -1,6 +1,5 @@
 import { Plugin } from "payload";
 import { ecommercePlugin } from "@payloadcms/plugin-ecommerce";
-import { stripeAdapter } from "@payloadcms/plugin-ecommerce/payments/stripe";
 import { formBuilderPlugin } from "@payloadcms/plugin-form-builder";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
 import { seoPlugin } from "@payloadcms/plugin-seo";
@@ -12,6 +11,8 @@ import {
 } from "@payloadcms/richtext-lexical";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 
+import { codAdapter } from "@repo/payments/cod";
+import { razorpayAdapter } from "@repo/payments/razorpay";
 import { adminOnlyFieldAccess } from "@/access/adminOnlyFieldAccess";
 import { adminOrPublishedStatus } from "@/access/adminOrPublishedStatus";
 import { customerOnlyFieldAccess } from "@/access/customerOnlyFieldAccess";
@@ -152,11 +153,12 @@ export const plugins: Plugin[] = [
     },
     payments: {
       paymentMethods: [
-        stripeAdapter({
-          secretKey: env.STRIPE_SECRET_KEY,
-          publishableKey: env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-          webhookSecret: env.STRIPE_WEBHOOKS_SIGNING_SECRET,
+        razorpayAdapter({
+          keyId: env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          keySecret: env.RAZORPAY_KEY_SECRET,
+          webhookSecret: env.RAZORPAY_WEBHOOK_SECRET,
         }),
+        codAdapter(),
       ],
     },
     products: {

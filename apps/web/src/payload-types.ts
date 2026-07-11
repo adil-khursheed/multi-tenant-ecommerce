@@ -1470,10 +1470,14 @@ export interface Transaction {
         id?: string | null;
       }[]
     | null;
-  paymentMethod?: 'stripe' | null;
-  stripe?: {
+  paymentMethod?: ('razorpay' | 'cod') | null;
+  razorpay?: {
     customerID?: string | null;
-    paymentIntentID?: string | null;
+    orderID?: string | null;
+    paymentID?: string | null;
+  };
+  cod?: {
+    codConfirmed?: boolean | null;
   };
   billingAddress?: {
     title?: string | null;
@@ -2698,11 +2702,17 @@ export interface TransactionsSelect<T extends boolean = true> {
         id?: T;
       };
   paymentMethod?: T;
-  stripe?:
+  razorpay?:
     | T
     | {
         customerID?: T;
-        paymentIntentID?: T;
+        orderID?: T;
+        paymentID?: T;
+      };
+  cod?:
+    | T
+    | {
+        codConfirmed?: T;
       };
   billingAddress?:
     | T

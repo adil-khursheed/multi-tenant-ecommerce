@@ -11,7 +11,7 @@ let client: Razorpay | null = null;
 export function getRazorpayClient(): Razorpay {
   if (client) return client;
 
-  const keyId = env.RAZORPAY_KEY_ID;
+  const keyId = env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const keySecret = env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
