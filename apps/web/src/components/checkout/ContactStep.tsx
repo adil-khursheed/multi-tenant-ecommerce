@@ -2,11 +2,9 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { LogIn, Mail } from 'lucide-react'
 
+import { CheckoutInput as Input } from '@/components/checkout/ui/CheckoutInput'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { StepHeader } from '@/components/checkout/ui/StepHeader'
 
 type Props = {
   email: string
@@ -27,99 +25,80 @@ export const ContactStep: React.FC<Props> = ({
 }) => {
   if (user) {
     return (
-      <div>
-        <StepHeader number="01" title="Contact" />
-        <div className="bg-card border border-border rounded-sm p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="font-sans text-sm font-medium text-primary">
-                  {(user.email?.[0] || '').toUpperCase()}
-                </span>
-              </div>
-              <div>
-                <p className="text-sm font-sans font-medium text-foreground">{user.email}</p>
-                <p className="text-xs font-sans text-muted-foreground">
-                  Not you?{' '}
-                  <Link href="/logout" className="text-primary hover:underline">
-                    Log out
-                  </Link>
-                </p>
-              </div>
+      <div className="overflow-hidden">
+        <div className="bg-secondary border border-border rounded-[4px] p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center font-sans font-medium text-xs">
+              {(user.email?.[0] || '').toUpperCase()}
             </div>
-            <Button variant="ghost" size="sm" onClick={onContinue}>
-              Continue
-            </Button>
+            <div>
+              <p className="font-sans text-[13px] text-muted-foreground">{user.email}</p>
+              <Link href="/logout" className="font-sans text-[11px] text-primary hover:underline">
+                Not you? Log out
+              </Link>
+            </div>
           </div>
+          <button onClick={onContinue} className="font-sans font-medium text-[13px] text-foreground underline">
+            Continue
+          </button>
         </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <StepHeader number="01" title="Contact" subtitle="Checkout as guest or log in to your account" />
+    <div className="overflow-hidden">
+      <div className="flex gap-8 border-b border-border mb-8">
+        <button className="pb-2 font-sans font-medium text-[13px] text-foreground border-b-2 border-primary">Guest Checkout</button>
+        <Link href="/login" className="pb-2 font-sans text-[13px] text-muted-foreground hover:text-foreground transition-colors">Sign In</Link>
+      </div>
 
-      <div className="bg-card border border-border rounded-sm p-5 space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Mail className="w-4 h-4 text-muted-foreground" />
-          <p className="text-xs font-sans uppercase tracking-[0.08em] font-medium text-foreground">
-            Email address
-          </p>
-        </div>
-
-        <div className="flex gap-2">
-          <Input
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={!emailEditable}
-            className="flex-1 h-11"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && email && emailEditable) {
-                setEmailEditable(false)
-                onContinue()
-              }
-            }}
-          />
-          <Button
-            variant="default"
-            disabled={!email || !emailEditable}
-            onClick={() => {
+      <div className="max-w-md">
+        <Input
+          label="EMAIL ADDRESS FOR ORDER UPDATES"
+          placeholder="e.g. name@example.com"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          success={email.includes('@') && email.includes('.')}
+          disabled={!emailEditable}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && email && emailEditable) {
               setEmailEditable(false)
               onContinue()
-            }}
-            className="h-11 px-6"
-          >
-            Continue
-          </Button>
-        </div>
+            }
+          }}
+        />
+        <p className="font-sans text-[11px] text-muted-foreground mt-4 text-center">
+          By continuing, you agree to our <a href="#" className="text-primary">Terms</a> & <a href="#" className="text-primary">Privacy Policy</a>
+        </p>
 
-        {email && !emailEditable && (
-          <div className="flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-sm p-3">
-            <span className="text-sm font-sans text-foreground flex-1">{email}</span>
+        {email && !emailEditable ? (
+          <div className="mt-8 flex items-center justify-between bg-secondary border border-border rounded-[4px] p-4">
+            <span className="font-sans text-[13px] text-muted-foreground">{email}</span>
             <button
               onClick={() => {
                 setEmailEditable(true)
                 setEmail('')
               }}
-              className="text-xs font-sans text-primary hover:underline shrink-0"
+              className="text-[12px] font-sans text-primary hover:underline"
             >
               Change
             </button>
           </div>
-        )}
-
-        <div className="border-t border-border pt-4">
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 text-sm font-sans text-primary hover:underline"
+        ) : (
+          <Button
+            disabled={!email.includes('@') || !emailEditable}
+            onClick={() => {
+              setEmailEditable(false)
+              onContinue()
+            }}
+            variant="default"
+            className="mt-8 w-full h-14 uppercase tracking-[0.1em] text-[14px] font-medium"
           >
-            <LogIn className="w-4 h-4" />
-            Log in to your account
-          </Link>
-        </div>
+            Continue to Shipping →
+          </Button>
+        )}
       </div>
     </div>
   )

@@ -1,417 +1,513 @@
-'use client'
+"use client";
 
-import React, { Suspense, useCallback, useEffect, useState } from 'react'
-import Link from 'next/link'
-import Script from 'next/script'
-import { motion, AnimatePresence } from 'motion/react'
-import { Check, ChevronDown, ChevronUp } from 'lucide-react'
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import Link from "next/link";
+import Script from "next/script";
 
 import {
   useAddresses,
   useCart,
-  usePayments,
-} from '@payloadcms/plugin-ecommerce/client/react'
+} from "@payloadcms/plugin-ecommerce/client/react";
 
-import { ContactStep } from '@/components/checkout/ContactStep'
-import { AddressStep } from '@/components/checkout/AddressStep'
-import { PaymentStep } from '@/components/checkout/PaymentStep'
-import { ReviewStep } from '@/components/checkout/ReviewStep'
-import { CODCheckout } from '@/components/checkout/CODCheckout'
-import { MobileSummary } from '@/components/checkout/MobileSummary'
-import { OrderSummary } from '@/components/checkout/OrderSummary'
-import { RazorpayCheckout } from '@/components/checkout/RazorpayCheckout'
-import { SuccessScreen } from '@/components/checkout/SuccessScreen'
-import { LoadingSpinner } from '@/components/LoadingSpinner'
-import { Button } from '@/components/ui/button'
-import { Address } from '@/payload-types'
-import { useAuth } from '@/providers/Auth'
+import { Check, Lock } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
-type PaymentMethod = 'razorpay' | 'cod'
-type Step = 'contact' | 'address' | 'payment' | 'review' | 'success'
+import { AddressStep } from "@/components/checkout/AddressStep";
+import { CODCheckout } from "@/components/checkout/CODCheckout";
+import { ContactStep } from "@/components/checkout/ContactStep";
+import { MobileSummary } from "@/components/checkout/MobileSummary";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { PaymentStep } from "@/components/checkout/PaymentStep";
+import { RazorpayCheckout } from "@/components/checkout/RazorpayCheckout";
+import { ReviewStep } from "@/components/checkout/ReviewStep";
+import { SuccessScreen } from "@/components/checkout/SuccessScreen";
+import { StepHeader } from "@/components/checkout/ui/StepHeader";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { Button } from "@/components/ui/button";
+import { Address } from "@/payload-types";
+import { useAuth } from "@/providers/Auth";
+import { cn } from "@/utilities/cn";
 
-const steps: { key: Step; number: string; title: string }[] = [
-  { key: 'contact', number: '01', title: 'Contact' },
-  { key: 'address', number: '02', title: 'Delivery Address' },
-  { key: 'payment', number: '03', title: 'Payment' },
-  { key: 'review', number: '04', title: 'Review' },
-]
-
-type StepAccordionProps = {
-  stepNumber: string
-  title: string
-  status: 'completed' | 'current' | 'upcoming'
-  onEdit?: () => void
-  summary?: React.ReactNode
-  children: React.ReactNode
-}
-
-const StepAccordion: React.FC<StepAccordionProps> = ({
-  stepNumber,
-  title,
-  status,
-  onEdit,
-  summary,
-  children,
-}) => {
-  const isExpanded = status === 'current'
-  const isCompleted = status === 'completed'
-
-  return (
-    <div
-      className={`border rounded-sm transition-colors ${
-        status === 'current'
-          ? 'border-foreground/20 bg-card'
-          : isCompleted
-            ? 'border-border bg-card'
-            : 'border-border bg-background'
-      }`}
-    >
-      {/* Header */}
-      <div
-        className={`flex items-center gap-4 px-5 py-4 ${
-          isCompleted ? 'cursor-pointer' : ''
-        }`}
-        onClick={isCompleted ? onEdit : undefined}
-      >
-        <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-mono ${
-            isCompleted
-              ? 'bg-success text-success-foreground'
-              : status === 'current'
-                ? 'bg-foreground text-background'
-                : 'bg-muted text-muted-foreground'
-          }`}
-        >
-          {isCompleted ? <Check className="w-4 h-4" /> : stepNumber}
-        </div>
-
-        <h3
-          className={`font-serif text-xl flex-1 ${
-            status === 'current'
-              ? 'text-foreground'
-              : isCompleted
-                ? 'text-foreground'
-                : 'text-muted-foreground'
-          }`}
-        >
-          {title}
-        </h3>
-
-        {isCompleted && summary && (
-          <div className="hidden md:block text-right mr-2">
-            {summary}
-          </div>
-        )}
-
-        {isCompleted && (
-          <button className="text-xs font-sans text-primary hover:underline shrink-0">
-            Edit
-          </button>
-        )}
-
-        {!isCompleted && !isExpanded && (
-          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
-        )}
-      </div>
-
-      {/* Content */}
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <div className="px-5 pb-5 pt-1">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
+type PaymentMethod = "razorpay" | "cod";
+type StepId = "contact" | "address" | "payment" | "review" | "success";
 
 export const CheckoutPage: React.FC = () => {
-  const { user } = useAuth()
-  const { cart, clearCart } = useCart()
-  const { addresses } = useAddresses()
+  const { user } = useAuth();
+  const { cart } = useCart();
+  const { addresses } = useAddresses();
 
-  const [activeStep, setActiveStep] = useState<Step>('contact')
-  const [error, setError] = useState<string | null>(null)
-  const [email, setEmail] = useState('')
-  const [emailEditable, setEmailEditable] = useState(true)
+  const [activeStep, setActiveStep] = useState<StepId>("contact");
+  const [completedSteps, setCompletedSteps] = useState<StepId[]>([]);
 
-  const [billingAddress, setBillingAddress] = useState<Partial<Address>>()
-  const [shippingAddress, setShippingAddress] = useState<Partial<Address>>()
-  const [sameAsShipping, setSameAsShipping] = useState(true)
+  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [emailEditable, setEmailEditable] = useState(true);
 
-  const [paymentData, setPaymentData] = useState<Record<string, unknown> | null>(null)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('razorpay')
-  const [selectedPaymentSubMethod, setSelectedPaymentSubMethod] = useState<string>('card')
-  const [isProcessingPayment, setProcessingPayment] = useState(false)
+  const [billingAddress, setBillingAddress] = useState<Partial<Address>>();
+  const [shippingAddress, setShippingAddress] = useState<Partial<Address>>();
+  const [sameAsShipping, setSameAsShipping] = useState(true);
 
-  const [completedOrderId, setCompletedOrderId] = useState<string | null>(null)
+  const [paymentData, setPaymentData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<PaymentMethod>("razorpay");
+  const [selectedPaymentSubMethod, setSelectedPaymentSubMethod] =
+    useState<string>("card");
+  const [isProcessingPayment, setProcessingPayment] = useState(false);
 
-  const cartIsEmpty = !cart || !cart.items || !cart.items.length
+  const [completedOrderId, setCompletedOrderId] = useState<string | null>(null);
+  const checkoutContainerRef = useRef<HTMLDivElement>(null);
+
+  const cartIsEmpty = !cart || !cart.items || !cart.items.length;
 
   useEffect(() => {
     if (!billingAddress && addresses && addresses.length > 0) {
-      setBillingAddress(addresses[0])
+      setBillingAddress(addresses[0]);
     }
-  }, [addresses, billingAddress])
+  }, [addresses, billingAddress]);
 
   useEffect(() => {
-    if (user && activeStep === 'contact') {
-      setActiveStep('address')
+    if (
+      user &&
+      activeStep === "contact" &&
+      !completedSteps.includes("contact")
+    ) {
+      handleNext("contact", "address");
     }
-  }, [user, activeStep])
+  }, [user, activeStep, completedSteps]);
 
-  const effectiveShippingAddress = sameAsShipping ? billingAddress : shippingAddress
-  const canProceedToPayment = Boolean(user || (email && !emailEditable)) && Boolean(billingAddress)
+  const effectiveShippingAddress = sameAsShipping
+    ? billingAddress
+    : shippingAddress;
+  const canProceedToPayment =
+    Boolean(user || (email && !emailEditable)) && Boolean(billingAddress);
 
-  const getStepStatus = (step: Step): 'completed' | 'current' | 'upcoming' => {
-    const order: Step[] = ['contact', 'address', 'payment', 'review']
-    const currentIdx = order.indexOf(activeStep)
-    const stepIdx = order.indexOf(step)
-
-    if (activeStep === 'success') return 'completed'
-    if (stepIdx < currentIdx) return 'completed'
-    if (stepIdx === currentIdx) return 'current'
-    return 'upcoming'
-  }
-
-  const handleContactContinue = useCallback(() => {
-    setActiveStep('address')
-  }, [])
+  const handleNext = (current: StepId, next: StepId) => {
+    setCompletedSteps((prev) => [...new Set([...prev, current])]);
+    setActiveStep(next);
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   const handlePaymentReady = useCallback(
-    (method: PaymentMethod, subMethod: string, data: Record<string, unknown>) => {
-      setSelectedPaymentMethod(method)
-      setSelectedPaymentSubMethod(subMethod)
-      setPaymentData(data)
-      setError(null)
-      setActiveStep('review')
+    (
+      method: PaymentMethod,
+      subMethod: string,
+      data: Record<string, unknown>,
+    ) => {
+      setSelectedPaymentMethod(method);
+      setSelectedPaymentSubMethod(subMethod);
+      setPaymentData(data);
+      setError(null);
+      handleNext("payment", "review");
     },
     [],
-  )
+  );
 
   const handlePaymentSuccess = useCallback(
     (result: { orderID: string; accessToken?: string }) => {
-      setCompletedOrderId(result.orderID)
-      setActiveStep('success')
+      setCompletedOrderId(result.orderID);
+      handleNext("review", "success");
     },
     [],
-  )
+  );
 
   if (cartIsEmpty && isProcessingPayment) {
     return (
-      <div className="py-12 w-full flex items-center justify-center">
+      <div className="py-20 w-full flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
-          <p className="font-sans text-sm text-muted-foreground mb-4">Processing your payment...</p>
+          <p className="font-sans text-[13px] text-muted-foreground mb-6 tracking-wide">
+            Processing your payment...
+          </p>
           <LoadingSpinner />
         </div>
       </div>
-    )
+    );
   }
 
-  if (cartIsEmpty && activeStep !== 'success') {
+  if (cartIsEmpty && activeStep !== "success") {
     return (
-      <div className="py-12 w-full items-center">
-        <p className="font-sans text-sm text-muted-foreground mb-4">Your cart is empty.</p>
-        <Link href="/search" className="font-sans text-sm text-primary hover:underline">
-          Continue shopping?
+      <div className="py-20 w-full text-center min-h-screen bg-background flex flex-col items-center justify-center">
+        <p className="font-sans text-[15px] text-muted-foreground mb-6">
+          Your cart is empty.
+        </p>
+        <Link href="/search">
+          <Button
+            variant="default"
+            size="lg"
+            className="h-12 px-8 uppercase tracking-[0.08em] font-sans text-[11px]"
+          >
+            Continue Shopping
+          </Button>
         </Link>
       </div>
-    )
+    );
   }
 
-  if (activeStep === 'success' && completedOrderId) {
-    return <SuccessScreen orderID={completedOrderId} />
+  if (activeStep === "success" && completedOrderId) {
+    return <SuccessScreen orderID={completedOrderId} />;
   }
 
   return (
-    <>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+    <div className="min-h-screen bg-background selection:bg-primary/20 selection:text-primary pb-20">
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
 
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 my-8 lg:my-12">
-        {/* Left Column - Stepper */}
-        <div className="flex-1 min-w-0 space-y-4">
-          {/* Contact */}
-          <StepAccordion
-            stepNumber="01"
-            title="Contact"
-            status={getStepStatus('contact')}
-            onEdit={() => setActiveStep('contact')}
-            summary={
-              <span className="text-xs font-sans text-muted-foreground">
-                {user?.email || email || ''}
-              </span>
-            }
-          >
-            <ContactStep
-              email={email}
-              setEmail={setEmail}
-              emailEditable={emailEditable}
-              setEmailEditable={setEmailEditable}
-              user={user}
-              onContinue={handleContactContinue}
-            />
-          </StepAccordion>
-
-          {/* Address */}
-          <StepAccordion
-            stepNumber="02"
-            title="Delivery Address"
-            status={getStepStatus('address')}
-            onEdit={() => {
-              setPaymentData(null)
-              setActiveStep('address')
-            }}
-            summary={
-              billingAddress ? (
-                <span className="text-xs font-sans text-muted-foreground">
-                  {billingAddress.firstName} {billingAddress.lastName}, {billingAddress.city}
-                </span>
-              ) : undefined
-            }
-          >
-            <AddressStep
-              billingAddress={billingAddress}
-              setBillingAddress={setBillingAddress}
-              shippingAddress={shippingAddress}
-              setShippingAddress={setShippingAddress}
-              sameAsShipping={sameAsShipping}
-              setSameAsShipping={setSameAsShipping}
-              email={email}
-              user={user}
-              emailEditable={emailEditable}
-            />
-
-            {activeStep === 'address' && (
-              <div className="mt-6">
-                <Button
-                  variant="default"
-                  className="w-full h-11"
-                  disabled={!canProceedToPayment}
-                  onClick={() => setActiveStep('payment')}
-                >
-                  Continue to Payment
-                </Button>
-              </div>
-            )}
-          </StepAccordion>
-
-          {/* Payment */}
-          <StepAccordion
-            stepNumber="03"
-            title="Payment"
-            status={getStepStatus('payment')}
-            onEdit={() => {
-              setPaymentData(null)
-              setActiveStep('payment')
-            }}
-            summary={
-              <span className="text-xs font-sans text-muted-foreground">
-                {selectedPaymentMethod === 'cod'
-                  ? 'Cash on Delivery'
-                  : selectedPaymentSubMethod === 'upi'
-                    ? 'UPI'
-                    : 'Card'}
-              </span>
-            }
-          >
-            {activeStep === 'payment' && !paymentData && (
-              <PaymentStep
-                onPaymentReady={handlePaymentReady}
-                billingAddress={billingAddress as Record<string, unknown>}
-                shippingAddress={effectiveShippingAddress as Record<string, unknown>}
-                email={email || (user as any)?.email as string}
-              />
-            )}
-
-            {activeStep === 'review' && paymentData && (
-              <div className="space-y-4">
-                {error && (
-                  <div className="bg-destructive/10 border border-destructive/30 rounded-sm p-3 text-sm font-sans text-destructive">
-                    {error}
-                  </div>
+      {/* Navbar */}
+      <nav className="sticky top-0 z-100 bg-card border-b border-border h-16 px-4 md:px-12 flex items-center justify-between">
+        {/* Desktop Stepper */}
+        <div className="hidden md:flex items-center gap-12 flex-1 justify-center">
+          {[
+            { id: "address", label: "Address", step: 1 },
+            { id: "payment", label: "Payment", step: 2 },
+            { id: "review", label: "Confirmation", step: 3 },
+          ].map((item, idx) => {
+            const isActive =
+              activeStep === item.id ||
+              (activeStep === "contact" && item.id === "address");
+            const isDone =
+              completedSteps.includes(item.id as StepId) &&
+              activeStep !== item.id;
+            return (
+              <div key={item.id} className="flex items-center gap-3 relative">
+                {idx > 0 && (
+                  <div
+                    className={cn(
+                      "absolute -left-8 top-1/2 -translate-y-1/2 w-4 h-px",
+                      isDone ? "bg-success" : "bg-border",
+                    )}
+                  />
                 )}
-
-                <Suspense
-                  fallback={
-                    <div className="py-8 text-center">
-                      <LoadingSpinner />
-                    </div>
-                  }
-                >
-                  {selectedPaymentMethod === 'razorpay' && Boolean(paymentData['razorpayOrderID']) && (
-                    <RazorpayCheckout
-                      razorpayOrderID={paymentData['razorpayOrderID'] as string}
-                      amount={paymentData['amount'] as number}
-                      currency={paymentData['currency'] as string}
-                      customerEmail={email || (user as any)?.email as string}
-                      billingAddress={billingAddress as Record<string, unknown>}
-                      setProcessingPayment={setProcessingPayment}
-                      onSuccess={handlePaymentSuccess}
-                    />
+                <div
+                  className={cn(
+                    "w-7 h-7 rounded-full flex items-center justify-center transition-colors",
+                    isDone
+                      ? "bg-success"
+                      : isActive
+                        ? "bg-foreground"
+                        : "border border-border",
                   )}
-
-                  {selectedPaymentMethod === 'cod' && Boolean(paymentData['transactionID']) && (
-                    <CODCheckout
-                      transactionID={paymentData['transactionID'] as string}
-                      customerEmail={email || (user as any)?.email as string}
-                      setProcessingPayment={setProcessingPayment}
-                      onSuccess={handlePaymentSuccess}
-                    />
-                  )}
-                </Suspense>
-
-                <Button
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => {
-                    setPaymentData(null)
-                    setActiveStep('payment')
-                  }}
                 >
-                  Back to Payment
-                </Button>
+                  {isDone ? (
+                    <Check className="w-3.5 h-3.5 text-background" />
+                  ) : (
+                    <span
+                      className={cn(
+                        "font-mono text-[13px]",
+                        isActive ? "text-background" : "text-muted-foreground",
+                      )}
+                    >
+                      {item.step}
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={cn(
+                    "font-sans font-medium text-[12px]",
+                    isDone
+                      ? "text-success"
+                      : isActive
+                        ? "text-foreground"
+                        : "text-muted-foreground",
+                  )}
+                >
+                  {item.label}
+                </span>
               </div>
-            )}
-          </StepAccordion>
-
-          {/* Review */}
-          {activeStep === 'review' && paymentData && (
-            <StepAccordion
-              stepNumber="04"
-              title="Review"
-              status="current"
-            >
-              <ReviewStep
-                billingAddress={billingAddress}
-                shippingAddress={effectiveShippingAddress}
-                paymentMethod={selectedPaymentMethod}
-                paymentSubMethod={selectedPaymentSubMethod}
-                onEdit={(step) => {
-                  setPaymentData(null)
-                  setActiveStep(step)
-                }}
-              />
-            </StepAccordion>
-          )}
+            );
+          })}
         </div>
 
-        {/* Right Column - Summary */}
-        <div className="w-full lg:w-[380px] shrink-0 hidden lg:block">
-          <div className="sticky top-8">
-            <OrderSummary />
+        <div className="flex-1 flex justify-end items-center gap-4">
+          <div className="hidden md:flex items-center gap-2 text-success">
+            <Lock className="w-3.5 h-3.5 stroke-[1.5]" />
+            <span className="font-sans text-[12px]">Secure Checkout</span>
           </div>
+          <button className="font-sans text-[12px] text-primary hover:underline">
+            Need help?
+          </button>
         </div>
+      </nav>
 
-        {/* Mobile Summary */}
-        <MobileSummary />
-      </div>
-    </>
-  )
-}
+      {/* Main Content */}
+      <main className="max-w-[1200px] mx-auto px-5 md:px-12 py-10 md:py-16">
+        <div className="flex flex-col lg:flex-row gap-12">
+          {/* Left Column - Checkout Steps */}
+          <div
+            className="w-full lg:w-[60%] flex flex-col gap-12"
+            ref={checkoutContainerRef}
+          >
+            {/* Step 1 - Contact */}
+            <section
+              className={cn(
+                "transition-opacity duration-300",
+                activeStep !== "contact" && completedSteps.includes("contact")
+                  ? "opacity-100"
+                  : activeStep === "contact"
+                    ? "opacity-100"
+                    : "opacity-40 grayscale pointer-events-none",
+              )}
+            >
+              <StepHeader
+                number="01"
+                title="Contact"
+                subtitle="How should we reach you about your order?"
+                isCompleted={
+                  completedSteps.includes("contact") && activeStep !== "contact"
+                }
+                onEdit={() => setActiveStep("contact")}
+              />
+
+              <AnimatePresence mode="wait">
+                {activeStep === "contact" ? (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <ContactStep
+                      email={email}
+                      setEmail={setEmail}
+                      emailEditable={emailEditable}
+                      setEmailEditable={setEmailEditable}
+                      user={user}
+                      onContinue={() => handleNext("contact", "address")}
+                    />
+                  </motion.div>
+                ) : (
+                  completedSteps.includes("contact") && (
+                    <div className="bg-secondary border border-border rounded-[4px] p-4 flex items-center justify-between">
+                      <p className="font-sans text-[13px] text-muted-foreground">
+                        {email || user?.email}
+                      </p>
+                    </div>
+                  )
+                )}
+              </AnimatePresence>
+            </section>
+
+            {/* Step 2 - Address */}
+            <section
+              className={cn(
+                "transition-opacity duration-300",
+                activeStep !== "address" && completedSteps.includes("address")
+                  ? "opacity-100"
+                  : activeStep === "address"
+                    ? "opacity-100"
+                    : "opacity-40 grayscale pointer-events-none",
+              )}
+            >
+              <StepHeader
+                number="02"
+                title="Delivery Address"
+                subtitle="Where should we send your order?"
+                isCompleted={
+                  completedSteps.includes("address") && activeStep !== "address"
+                }
+                onEdit={() => setActiveStep("address")}
+              />
+
+              <AnimatePresence mode="wait">
+                {activeStep === "address" ? (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <AddressStep
+                      billingAddress={billingAddress}
+                      setBillingAddress={setBillingAddress}
+                      shippingAddress={shippingAddress}
+                      setShippingAddress={setShippingAddress}
+                      sameAsShipping={sameAsShipping}
+                      setSameAsShipping={setSameAsShipping}
+                      email={email}
+                      user={user}
+                      emailEditable={emailEditable}
+                    />
+
+                    <div className="mt-8 border-t border-border pt-6">
+                      <Button
+                        type="button"
+                        variant="default"
+                        className="w-full h-14 uppercase tracking-[0.1em] text-[14px] font-medium"
+                        disabled={!canProceedToPayment}
+                        onClick={() => handleNext("address", "payment")}
+                      >
+                        Continue to Payment →
+                      </Button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  completedSteps.includes("address") &&
+                  billingAddress && (
+                    <div className="bg-secondary border border-border rounded-[4px] p-5 flex items-center justify-between">
+                      <p className="font-sans text-[13px] text-muted-foreground">
+                        {billingAddress.firstName} {billingAddress.lastName},{" "}
+                        {billingAddress.city}
+                      </p>
+                    </div>
+                  )
+                )}
+              </AnimatePresence>
+            </section>
+
+            {/* Step 3 - Payment */}
+            <section
+              className={cn(
+                "transition-opacity duration-300",
+                activeStep !== "payment" && completedSteps.includes("payment")
+                  ? "opacity-100"
+                  : activeStep === "payment"
+                    ? "opacity-100"
+                    : "opacity-40 grayscale pointer-events-none",
+              )}
+            >
+              <StepHeader
+                number="03"
+                title="Payment"
+                subtitle="All transactions are 256-bit SSL encrypted."
+                isCompleted={
+                  completedSteps.includes("payment") && activeStep !== "payment"
+                }
+                onEdit={() => setActiveStep("payment")}
+              />
+
+              <AnimatePresence mode="wait">
+                {activeStep === "payment" ? (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <PaymentStep
+                      onPaymentReady={handlePaymentReady}
+                      billingAddress={billingAddress as Record<string, unknown>}
+                      shippingAddress={
+                        effectiveShippingAddress as Record<string, unknown>
+                      }
+                      email={email || ((user as any)?.email as string)}
+                    />
+                  </motion.div>
+                ) : (
+                  completedSteps.includes("payment") &&
+                  paymentData && (
+                    <div className="bg-secondary border border-border rounded-[4px] p-5 flex items-center justify-between">
+                      <p className="font-sans text-[13px] text-muted-foreground">
+                        {selectedPaymentMethod === "cod"
+                          ? "Cash on Delivery"
+                          : selectedPaymentSubMethod === "upi"
+                            ? "UPI"
+                            : "Card"}
+                      </p>
+                    </div>
+                  )
+                )}
+              </AnimatePresence>
+            </section>
+
+            {/* Step 4 - Review (only shown when in review step) */}
+            <AnimatePresence>
+              {activeStep === "review" && paymentData && (
+                <motion.section
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <ReviewStep
+                    billingAddress={billingAddress}
+                    shippingAddress={effectiveShippingAddress}
+                    paymentMethod={selectedPaymentMethod}
+                    paymentSubMethod={selectedPaymentSubMethod}
+                    onEdit={(step) => setActiveStep(step as StepId)}
+                  />
+
+                  {error && (
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-[4px] p-4 text-[13px] font-sans text-destructive">
+                      {error}
+                    </div>
+                  )}
+
+                  <Suspense
+                    fallback={
+                      <div className="py-12 text-center">
+                        <LoadingSpinner />
+                      </div>
+                    }
+                  >
+                    {selectedPaymentMethod === "razorpay" &&
+                      Boolean(paymentData["razorpayOrderID"]) && (
+                        <RazorpayCheckout
+                          razorpayOrderID={
+                            paymentData["razorpayOrderID"] as string
+                          }
+                          amount={paymentData["amount"] as number}
+                          currency={paymentData["currency"] as string}
+                          customerEmail={
+                            email || ((user as any)?.email as string)
+                          }
+                          billingAddress={
+                            billingAddress as Record<string, unknown>
+                          }
+                          setProcessingPayment={setProcessingPayment}
+                          onSuccess={handlePaymentSuccess}
+                        />
+                      )}
+
+                    {selectedPaymentMethod === "cod" &&
+                      Boolean(paymentData["transactionID"]) && (
+                        <CODCheckout
+                          transactionID={paymentData["transactionID"] as string}
+                          customerEmail={
+                            email || ((user as any)?.email as string)
+                          }
+                          setProcessingPayment={setProcessingPayment}
+                          onSuccess={handlePaymentSuccess}
+                        />
+                      )}
+                  </Suspense>
+
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 uppercase tracking-[0.08em]"
+                    onClick={() => {
+                      setPaymentData(null);
+                      setActiveStep("payment");
+                    }}
+                  >
+                    Back to Payment
+                  </Button>
+                </motion.section>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Right Column - Order Summary */}
+          <aside className="w-full lg:w-[40%] hidden lg:block">
+            <div className="sticky top-24">
+              <OrderSummary />
+            </div>
+          </aside>
+        </div>
+      </main>
+
+      {/* Mobile Summary */}
+      <MobileSummary />
+    </div>
+  );
+};

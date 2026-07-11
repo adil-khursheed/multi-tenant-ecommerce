@@ -57,6 +57,26 @@ export const ProductsCollection: CollectionOverride = ({
   },
   hooks: {
     ...defaultCollection.hooks,
+    afterRead: [
+      ...(defaultCollection.hooks?.afterRead || []),
+      async ({ doc, req }) => {
+        if (doc.tenant && typeof doc.tenant === "string") {
+          try {
+            const tenantDoc = await req.payload.findByID({
+              collection: "tenants",
+              id: doc.tenant,
+              req,
+            });
+            if (tenantDoc) {
+              doc.tenant = tenantDoc;
+            }
+          } catch (e) {
+            // Ignore if tenant cannot be fetched
+          }
+        }
+        return doc;
+      },
+    ],
     beforeChange: [
       ...(defaultCollection.hooks?.beforeChange || []),
       ({ data, originalDoc }) => {
@@ -132,6 +152,7 @@ export const ProductsCollection: CollectionOverride = ({
     priceInINR: true,
     inventory: true,
     meta: true,
+    tenant: true,
   },
   fields: [
     { name: "title", type: "text", required: true },

@@ -1,139 +1,278 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import React from "react";
 
-import { Media } from '@/components/Media'
-import { Price } from '@/components/Price'
+import { useCart } from "@payloadcms/plugin-ecommerce/client/react";
+
+import {
+  CustomerSupportIcon,
+  PackageIcon,
+  Shield01Icon,
+  TruckIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
+import { Media } from "@/components/Media";
+import { Price } from "@/components/Price";
 
 export const OrderSummary: React.FC = () => {
-  const { cart } = useCart()
+  const { cart } = useCart();
 
-  if (!cart || !cart.items || !cart.items.length) return null
+  if (!cart || !cart.items || !cart.items.length) return null;
 
-  const vendorGroups: Record<string, typeof cart.items> = {}
+  const vendorGroups: Record<string, typeof cart.items> = {};
 
   cart.items.forEach((item) => {
-    if (typeof item.product === 'object' && item.product) {
+    if (typeof item.product === "object" && item.product) {
       const vendor =
-        typeof item.product.vendor === 'object' && item.product.vendor
-          ? (item.product.vendor as Record<string, unknown>)
-          : null
-      const vendorName = vendor?.storeName || vendor?.name || 'Store'
-      const vendorId = (item.product.vendor as string) || 'unknown'
+        typeof item.product.tenant === "object" && item.product.tenant
+          ? (item.product.tenant as Record<string, unknown>)
+          : null;
+      const vendorId =
+        (typeof item.product.tenant === "string"
+          ? item.product.tenant
+          : typeof item.product.tenant === "object" && item.product.tenant
+            ? (item.product.tenant.id as string)
+            : null) || "unknown";
 
       if (!vendorGroups[vendorId]) {
-        vendorGroups[vendorId] = []
+        vendorGroups[vendorId] = [];
       }
-      vendorGroups[vendorId].push(item)
+      vendorGroups[vendorId].push(item);
     }
-  })
+  });
 
-  const vendorCount = Object.keys(vendorGroups).length
+  const totalItems = cart.items.reduce(
+    (acc, item) => acc + (item.quantity || 1),
+    0,
+  );
+  const savings = 0; // In case we add savings logic later
 
   return (
-    <div className="bg-primary/5 border border-border rounded-sm p-5">
-      <h3 className="font-serif text-lg text-foreground mb-4">
-        Order Summary
-        {vendorCount > 1 && (
-          <span className="font-sans text-xs text-muted-foreground ml-2 font-normal">
-            from {vendorCount} sellers
-          </span>
-        )}
-      </h3>
+    <aside className="w-full">
+      <div className="md:sticky md:top-8 border border-border rounded-[4px] bg-card overflow-hidden">
+        <div className="bg-foreground px-6 py-5 flex items-center justify-between">
+          <div className="flex items-baseline gap-2">
+            <h2 className="font-serif text-[22px] text-background">
+              Order Summary
+            </h2>
+            <span className="font-mono text-[13px] text-muted-foreground">
+              ({totalItems} items)
+            </span>
+          </div>
+          <button className="font-sans text-[12px] text-primary hover:underline">
+            Edit Cart
+          </button>
+        </div>
 
-      <div className="space-y-4">
-        {Object.entries(vendorGroups).map(([vendorId, items]) => {
-          const firstProduct = items[0]?.product
-          const vendorName =
-            typeof firstProduct === 'object' && firstProduct
-              ? typeof firstProduct.vendor === 'object' && firstProduct.vendor
-                ? ((firstProduct.vendor as Record<string, unknown>).storeName as string) ||
-                  ((firstProduct.vendor as Record<string, unknown>).name as string) ||
-                  'Store'
-                : 'Store'
-              : 'Store'
+        {/* Items by Vendor */}
+        <div className="max-h-[500px] overflow-y-auto scrollbar-hide">
+          {Object.entries(vendorGroups).map(([vendorId, items]) => {
+            const firstProduct = items[0]?.product;
+            console.log(firstProduct);
 
-          return (
-            <div key={vendorId}>
-              {vendorCount > 1 && (
-                <p className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium text-muted-foreground mb-2">
-                  {vendorName}
-                </p>
-              )}
+            const vendorName =
+              typeof firstProduct === "object" && firstProduct
+                ? typeof firstProduct.tenant === "object" && firstProduct.tenant
+                  ? ((firstProduct.tenant as Record<string, unknown>)
+                      .storeName as string) ||
+                    ((firstProduct.tenant as Record<string, unknown>)
+                      .name as string) ||
+                    "Store"
+                  : "Store"
+                : "Store";
 
-              <div className="space-y-3">
+            const vendorItemsCount = items.reduce(
+              (acc, item) => acc + (item.quantity || 1),
+              0,
+            );
+            const vendorInitial = vendorName.charAt(0).toUpperCase();
+
+            return (
+              <React.Fragment key={vendorId}>
+                <div className="bg-muted px-6 py-2 border-b border-border flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full border border-border bg-background flex items-center justify-center text-[8px] font-bold text-foreground">
+                      {vendorInitial}
+                    </div>
+                    <span className="font-sans font-medium text-[12px] text-foreground">
+                      {vendorName} — {vendorItemsCount} item
+                      {vendorItemsCount !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+
                 {items.map((item, index) => {
-                  if (typeof item.product !== 'object' || !item.product) return null
+                  if (typeof item.product !== "object" || !item.product)
+                    return null;
 
-                  const { product, quantity, variant } = item
-                  let price = product.priceInINR
-                  let image = product.gallery?.[0]?.image || product.meta?.image
+                  const { product, quantity, variant } = item;
+                  let price = product.priceInINR;
+                  let image =
+                    product.gallery?.[0]?.image || product.meta?.image;
 
-                  const isVariant = Boolean(variant) && typeof variant === 'object'
+                  const isVariant =
+                    Boolean(variant) && typeof variant === "object";
                   if (isVariant) {
-                    price = variant?.priceInINR
+                    price = variant?.priceInINR;
                     const imageVariant = product.gallery?.find((g: any) => {
-                      if (!g.variantOption) return false
+                      if (!g.variantOption) return false;
                       const variantOptionID =
-                        typeof g.variantOption === 'object' ? g.variantOption.id : g.variantOption
+                        typeof g.variantOption === "object"
+                          ? g.variantOption.id
+                          : g.variantOption;
                       return variant?.options?.some((o: any) =>
-                        typeof o === 'object' ? o.id === variantOptionID : o === variantOptionID,
-                      )
-                    })
-                    if (imageVariant && typeof imageVariant.image !== 'string') {
-                      image = imageVariant.image
+                        typeof o === "object"
+                          ? o.id === variantOptionID
+                          : o === variantOptionID,
+                      );
+                    });
+                    if (
+                      imageVariant &&
+                      typeof imageVariant.image !== "string"
+                    ) {
+                      image = imageVariant.image;
                     }
                   }
 
+                  const variantLabel = isVariant
+                    ? variant?.options
+                        ?.map((o: any) =>
+                          typeof o === "object" ? o.label : "",
+                        )
+                        .filter(Boolean)
+                        .join(", ")
+                    : undefined;
+
                   return (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="relative w-14 h-14 rounded-sm border border-border overflow-hidden shrink-0 bg-secondary">
-                        {image && typeof image !== 'string' && (
+                    <div
+                      key={`${vendorId}-${index}`}
+                      className="p-6 border-b border-border flex gap-4 bg-card"
+                    >
+                      <div className="relative w-14 h-[72px] bg-muted rounded-[2px] overflow-hidden shrink-0 border border-border">
+                        {image && typeof image !== "string" && (
                           <Media
                             fill
                             imgClassName="object-cover"
                             resource={image}
-                            size="120px"
+                            size="56px"
                           />
                         )}
-                        <span className="absolute -top-1 -right-1 bg-foreground text-background text-[9px] font-mono w-4 h-4 flex items-center justify-center rounded-full">
-                          {quantity}
-                        </span>
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-sans font-medium text-foreground truncate">
-                          {product.title}
+                        <p className="font-sans font-medium text-[10px] tracking-wider text-primary mb-1 uppercase truncate">
+                          {vendorName}
                         </p>
-                        {isVariant && (
-                          <p className="text-[10px] font-mono text-muted-foreground tracking-wider truncate">
-                            {variant?.options
-                              ?.map((o: any) => (typeof o === 'object' ? o.label : ''))
-                              .filter(Boolean)
-                              .join(', ')}
+                        <h3 className="font-sans font-medium text-[13px] text-foreground mb-1 line-clamp-2 leading-snug">
+                          {product.title}
+                        </h3>
+                        {variantLabel && (
+                          <p className="font-sans text-[11px] text-muted-foreground">
+                            {variantLabel}
                           </p>
                         )}
+                        <div className="flex items-center gap-3 mt-1">
+                          <p className="font-mono text-[11px] text-muted-foreground">
+                            Qty: {quantity}
+                          </p>
+                        </div>
                       </div>
-
-                      {typeof price === 'number' && (
-                        <Price amount={price * (quantity || 1)} className="text-sm font-sans text-foreground shrink-0" />
-                      )}
+                      <div className="text-right">
+                        {typeof price === "number" && (
+                          <Price
+                            amount={price * (quantity || 1)}
+                            className="font-mono font-medium text-[14px] text-foreground"
+                          />
+                        )}
+                      </div>
                     </div>
-                  )
+                  );
                 })}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
 
-      <div className="border-t border-border mt-4 pt-4">
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-sans font-medium uppercase tracking-wider text-muted-foreground">Total</span>
-          <Price className="text-lg font-sans font-medium text-foreground" amount={cart.subtotal || 0} />
+        {/* Price Breakdown */}
+        <div className="p-6 space-y-3 bg-card">
+          <div className="flex justify-between items-center">
+            <span className="font-sans text-[13px] text-muted-foreground">
+              Subtotal
+            </span>
+            <Price
+              amount={cart.subtotal || 0}
+              className="font-mono text-[14px] text-foreground"
+            />
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="font-sans text-[13px] text-muted-foreground">
+              Shipping (Standard)
+            </span>
+            <span className="font-mono text-[14px] text-muted-foreground">
+              Calculated next
+            </span>
+          </div>
+
+          <div className="pt-5 border-t border-border flex justify-between items-baseline">
+            <span className="font-sans font-medium text-[15px] text-foreground">
+              Total
+            </span>
+            <Price
+              amount={cart.subtotal || 0}
+              className="font-mono font-bold text-[22px] text-foreground"
+            />
+          </div>
+
+          {savings > 0 && (
+            <div className="mt-6 bg-success/10 rounded-[4px] p-3 text-center">
+              <p className="font-sans font-medium text-[12px] text-success">
+                🎉 You're saving ₹{savings.toLocaleString()} on this order
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Trust signals */}
+        <div className="px-6 py-8 border-t border-border bg-muted/50 grid grid-cols-2 gap-y-5 gap-x-4">
+          <div className="flex items-start gap-2">
+            <HugeiconsIcon
+              icon={Shield01Icon}
+              className="w-4 h-4 text-primary shrink-0 mt-0.5"
+            />
+            <p className="font-sans text-[11px] text-muted-foreground leading-tight">
+              100% Secure Payments
+            </p>
+          </div>
+          <div className="flex items-start gap-2">
+            <HugeiconsIcon
+              icon={PackageIcon}
+              className="w-4 h-4 text-primary shrink-0 mt-0.5"
+            />
+            <p className="font-sans text-[11px] text-muted-foreground leading-tight">
+              Easy 15-Day Returns
+            </p>
+          </div>
+          <div className="flex items-start gap-2">
+            <HugeiconsIcon
+              icon={TruckIcon}
+              className="w-4 h-4 text-primary shrink-0 mt-0.5"
+            />
+            <p className="font-sans text-[11px] text-muted-foreground leading-tight">
+              Genuine Branded Products
+            </p>
+          </div>
+          <div className="flex items-start gap-2">
+            <HugeiconsIcon
+              icon={CustomerSupportIcon}
+              className="w-4 h-4 text-primary shrink-0 mt-0.5"
+            />
+            <p className="font-sans text-[11px] text-muted-foreground leading-tight">
+              24/7 Customer Support
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
+    </aside>
+  );
+};

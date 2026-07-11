@@ -74,13 +74,15 @@ export const CODCheckout: React.FC<Props> = ({
   return (
     <div>
       {error && <Message error={error} />}
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-[13px] font-sans text-muted-foreground mb-6">
         Pay when your order is delivered. Keep exact change ready.
       </p>
       <Button
+        type="button"
         onClick={handleConfirm}
         disabled={isLoading}
         variant="default"
+        className="w-full h-12 uppercase tracking-[0.08em] font-medium rounded-[4px]"
       >
         {isLoading ? "Placing order..." : "Place Order (COD)"}
       </Button>

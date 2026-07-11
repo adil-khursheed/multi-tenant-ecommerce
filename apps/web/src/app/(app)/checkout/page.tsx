@@ -7,7 +7,7 @@ import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
 
 export default function Checkout() {
   return (
-    <div className="container min-h-[90vh] flex">
+    <div className="min-h-screen">
       {!env.NEXT_PUBLIC_RAZORPAY_KEY_ID && (
         <div>
           <Fragment>

@@ -1,0 +1,837 @@
+<USER_REQUEST>
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, Lock, Check, MapPin, Truck, CreditCard, Smartphone, Wallet, Calendar, ShieldCheck, X, AlertCircle, Plus, Briefcase, Home, MoreHorizontal, Copy, Download, Package, ShoppingBag, HelpCircle, Search, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+
+// --- Types & Constants ---
+
+type StepId = 'contact' | 'address' | 'delivery' | 'offers' | 'payment' | 'review';
+
+// --- Sub-components ---
+
+const StepHeader = ({
+  number,
+  title,
+  subtitle,
+  isCompleted,
+  onEdit
+}: {
+  number: string;
+  title: string;
+  subtitle?: string;
+  isCompleted?: boolean;
+  onEdit?: () => void;
+}) => <div className="flex items-start justify-between mb-8">
+    <div className="flex items-start gap-4">
+      <div className="bg-[#1A1714] text-[#FDFAF6] font-mono text-[11px] px-[7px] py-[3px] rounded-[2px] mt-2">
+        {number}
+      </div>
+      <div>
+        <h2 className="font-serif text-[26px] leading-tight text-[#1A1714]">{title}</h2>
+        {subtitle && <p className="font-sans text-[13px] text-[#A89F96] mt-1">{subtitle}</p>}
+      </div>
+    </div>
+    {isCompleted && <button onClick={onEdit} className="font-sans text-[13px] text-[#C4622D] hover:underline">
+        Edit
+      </button>}
+  </div>;
+const Input = ({
+  label,
+  required,
+  placeholder,
+  className,
+  error,
+  success,
+  type = 'text',
+  ...props
+}: any) => <div className={cn("flex flex-col gap-1.5", className)}>
+    <label className="font-sans font-medium text-[11px] tracking-[0.08em] uppercase text-[#1A1714]">
+      {label} {required && <span className="text-[#C4622D] ml-0.5">•</span>}
+    </label>
+    <div className="relative">
+      <input type={type} placeholder={placeholder} className={cn("w-full h-12 bg-[#FDFAF6] border border-[#DDD7CF] rounded-[4px] px-3.5 font-sans text-sm text-[#1A1714] placeholder-[#A89F96] transition-all focus:border-[#1A1714] outline-none", error && "border-[#A8362B]", success && "border-[#4A7C59]")} {...props} />
+      {success && <Check className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#4A7C59]" />}
+      {error && <X className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#A8362B]" />}
+    </div>
+    {error && <p className="font-sans text-[12px] text-[#A8362B]">{error}</p>}
+  </div>;
+
+// --- Main Page Component ---
+
+export const CheckoutPage = () => {
+  const [activeStep, setActiveStep] = useState<StepId>('address');
+  const [completedSteps, setCompletedSteps] = useState<StepId[]>(['contact']);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('upi');
+  const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [errorState, setErrorState] = useState<string | null>(null);
+
+  // Form states
+  const [email, setEmail] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [isGSTOn, setIsGSTOn] = useState(false);
+  const checkoutContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Force standard look on load
+    document.body.style.backgroundColor = '#F7F4EF';
+    return () => {
+      document.body.style.backgroundColor = '';
+    };
+  }, []);
+  const handleNext = (current: StepId, next: StepId) => {
+    setCompletedSteps(prev => [...new Set([...prev, current])]);
+    setActiveStep(next);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+  const handlePlaceOrder = () => {
+    setIsProcessing(true);
+    // Simulate error initially for the "Card Declined" requirement
+    setTimeout(() => {
+      setErrorState('Your card was declined by the bank. This is usually due to insufficient funds or a temporary bank block.');
+      setIsProcessing(false);
+      // After a second, let them succeed if they retry? No, let's keep it static for the demo unless triggered.
+    }, 2000);
+  };
+  const handleFinalRetry = () => {
+    setErrorState(null);
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setIsSuccess(true);
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 1500);
+  };
+  if (isSuccess) {
+    return <div className="min-h-screen bg-[#F7F4EF] flex flex-col items-center py-16 px-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="max-w-[640px] w-full text-center">
+          <motion.div initial={{
+          scale: 0.8,
+          opacity: 0
+        }} animate={{
+          scale: 1,
+          opacity: 1
+        }} transition={{
+          type: "spring",
+          damping: 15
+        }} className="flex justify-center mb-8">
+            <div className="relative">
+              <ShoppingBag className="w-[120px] h-[120px] text-[#1A1714] stroke-[0.5]" />
+              <div className="absolute top-1/4 right-0 text-[#B8935A]">
+                <span className="text-2xl">✨</span>
+              </div>
+            </div>
+          </motion.div>
+
+          <p className="font-mono text-[12px] uppercase tracking-[0.2em] text-[#4A7C59] mb-4">ORDER PLACED</p>
+          <h1 className="font-serif text-[44px] font-thin text-[#1A1714] mb-4">You’re all set, Priya!</h1>
+          <p className="font-sans text-[15px] text-[#6B6259] mb-12">Your order has been confirmed and will be dispatched shortly.</p>
+
+          <div className="bg-[#EFEBE3] border border-[#DDD7CF] rounded-[4px] p-6 mb-8 text-left">
+            <p className="font-mono text-[10px] uppercase text-[#A89F96] mb-1">ORDER ID</p>
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[18px] font-medium text-[#1A1714]">#LXB-20240605-8291</p>
+              <button className="flex items-center gap-1.5 text-[#6B6259] hover:text-[#1A1714] transition-colors">
+                <Copy className="w-4 h-4" />
+                <span className="text-xs font-sans">Copy</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 mb-12">
+            <div className="flex items-center justify-between relative px-2">
+              <div className="absolute top-4 left-0 right-0 h-[1px] border-t border-dashed border-[#DDD7CF] -z-10" />
+              {[{
+              label: 'Confirmed',
+              status: 'current'
+            }, {
+              label: 'Dispatched',
+              status: 'upcoming'
+            }, {
+              label: 'Out for Delivery',
+              status: 'upcoming'
+            }, {
+              label: 'Delivered',
+              status: 'upcoming'
+            }].map((step, idx) => <div key={idx} className="flex flex-col items-center gap-2 bg-[#F7F4EF]">
+                  <div className={cn("w-2.5 h-2.5 rounded-full", step.status === 'current' ? "bg-[#C4622D]" : "border border-[#DDD7CF] bg-[#F7F4EF]")} />
+                  <span className="font-sans text-[12px] text-[#6B6259] text-center w-16">{step.label}</span>
+                </div>)}
+            </div>
+          </div>
+
+          <p className="font-sans text-[12px] text-[#A89F96] mb-12">
+            You’ll receive SMS and email updates at <span className="text-[#6B6259]">priya@email.com</span> and <span className="text-[#6B6259]">9876543210</span>.
+          </p>
+
+          <div className="flex flex-col md:flex-row gap-4 mb-8">
+            <button className="flex-1 h-14 bg-[#1A1714] text-[#FDFAF6] font-sans font-medium uppercase tracking-[0.1em] text-[14px] flex items-center justify-center gap-2">
+              Track My Order <ChevronLeft className="w-4 h-4 rotate-180" />
+            </button>
+            <button className="flex-1 h-14 border border-[#DDD7CF] text-[#1A1714] font-sans font-medium uppercase tracking-[0.1em] text-[14px]">
+              Continue Shopping
+            </button>
+          </div>
+
+          <button className="flex items-center justify-center gap-2 font-sans text-[12px] text-[#C4622D] mx-auto hover:underline">
+            <Download className="w-3.5 h-3.5" /> Download Invoice
+          </button>
+        </div>
+      </div>;
+  }
+  return <div className="min-h-screen bg-[#F7F4EF] selection:bg-[#C4622D]/20 selection:text-[#C4622D]">
+      {/* Top Banner */}
+      <div className="hidden md:block bg-[#1A1714] text-[#FDFAF6] py-2 text-center">
+        <p className="font-sans text-[11px]">Free shipping on orders above ₹2,999 · 120+ Curated Brands</p>
+      </div>
+
+      {/* Navbar */}
+      <nav className="sticky top-0 z-[100] bg-[#FDFAF6] border-b border-[#DDD7CF] h-16 px-4 md:px-12 flex items-center justify-between">
+        <div className="flex-1">
+          <button onClick={() => {
+          if (window.confirm('Leave checkout? Your cart will be saved.')) {
+            window.location.href = '/';
+          }
+        }} className="font-serif font-semibold text-[20px] text-[#1A1714] tracking-tight">
+            LUXE BAZAAR
+          </button>
+        </div>
+
+        {/* Desktop Stepper */}
+        <div className="hidden md:flex items-center gap-12 flex-1 justify-center">
+          {[{
+          id: 'address',
+          label: 'Address',
+          step: 1
+        }, {
+          id: 'payment',
+          label: 'Payment',
+          step: 2
+        }, {
+          id: 'review',
+          label: 'Confirmation',
+          step: 3
+        }].map((item, idx) => {
+          const isActive = activeStep === item.id || activeStep === 'contact' && item.id === 'address';
+          const isDone = completedSteps.includes(item.id as StepId) && activeStep !== item.id;
+          return <div key={item.id} className="flex items-center gap-3 relative">
+                {idx > 0 && <div className={cn("absolute -left-8 top-1/2 -translate-y-1/2 w-4 h-[1px]", isDone ? "bg-[#4A7C59]" : "bg-[#DDD7CF]")} />}
+                <div className={cn("w-7 h-7 rounded-full flex items-center justify-center transition-colors", isDone ? "bg-[#4A7C59]" : isActive ? "bg-[#1A1714]" : "border border-[#DDD7CF]")}>
+                  {isDone ? <Check className="w-3.5 h-3.5 text-[#FDFAF6]" /> : <span className={cn("font-mono text-[13px]", isActive ? "text-[#FDFAF6]" : "text-[#A89F96]")}>{item.step}</span>}
+                </div>
+                <span className={cn("font-sans font-medium text-[12px]", isDone ? "text-[#4A7C59]" : isActive ? "text-[#1A1714]" : "text-[#A89F96]")}>{item.label}</span>
+              </div>;
+        })}
+        </div>
+
+        <div className="flex-1 flex justify-end items-center gap-4">
+          <div className="hidden md:flex items-center gap-2 text-[#4A7C59]">
+            <Lock className="w-3.5 h-3.5 stroke-[1.5]" />
+            <span className="font-sans text-[12px]">Secure Checkout</span>
+          </div>
+          <button className="font-sans text-[12px] text-[#C4622D] hover:underline">Need help?</button>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="max-w-[1200px] mx-auto px-5 md:px-12 py-10 md:py-16">
+        <div className="flex flex-col lg:flex-row gap-12">
+          
+          {/* Left Column - Checkout Steps */}
+          <div className="w-full lg:w-[60%] flex flex-col gap-12" ref={checkoutContainerRef}>
+            
+            {/* Step 1 - Contact */}
+            <section className={cn("transition-opacity duration-300", activeStep !== 'contact' && completedSteps.includes('contact') ? "opacity-100" : activeStep === 'contact' ? "opacity-100" : "opacity-40 grayscale pointer-events-none")}>
+              <StepHeader number="01" title="Contact" subtitle="How should we reach you about your order?" isCompleted={completedSteps.includes('contact') && activeStep !== 'contact'} onEdit={() => setActiveStep('contact')} />
+              
+              <AnimatePresence mode="wait">
+                {activeStep === 'contact' ? <motion.div initial={{
+                height: 0,
+                opacity: 0
+              }} animate={{
+                height: 'auto',
+                opacity: 1
+              }} exit={{
+                height: 0,
+                opacity: 0
+              }} className="overflow-hidden">
+                    <div className="flex gap-8 border-b border-[#DDD7CF] mb-8">
+                      <button className="pb-2 font-sans font-medium text-[13px] text-[#1A1714] border-b-2 border-[#C4622D]">Guest Checkout</button>
+                      <button className="pb-2 font-sans text-[13px] text-[#A89F96]">Sign In</button>
+                    </div>
+                    
+                    <div className="max-w-md">
+                      <Input label="EMAIL ADDRESS FOR ORDER UPDATES" placeholder="e.g. name@example.com" required value={email} onChange={(e: any) => setEmail(e.target.value)} success={email.includes('@') && email.includes('.')} />
+                      <p className="font-sans text-[11px] text-[#A89F96] mt-4 text-center">
+                        By continuing, you agree to our <a href="#" className="text-[#C4622D]">Terms</a> & <a href="#" className="text-[#C4622D]">Privacy Policy</a>
+                      </p>
+                      
+                      <button disabled={!email.includes('@')} onClick={() => handleNext('contact', 'address')} className="mt-8 w-full h-13 bg-[#1A1714] text-[#FDFAF6] font-sans font-medium uppercase tracking-[0.1em] text-[14px] disabled:opacity-30">
+                        Continue to Shipping →
+                      </button>
+                    </div>
+                  </motion.div> : completedSteps.includes('contact') && <div className="bg-[#EFEBE3] border border-[#DDD7CF] rounded-[4px] p-4 flex items-center justify-between">
+                      <p className="font-sans text-[13px] text-[#6B6259]">{email || 'priya@email.com'}</p>
+                    </div>}
+              </AnimatePresence>
+            </section>
+
+            {/* Step 2 - Address */}
+            <section className={cn("transition-opacity duration-300", activeStep !== 'address' && completedSteps.includes('address') ? "opacity-100" : activeStep === 'address' ? "opacity-100" : "opacity-40 grayscale pointer-events-none")}>
+              <StepHeader number="02" title="Delivery Address" subtitle="Where should we send your order?" isCompleted={completedSteps.includes('address') && activeStep !== 'address'} onEdit={() => setActiveStep('address')} />
+              
+              <AnimatePresence mode="wait">
+                {activeStep === 'address' ? <motion.div initial={{
+                height: 0,
+                opacity: 0
+              }} animate={{
+                height: 'auto',
+                opacity: 1
+              }} exit={{
+                height: 0,
+                opacity: 0
+              }} className="overflow-hidden">
+                    {/* Saved Addresses */}
+                    <div className="flex gap-4 overflow-x-auto pb-6 -mx-1 px-1 scrollbar-hide">
+                      {SAVED_ADDRESSES.map(addr => <div key={addr.id} className={cn("min-w-[240px] bg-[#EFEBE3] border rounded-[4px] p-5 relative transition-all cursor-pointer", addr.id === 'addr1' ? "border-[#1A1714] border-[1.5px]" : "border-[#DDD7CF]")}>
+                          {addr.id === 'addr1' && <div className="absolute top-4 right-4 bg-[#4A7C59] w-5 h-5 rounded-full flex items-center justify-center">
+                              <Check className="w-3 h-3 text-white" />
+                            </div>}
+                          <p className="font-mono text-[9px] uppercase tracking-wider text-[#B8935A] mb-3">{addr.type}</p>
+                          <p className="font-sans font-medium text-[14px] text-[#1A1714] mb-1">{addr.name}</p>
+                          <p className="font-sans text-[12px] leading-[1.6] text-[#6B6259] mb-4 h-12 overflow-hidden">{addr.address}</p>
+                          <p className="font-mono text-[12px] text-[#6B6259] mb-4">{addr.phone}</p>
+                          <div className="flex gap-4">
+                            <span className="font-sans font-medium text-[12px] text-[#C4622D]">Deliver Here</span>
+                            <span className="font-sans text-[12px] text-[#A89F96]">Edit</span>
+                          </div>
+                        </div>)}
+                      <div className="min-w-[240px] border border-[#DDD7CF] border-dashed rounded-[4px] flex flex-col items-center justify-center p-5 text-[#A89F96]">
+                        <Plus className="w-6 h-6 mb-2" />
+                        <span className="font-sans text-sm">Add New Address</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 space-y-6">
+                      <Input label="FULL NAME" placeholder="e.g. Priya Mehta" required success />
+                      <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
+                        <div className="md:col-span-6 flex gap-0">
+                          <div className="h-12 border border-[#DDD7CF] bg-[#EFEBE3] px-3 flex items-center gap-2 rounded-l-[4px] border-right-0">
+                            <span className="text-lg">🇮🇳</span>
+                            <span className="font-mono text-sm">+91</span>
+                          </div>
+                          <Input label="MOBILE NUMBER" className="flex-1" placeholder="98765 43210" required containerClassName="rounded-l-none" />
+                        </div>
+                        <Input label="ALTERNATE PHONE" className="md:col-span-4" placeholder="Optional" />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
+                        <Input label="PINCODE" className="md:col-span-4" placeholder="6 digits" required value={pincode} onChange={(e: any) => setPincode(e.target.value)} success={pincode.length === 6} />
+                        <Input label="CITY" className="md:col-span-6" placeholder="Auto-fetched" value={pincode.length === 6 ? 'Bengaluru' : ''} />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-6">
+                        <Input label="STATE" placeholder="Karnataka" />
+                        <Input label="COUNTRY" placeholder="India" disabled />
+                      </div>
+                      
+                      <Input label="ADDRESS LINE 1" placeholder="House/Flat/Block No, Street Name" required />
+                      <Input label="ADDRESS LINE 2" placeholder="Area, Landmark (optional)" />
+                      
+                      <div>
+                        <label className="font-sans font-medium text-[11px] tracking-[0.08em] uppercase text-[#1A1714] mb-1.5 block">
+                          DELIVERY INSTRUCTIONS
+                        </label>
+                        <textarea className="w-full h-24 bg-[#FDFAF6] border border-[#DDD7CF] rounded-[4px] p-3.5 font-sans text-sm text-[#1A1714] placeholder-[#A89F96] transition-all focus:border-[#1A1714] outline-none resize-none" placeholder="Anything the delivery person should know? (e.g. 'Ring the bell twice')" />
+                        <p className="font-mono text-[10px] text-[#A89F96] text-right mt-1">0 / 120</p>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <p className="font-sans font-medium text-[12px] text-[#1A1714]">Save as:</p>
+                        <div className="flex gap-2">
+                          {[{
+                        id: 'home',
+                        icon: <Home className="w-3.5 h-3.5" />,
+                        label: 'Home'
+                      }, {
+                        id: 'work',
+                        icon: <Briefcase className="w-3.5 h-3.5" />,
+                        label: 'Work'
+                      }, {
+                        id: 'other',
+                        icon: <MapPin className="w-3.5 h-3.5" />,
+                        label: 'Other'
+                      }].map(chip => <button key={chip.id} className={cn("flex items-center gap-2 px-4 py-2 border rounded-[2px] font-sans text-[12px] transition-colors", chip.id === 'home' ? "bg-[#1A1714] text-[#FDFAF6] border-[#1A1714]" : "bg-transparent text-[#1A1714] border-[#DDD7CF]")}>
+                              {chip.icon} {chip.label}
+                            </button>)}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-4 py-4 border-t border-b border-[#DDD7CF]">
+                        <div className="flex items-center justify-between">
+                          <p className="font-sans text-[14px] text-[#1A1714]">I need a GST invoice for this order</p>
+                          <button onClick={() => setIsGSTOn(!isGSTOn)} className={cn("w-10 h-5 rounded-full relative transition-colors duration-300", isGSTOn ? "bg-[#1A1714]" : "bg-[#DDD7CF]")}>
+                            <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all duration-300", isGSTOn ? "left-[22px]" : "left-0.5")} />
+                          </button>
+                        </div>
+                        <AnimatePresence>
+                          {isGSTOn && <motion.div initial={{
+                        height: 0,
+                        opacity: 0
+                      }} animate={{
+                        height: 'auto',
+                        opacity: 1
+                      }} exit={{
+                        height: 0,
+                        opacity: 0
+                      }} className="overflow-hidden pt-2 space-y-4">
+                              <Input label="GSTIN NUMBER" placeholder="Enter your 15-digit GSTIN" />
+                              <Input label="BUSINESS NAME" placeholder="Enter registered business name" />
+                            </motion.div>}
+                        </AnimatePresence>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded-[2px] border border-[#1A1714] flex items-center justify-center bg-[#1A1714]">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="font-sans text-[13px] text-[#6B6259]">Save this address for future orders</span>
+                      </div>
+
+                      <button onClick={() => handleNext('address', 'payment')} className="w-full h-14 bg-[#1A1714] text-[#FDFAF6] font-sans font-medium uppercase tracking-[0.1em] text-[14px]">
+                        Continue to Payment →
+                      </button>
+                    </div>
+                  </motion.div> : completedSteps.includes('address') && <div className="bg-[#EFEBE3] border border-[#DDD7CF] rounded-[4px] p-5 flex items-center justify-between">
+                      <div className="flex gap-4 items-center">
+                        <MapPin className="w-4 h-4 text-[#A89F96]" />
+                        <p className="font-sans text-[13px] text-[#6B6259]">
+                          Priya Mehta, 24 MG Road, Bengaluru 560001
+                        </p>
+                      </div>
+                    </div>}
+              </AnimatePresence>
+            </section>
+
+            {/* Step 3 - Payment */}
+            <section className={cn("transition-opacity duration-300", activeStep !== 'payment' && completedSteps.includes('payment') ? "opacity-100" : activeStep === 'payment' ? "opacity-100" : "opacity-40 grayscale pointer-events-none")}>
+              <StepHeader number="03" title="Payment" subtitle="All transactions are 256-bit SSL encrypted." isCompleted={completedSteps.includes('payment') && activeStep !== 'payment'} onEdit={() => setActiveStep('payment')} />
+              
+              <AnimatePresence mode="wait">
+                {activeStep === 'payment' ? <motion.div initial={{
+                height: 0,
+                opacity: 0
+              }} animate={{
+                height: 'auto',
+                opacity: 1
+              }} exit={{
+                height: 0,
+                opacity: 0
+              }} className="overflow-hidden">
+                    <div className="flex flex-col md:flex-row gap-0 border border-[#DDD7CF] rounded-[4px] overflow-hidden">
+                      {/* Side Nav */}
+                      <div className="w-full md:w-[200px] bg-[#EFEBE3] border-r border-[#DDD7CF]">
+                        {PAYMENT_METHODS.map(method => <button key={method.id} onClick={() => setPaymentMethod(method.id)} className={cn("w-full px-5 py-4 flex items-center gap-3 transition-all relative text-left", paymentMethod === method.id ? "bg-[#FDFAF6] border-l-[3px] border-l-[#C4622D] text-[#1A1714]" : "text-[#6B6259] hover:bg-black/5")}>
+                            <span className="flex-shrink-0">{method.icon}</span>
+                            <div className="flex flex-col">
+                              <span className="font-sans font-medium text-[13px]">{method.label}</span>
+                              {method.badge && <span className="font-mono text-[8px] bg-[#B8935A] text-white px-1 py-0.5 rounded-[1px] mt-0.5 w-fit">
+                                  {method.badge}
+                                </span>}
+                            </div>
+                          </button>)}
+                      </div>
+
+                      {/* Payment Content Panel */}
+                      <div className="flex-1 bg-[#FDFAF6] p-6 md:p-8">
+                        <AnimatePresence mode="wait">
+                          {paymentMethod === 'upi' && <motion.div key="upi" initial={{
+                        opacity: 0,
+                        x: 10
+                      }} animate={{
+                        opacity: 1,
+                        x: 0
+                      }} exit={{
+                        opacity: 0,
+                        x: -10
+                      }} className="space-y-8">
+                              <div className="grid grid-cols-2 gap-4">
+                                {[{
+                            name: 'Google Pay',
+                            logo: 'G'
+                          }, {
+                            name: 'PhonePe',
+                            logo: 'P'
+                          }, {
+                            name: 'Paytm',
+                            logo: 'Pt'
+                          }, {
+                            name: 'BHIM UPI',
+                            logo: 'B'
+                          }].map(app => <button key={app.name} className="flex items-center gap-3 p-4 border border-[#DDD7CF] rounded-[4px] bg-[#FDFAF6] hover:bg-[#EFEBE3] transition-colors">
+                                    <div className="w-7 h-7 bg-[#1A1714] text-white rounded-full flex items-center justify-center font-bold text-xs">{app.logo}</div>
+                                    <span className="font-sans font-medium text-[13px] text-[#1A1714]">{app.name}</span>
+                                  </button>)}
+                              </div>
+                              
+                              <div className="pt-4 border-t border-[#DDD7CF]">
+                                <button className="font-sans text-[12px] text-[#C4622D] hover:underline">Don't see your app? Enter UPI ID</button>
+                              </div>
+
+                              <div className="flex items-center justify-center py-4 bg-[#EFEBE3]/30 rounded-[4px] border border-dashed border-[#DDD7CF]">
+                                <div className="text-center">
+                                  <button className="flex items-center gap-2 font-sans text-[13px] text-[#C4622D] mb-2 mx-auto">
+                                    <Smartphone className="w-4 h-4" /> Show QR Code
+                                  </button>
+                                  <p className="font-sans text-[11px] text-[#A89F96]">Scan with any UPI app to pay instantly</p>
+                                </div>
+                              </div>
+                            </motion.div>}
+
+                          {paymentMethod === 'card' && <motion.div key="card" initial={{
+                        opacity: 0,
+                        x: 10
+                      }} animate={{
+                        opacity: 1,
+                        x: 0
+                      }} exit={{
+                        opacity: 0,
+                        x: -10
+                      }} className="space-y-8">
+                              {/* Card Visual */}
+                              <div className="perspective-[1000px] flex justify-center mb-10">
+                                <motion.div animate={{
+                            rotateY: isFlipped ? 180 : 0
+                          }} transition={{
+                            duration: 0.6,
+                            type: "spring",
+                            damping: 15
+                          }} className="relative w-full max-w-[340px] aspect-[1.58/1] preserve-3d">
+                                  {/* Front */}
+                                  <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-[#1A1714] to-[#3D352F] rounded-xl p-6 flex flex-col justify-between text-white shadow-xl overflow-hidden">
+                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.1),transparent)]" />
+                                    <div className="flex justify-between items-start z-10">
+                                      <div className="w-10 h-8 bg-white/20 rounded-md backdrop-blur-sm" />
+                                      <div className="font-mono italic font-bold text-lg">VISA</div>
+                                    </div>
+                                    <div className="z-10 mt-8">
+                                      <p className="font-mono text-xl tracking-[0.2em]">•••• •••• •••• 4242</p>
+                                    </div>
+                                    <div className="flex justify-between items-end z-10">
+                                      <div>
+                                        <p className="font-sans text-[10px] text-white/50 uppercase tracking-wider mb-1">Card Holder</p>
+                                        <p className="font-sans text-[13px] tracking-wide">PRIYA MEHTA</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="font-sans text-[10px] text-white/50 uppercase tracking-wider mb-1">Expires</p>
+                                        <p className="font-sans text-[13px] tracking-wide">09/28</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {/* Back */}
+                                  <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-[#1A1714] to-[#3D352F] rounded-xl flex flex-col justify-between text-white shadow-xl rotate-y-180">
+                                    <div className="w-full h-10 bg-black/40 mt-8" />
+                                    <div className="px-6 pb-6">
+                                      <div className="flex justify-end">
+                                        <div className="bg-white/90 text-[#1A1714] px-3 py-1.5 rounded-sm font-mono text-sm">•••</div>
+                                      </div>
+                                      <p className="font-sans text-[8px] text-white/30 uppercase mt-4 text-center">Authorized Signature · Not Transferable</p>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              </div>
+
+                              <div className="space-y-6">
+                                <Input label="CARD NUMBER" placeholder="•••• •••• •••• ••••" required />
+                                <Input label="CARDHOLDER NAME" placeholder="Name as on card" required />
+                                <div className="grid grid-cols-2 gap-4">
+                                  <Input label="EXPIRY DATE" placeholder="MM / YY" required />
+                                  <Input label="CVV" placeholder="•••" required onFocus={() => setIsFlipped(true)} onBlur={() => setIsFlipped(false)} />
+                                </div>
+                                <div className="flex items-center gap-2 pt-2">
+                                  <div className="w-3.5 h-3.5 border border-[#DDD7CF] rounded-[2px]" />
+                                  <span className="font-sans text-[12px] text-[#A89F96]">Save this card securely for faster payments</span>
+                                </div>
+                              </div>
+                            </motion.div>}
+                          
+                          {paymentMethod === 'cod' && <motion.div key="cod" initial={{
+                        opacity: 0,
+                        x: 10
+                      }} animate={{
+                        opacity: 1,
+                        x: 0
+                      }} exit={{
+                        opacity: 0,
+                        x: -10
+                      }} className="text-center py-4">
+                              <div className="mb-6 flex justify-center">
+                                <div className="relative">
+                                  <Package className="w-20 h-20 text-[#1A1714] stroke-[0.5]" />
+                                  <div className="absolute -bottom-2 -right-2 bg-[#FDFAF6] p-1 border border-[#DDD7CF] rounded-full">
+                                    <span className="text-xl">💵</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <h3 className="font-serif text-[22px] text-[#1A1714] mb-3">Pay when your order arrives</h3>
+                              <p className="font-sans text-[13px] text-[#6B6259] leading-relaxed mb-8">
+                                Hand the cash to the delivery person when your order reaches you. 
+                                Please keep the exact change ready for a faster experience.
+                              </p>
+                              <div className="bg-[#EFEBE3] border-l-2 border-l-[#8F6B2A] p-4 text-left">
+                                <p className="font-sans text-[13px] text-[#6B6259]">
+                                  A convenience fee of <span className="font-mono">₹49</span> is added for Cash on Delivery orders.
+                                </p>
+                              </div>
+                            </motion.div>}
+
+                          {paymentMethod !== 'upi' && paymentMethod !== 'card' && paymentMethod !== 'cod' && <div className="flex flex-col items-center justify-center py-20 text-[#A89F96]">
+                              <Smartphone className="w-12 h-12 mb-4 stroke-[0.5]" />
+                              <p className="font-sans text-sm">Select a provider to continue</p>
+                            </div>}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </motion.div> : completedSteps.includes('payment') && <div className="bg-[#EFEBE3] border border-[#DDD7CF] rounded-[4px] p-5 flex items-center justify-between">
+                      <div className="flex gap-4 items-center">
+                        <CreditCard className="w-4 h-4 text-[#A89F96]" />
+                        <p className="font-sans text-[13px] text-[#6B6259]">
+                          UPI (Google Pay) · ₹3,479
+                        </p>
+                      </div>
+                    </div>}
+              </AnimatePresence>
+            </section>
+
+            {/* Error Message & Final Review */}
+            <div className="space-y-4">
+              {errorState && <motion.div initial={{
+              opacity: 0,
+              y: -10
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} className="bg-[#A8362B]/5 border border-[#A8362B] rounded-[4px] p-4 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-[#A8362B] flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-sans text-[13px] text-[#A8362B] leading-relaxed">
+                      {errorState}
+                    </p>
+                    <div className="mt-2 flex gap-4">
+                      <button onClick={handleFinalRetry} className="font-sans font-medium text-[12px] text-[#C4622D] hover:underline">Try a different card →</button>
+                      <button onClick={handleFinalRetry} className="font-sans font-medium text-[12px] text-[#C4622D] hover:underline">Pay via UPI →</button>
+                    </div>
+                  </div>
+                </motion.div>}
+
+              <div className="text-center py-2">
+                <p className="font-sans text-[13px] text-[#6B6259]">
+                  You are paying <span className="font-mono text-[#1A1714]">₹6,479</span> via <span className="font-sans text-[#1A1714]">UPI (Google Pay)</span>
+                </p>
+              </div>
+
+              <button disabled={isProcessing} onClick={handlePlaceOrder} className={cn("w-full h-16 bg-[#C4622D] text-[#FDFAF6] font-sans font-medium uppercase tracking-[0.12em] text-[15px] flex items-center justify-center gap-3 transition-all", isProcessing ? "opacity-80" : "hover:bg-[#B05425]")}>
+                {isProcessing ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <>
+                    <Lock className="w-4 h-4 stroke-[1.5]" />
+                    Place Order & Pay ₹6,479
+                  </>}
+              </button>
+
+              <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 pt-4 text-[#A89F96]">
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span className="font-sans text-[11px] uppercase tracking-wider">SSL Encrypted</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Package className="w-4 h-4" />
+                  <span className="font-sans text-[11px] uppercase tracking-wider">Easy 15-day Returns</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Lock className="w-4 h-4" />
+                  <span className="font-sans text-[11px] uppercase tracking-wider">Razorpay Secured</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Column - Order Summary */}
+          <aside className="w-full lg:w-[40%]">
+            <div className="sticky top-24 border border-[#DDD7CF] rounded-[4px] bg-[#FDFAF6] overflow-hidden">
+              <div className="bg-[#1A1714] px-6 py-5 flex items-center justify-between">
+                <div className="flex items-baseline gap-2">
+                  <h2 className="font-serif text-[22px] text-[#FDFAF6]">Order Summary</h2>
+                  <span className="font-mono text-[13px] text-[#A89F96]">(3 items)</span>
+                </div>
+                <button className="font-sans text-[12px] text-[#B8935A] hover:underline">Edit Cart</button>
+              </div>
+
+              {/* Items by Vendor */}
+              <div className="max-h-[500px] overflow-y-auto scrollbar-hide">
+                {/* Vendor 1 */}
+                <div className="bg-[#EFEBE3] px-6 py-2 border-b border-[#DDD7CF] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full border border-[#DDD7CF] bg-white flex items-center justify-center text-[8px] font-bold">A</div>
+                    <span className="font-sans font-medium text-[12px] text-[#1A1714]">Studio Aara — 2 items</span>
+                  </div>
+                  <span className="font-sans text-[10px] text-[#4A7C59]">Ships within 24 hrs</span>
+                </div>
+                
+                {CART_ITEMS.filter(i => i.vendor === 'Studio Aara').map(item => <div key={item.id} className="p-6 border-b border-[#DDD7CF] flex gap-4">
+                    <img src={item.image} alt={item.name} className="w-14 h-[72px] object-cover rounded-[2px] border border-[#DDD7CF] flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans font-medium text-[10px] tracking-wider text-[#B8935A] mb-1">{item.brand}</p>
+                      <h3 className="font-sans font-medium text-[13px] text-[#1A1714] mb-1 line-clamp-2 leading-snug">{item.name}</h3>
+                      <p className="font-sans text-[11px] text-[#A89F96]">{item.variant}</p>
+                      <p className="font-mono text-[11px] text-[#A89F96] mt-1">Qty: {item.qty}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-mono font-medium text-[14px] text-[#1A1714]">₹{item.price.toLocaleString()}</p>
+                      {item.originalPrice && <p className="font-mono text-[11px] text-[#A89F96] line-through">₹{item.originalPrice.toLocaleString()}</p>}
+                    </div>
+                  </div>)}
+
+                {/* Vendor 2 */}
+                <div className="bg-[#EFEBE3] px-6 py-2 border-b border-[#DDD7CF] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full border border-[#DDD7CF] bg-white flex items-center justify-center text-[8px] font-bold">J</div>
+                    <span className="font-sans font-medium text-[12px] text-[#1A1714]">Jaipuri Roots — 1 item</span>
+                  </div>
+                </div>
+
+                {CART_ITEMS.filter(i => i.vendor === 'Jaipuri Roots').map(item => <div key={item.id} className="p-6 border-b border-[#DDD7CF] flex gap-4">
+                    <img src={item.image} alt={item.name} className="w-14 h-[72px] object-cover rounded-[2px] border border-[#DDD7CF] flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans font-medium text-[10px] tracking-wider text-[#B8935A] mb-1">{item.brand}</p>
+                      <h3 className="font-sans font-medium text-[13px] text-[#1A1714] mb-1 line-clamp-2 leading-snug">{item.name}</h3>
+                      <p className="font-sans text-[11px] text-[#A89F96]">{item.variant}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <p className="font-mono text-[11px] text-[#A89F96]">Qty: {item.qty}</p>
+                        {item.lowStock && <span className="font-sans text-[10px] text-[#C4622D]">Only {item.lowStock} left</span>}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-mono font-medium text-[14px] text-[#1A1714]">₹{item.price.toLocaleString()}</p>
+                    </div>
+                  </div>)}
+              </div>
+
+              {/* Price Breakdown */}
+              <div className="p-6 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-sans text-[13px] text-[#6B6259]">Subtotal</span>
+                  <span className="font-mono text-[14px] text-[#1A1714]">₹6,548</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-sans text-[13px] text-[#6B6259]">Shipping (Standard)</span>
+                  <span className="font-mono text-[14px] text-[#4A7C59] font-medium uppercase">Free</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-sans text-[13px] text-[#4A7C59]">Coupon (LUXE20)</span>
+                  <span className="font-mono text-[14px] text-[#4A7C59]">−₹480</span>
+                </div>
+                <div className="flex justify-between items-center pb-4">
+                  <span className="font-sans text-[13px] text-[#6B6259]">GST (18%)</span>
+                  <span className="font-mono text-[14px] text-[#1A1714]">₹411</span>
+                </div>
+                
+                <div className="pt-5 border-t border-[#DDD7CF] flex justify-between items-baseline">
+                  <span className="font-sans font-medium text-[15px] text-[#1A1714]">Total</span>
+                  <span className="font-mono font-bold text-[22px] text-[#1A1714]">₹6,479</span>
+                </div>
+
+                <div className="mt-6 bg-[#4A7C59]/10 rounded-[4px] p-3 text-center">
+                  <p className="font-sans font-medium text-[12px] text-[#4A7C59]">
+                    🎉 You're saving ₹480 on this order
+                  </p>
+                </div>
+              </div>
+
+              {/* Trust signals */}
+              <div className="px-6 py-8 border-t border-[#DDD7CF] bg-[#EFEBE3]/20 grid grid-cols-2 gap-y-5 gap-x-4">
+                <div className="flex items-start gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#B8935A] mt-0.5" />
+                  <p className="font-sans text-[11px] text-[#A89F96] leading-tight">100% Secure Payments</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Package className="w-4 h-4 text-[#B8935A] mt-0.5" />
+                  <p className="font-sans text-[11px] text-[#A89F96] leading-tight">Easy 15-Day Returns</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Truck className="w-4 h-4 text-[#B8935A] mt-0.5" />
+                  <p className="font-sans text-[11px] text-[#A89F96] leading-tight">Genuine Branded Products</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <HelpCircle className="w-4 h-4 text-[#B8935A] mt-0.5" />
+                  <p className="font-sans text-[11px] text-[#A89F96] leading-tight">24/7 Customer Support</p>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
+
+      {/* Mobile Footer Sticky Summary Strip */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[110] bg-[#EFEBE3] border-t border-[#DDD7CF] px-6 py-3 flex items-center justify-between">
+        <div className="flex flex-col">
+          <p className="font-mono text-[13px] text-[#1A1714]">3 items · ₹6,479</p>
+          <button onClick={() => setIsMobileSummaryOpen(true)} className="font-sans font-medium text-[11px] text-[#C4622D] flex items-center gap-1">
+            View Order Summary <ChevronDown className="w-3 h-3" />
+          </button>
+        </div>
+        <button onClick={handlePlaceOrder} className="bg-[#C4622D] text-white px-6 py-3 rounded-[2px] font-sans font-medium uppercase tracking-wider text-[12px]">
+          Pay Now
+        </button>
+      </div>
+
+      {/* Mobile Summary Bottom Sheet Overlay */}
+      <AnimatePresence>
+        {isMobileSummaryOpen && <>
+            <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} exit={{
+          opacity: 0
+        }} onClick={() => setIsMobileSummaryOpen(false)} className="fixed inset-0 bg-black/40 z-[120]" />
+            <motion.div initial={{
+          y: '100%'
+        }} animate={{
+          y: 0
+        }} exit={{
+          y: '100%'
+        }} transition={{
+          type: 'spring',
+          damping: 25,
+          stiffness: 200
+        }} className="fixed bottom-0 left-0 right-0 bg-[#FDFAF6] rounded-t-xl z-[130] max-h-[85vh] overflow-y-auto">
+              <div className="h-1 bg-[#DDD7CF] w-10 mx-auto mt-4 rounded-full" />
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="font-serif text-2xl text-[#1A1714]">Order Summary</h2>
+                  <button onClick={() => setIsMobileSummaryOpen(false)}>
+                    <X className="w-5 h-5 text-[#1A1714]" />
+                  </button>
+                </div>
+                {/* Content similar to desktop sidebar here if needed for mobile detail view */}
+                <div className="space-y-6">
+                  {CART_ITEMS.map(item => <div key={item.id} className="flex gap-4">
+                      <img src={item.image} alt={item.name} className="w-12 h-16 object-cover rounded" />
+                      <div className="flex-1">
+                        <p className="font-sans text-[13px] text-[#1A1714] leading-tight">{item.name}</p>
+                        <p className="font-mono text-[11px] text-[#A89F96] mt-1">₹{item.price.toLocaleString()}</p>
+                      </div>
+                    </div>)}
+                  <div className="pt-4 border-t border-[#DDD7CF] space-y-2">
+          
+<truncated 2202 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.

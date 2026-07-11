@@ -1,57 +1,61 @@
-'use client'
+"use client";
 
-import React, { useCallback, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
-import { defaultCountries as supportedCountries } from '@payloadcms/plugin-ecommerce/client/react'
-import { Plus, Check, MapPin, Building2 } from 'lucide-react'
+import React, { useCallback, useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import { AddressItem } from '@/components/addresses/AddressItem'
-import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import {
+  defaultCountries as supportedCountries,
+  useAddresses,
+} from "@payloadcms/plugin-ecommerce/client/react";
+
+import { Building2, Plus } from "lucide-react";
+
+import { CheckoutInput } from "@/components/checkout/ui/CheckoutInput";
+import { FormError } from "@/components/forms/FormError";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Address } from '@/payload-types'
-import { StepHeader } from '@/components/checkout/ui/StepHeader'
-import { FormError } from '@/components/forms/FormError'
+} from "@/components/ui/select";
+import { Address } from "@/payload-types";
+import { cn } from "@/utilities/cn";
 
-type AddressFormValues = {
-  title?: string | null
-  firstName?: string | null
-  lastName?: string | null
-  company?: string | null
-  addressLine1?: string | null
-  addressLine2?: string | null
-  city?: string | null
-  state?: string | null
-  postalCode?: string | null
-  country?: string | null
-  phone?: string | null
-}
+const addressSchema = z.object({
+  title: z.string().nullable().optional(),
+  firstName: z.string().min(1, "Required"),
+  lastName: z.string().min(1, "Required"),
+  company: z.string().nullable().optional(),
+  addressLine1: z.string().min(1, "Required"),
+  addressLine2: z.string().nullable().optional(),
+  city: z.string().min(1, "Required"),
+  state: z.string().nullable().optional(),
+  postalCode: z.string().min(1, "Required"),
+  country: z.string().min(1, "Required"),
+  phone: z.string().nullable().optional(),
+});
+
+type AddressFormValues = z.infer<typeof addressSchema>;
 
 type Props = {
-  billingAddress?: Partial<Address>
-  setBillingAddress: (addr: Partial<Address>) => void
-  shippingAddress?: Partial<Address>
-  setShippingAddress: (addr: Partial<Address>) => void
-  sameAsShipping: boolean
-  setSameAsShipping: (v: boolean) => void
-  isCompleted?: boolean
-  onEdit?: () => void
-  email?: string
-  user?: { email?: string | null } | null
-  emailEditable?: boolean
-}
-
-const titles = ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Prof.', 'Mx.', 'Other']
+  billingAddress?: Partial<Address>;
+  setBillingAddress: (addr: Partial<Address>) => void;
+  shippingAddress?: Partial<Address>;
+  setShippingAddress: (addr: Partial<Address>) => void;
+  sameAsShipping: boolean;
+  setSameAsShipping: (v: boolean) => void;
+  isCompleted?: boolean;
+  onEdit?: () => void;
+  email?: string;
+  user?: { email?: string | null } | null;
+  emailEditable?: boolean;
+};
 
 export const AddressStep: React.FC<Props> = ({
   billingAddress,
@@ -66,367 +70,381 @@ export const AddressStep: React.FC<Props> = ({
   user,
   emailEditable,
 }) => {
-  const { addresses } = useAddresses()
-  const [showForm, setShowForm] = useState(false)
-  const [needsGST, setNeedsGST] = useState(false)
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
+  const { addresses } = useAddresses();
+  const [showForm, setShowForm] = useState(false);
+  const [needsGST, setNeedsGST] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null,
+  );
 
   const {
-    register,
+    control,
     handleSubmit,
-    formState: { errors },
-    setValue,
     reset,
-  } = useForm<AddressFormValues>()
+  } = useForm<AddressFormValues>({
+    resolver: zodResolver(addressSchema),
+    defaultValues: {
+      firstName: billingAddress?.firstName || "",
+      lastName: billingAddress?.lastName || "",
+      addressLine1: billingAddress?.addressLine1 || "",
+      addressLine2: billingAddress?.addressLine2 || "",
+      city: billingAddress?.city || "",
+      state: billingAddress?.state || "",
+      postalCode: billingAddress?.postalCode || "",
+      country: billingAddress?.country || "",
+      phone: billingAddress?.phone || "",
+    }
+  });
 
   useEffect(() => {
     if (billingAddress?.id) {
-      setSelectedAddressId(billingAddress.id as string)
-      setShowForm(false)
+      setSelectedAddressId(billingAddress.id as string);
+      setShowForm(false);
     }
-  }, [billingAddress])
+  }, [billingAddress]);
 
   const onFormSubmit = useCallback(
     (data: AddressFormValues) => {
-      setBillingAddress(data as Partial<Address>)
-      setShowForm(false)
+      setBillingAddress(data as Partial<Address>);
+      setShowForm(false);
     },
     [setBillingAddress],
-  )
+  );
 
   const handleSelectAddress = useCallback(
     (addr: Partial<Address>) => {
-      setBillingAddress(addr)
-      setSelectedAddressId(addr.id as string)
-      setShowForm(false)
+      setBillingAddress(addr);
+      setSelectedAddressId(addr.id as string);
+      setShowForm(false);
     },
     [setBillingAddress],
-  )
+  );
 
-  const hasSavedAddresses = addresses && addresses.length > 0
+  const hasSavedAddresses = addresses && addresses.length > 0;
 
   return (
-    <div>
-      <StepHeader
-        number="02"
-        title="Delivery Address"
-        isCompleted={isCompleted}
-        onEdit={onEdit}
-      />
-
+    <div className="overflow-hidden">
       <div className="space-y-5">
         {/* Saved Addresses */}
         {hasSavedAddresses && !showForm && (
-          <div className="space-y-3">
-            <p className="text-xs font-sans uppercase tracking-[0.08em] font-medium text-foreground">
-              Saved addresses
-            </p>
-
-            <div className="space-y-2">
-              {addresses.map((addr) => (
-                <button
-                  key={addr.id}
-                  type="button"
-                  onClick={() => handleSelectAddress(addr)}
-                  className={`w-full text-left border rounded-sm p-4 transition-colors ${
-                    selectedAddressId === addr.id
-                      ? 'border-foreground bg-foreground/[0.02]'
-                      : 'border-border hover:border-foreground/30'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 shrink-0">
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                          selectedAddressId === addr.id ? 'border-foreground' : 'border-border'
-                        }`}
-                      >
-                        {selectedAddressId === addr.id && (
-                          <div className="w-2 h-2 rounded-full bg-foreground" />
-                        )}
-                      </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {addresses.map((addr) => {
+                const isSelected = selectedAddressId === addr.id;
+                return (
+                  <div
+                    key={addr.id}
+                    onClick={() => handleSelectAddress(addr)}
+                    className={cn(
+                      "border rounded-[4px] p-4 relative cursor-pointer transition-colors",
+                      isSelected
+                        ? "border-foreground bg-card"
+                        : "border-border bg-transparent hover:border-foreground",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "absolute top-4 right-4 w-4 h-4 rounded-full",
+                        isSelected
+                          ? "border-4 border-foreground"
+                          : "border border-border",
+                      )}
+                    />
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-sans font-medium text-[13px] text-foreground">
+                        {addr.title || "Saved Address"}
+                      </h4>
+                      {isSelected && (
+                        <span className="bg-secondary text-foreground text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-[2px]">
+                          Default
+                        </span>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <AddressItem address={addr} hideActions />
+                    <p className="font-sans text-[13px] text-muted-foreground leading-relaxed mb-4">
+                      {addr.firstName} {addr.lastName}
+                      <br />
+                      {addr.addressLine1}
+                      {addr.addressLine2 && (
+                        <>
+                          <br />
+                          {addr.addressLine2}
+                        </>
+                      )}
+                      <br />
+                      {addr.city}, {addr.state} {addr.postalCode}
+                      <br />
+                      {addr.country}
+                    </p>
+                    <div className="flex items-center gap-4 border-t border-border pt-3">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="font-sans text-[12px] text-primary h-auto p-0 hover:underline"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="font-sans text-[12px] text-muted-foreground h-auto p-0 hover:text-foreground hover:no-underline"
+                      >
+                        Remove
+                      </Button>
                     </div>
                   </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 text-sm font-sans text-primary hover:underline"
+              className="w-full flex items-center justify-center gap-2 h-12 border-dashed border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors mb-8"
             >
               <Plus className="w-4 h-4" />
-              Add a new address
-            </button>
-          </div>
+              <span className="font-sans text-[12px] uppercase tracking-[0.08em] font-medium">
+                Add New Address
+              </span>
+            </Button>
+          </>
         )}
 
-        {/* No saved addresses or adding new */}
+        {/* Form (New or no saved addresses) */}
         {(!hasSavedAddresses || showForm) && (
-          <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-            <p className="text-xs font-sans uppercase tracking-[0.08em] font-medium text-foreground">
-              {showForm ? 'New address' : 'Enter your address'}
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="addr-title" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                  Title
-                </Label>
-                <Select
-                  onValueChange={(v) => setValue('title', v)}
-                  defaultValue={billingAddress?.title || ''}
-                >
-                  <SelectTrigger id="addr-title" className="h-11">
-                    <SelectValue placeholder="Title" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {titles.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="addr-firstName" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                  First name <span className="text-primary">*</span>
-                </Label>
-                <Input
-                  id="addr-firstName"
-                  className="h-11"
-                  {...register('firstName', { required: 'Required' })}
-                />
-                {errors.firstName && <FormError message={errors.firstName.message} />}
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="addr-lastName" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                  Last name <span className="text-primary">*</span>
-                </Label>
-                <Input
-                  id="addr-lastName"
-                  className="h-11"
-                  {...register('lastName', { required: 'Required' })}
-                />
-                {errors.lastName && <FormError message={errors.lastName.message} />}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="addr-phone" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                Phone
-              </Label>
-              <Input
-                id="addr-phone"
-                type="tel"
-                className="h-11"
-                {...register('phone')}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="addr-company" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                Company
-              </Label>
-              <Input
-                id="addr-company"
-                className="h-11"
-                {...register('company')}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="addr-line1" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                Address line 1 <span className="text-primary">*</span>
-              </Label>
-              <Input
-                id="addr-line1"
-                className="h-11"
-                {...register('addressLine1', { required: 'Required' })}
-              />
-              {errors.addressLine1 && <FormError message={errors.addressLine1.message} />}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="addr-line2" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                Address line 2
-              </Label>
-              <Input
-                id="addr-line2"
-                className="h-11"
-                {...register('addressLine2')}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="addr-city" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                  City <span className="text-primary">*</span>
-                </Label>
-                <Input
-                  id="addr-city"
-                  className="h-11"
-                  {...register('city', { required: 'Required' })}
-                />
-                {errors.city && <FormError message={errors.city.message} />}
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="addr-state" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                  State
-                </Label>
-                <Input
-                  id="addr-state"
-                  className="h-11"
-                  {...register('state')}
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="addr-postalCode" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                  Postal code <span className="text-primary">*</span>
-                </Label>
-                <Input
-                  id="addr-postalCode"
-                  className="h-11"
-                  {...register('postalCode', { required: 'Required' })}
-                />
-                {errors.postalCode && <FormError message={errors.postalCode.message} />}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="addr-country" className="text-[11px] font-sans uppercase tracking-[0.08em] font-medium">
-                Country <span className="text-primary">*</span>
-              </Label>
-              <Select
-                onValueChange={(v) => setValue('country', v)}
-                defaultValue={billingAddress?.country || ''}
-              >
-                <SelectTrigger id="addr-country" className="h-11 w-full">
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {supportedCountries.map((c) => {
-                    const value = typeof c === 'string' ? c : c.value
-                    const label = typeof c === 'string' ? c : typeof c.label === 'string' ? c.label : value
-                    return (
-                      <SelectItem key={value} value={value}>{label}</SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-              {errors.country && <FormError message={errors.country.message} />}
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <Button type="submit" variant="default" className="h-11 px-8">
-                Save address
-              </Button>
-              {showForm && (
+          <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+            <div className="flex items-center justify-between">
+              <p className="font-sans font-medium text-[11px] tracking-[0.08em] uppercase text-foreground">
+                {showForm && hasSavedAddresses
+                  ? "New address"
+                  : "Enter your address"}
+              </p>
+              {showForm && hasSavedAddresses && (
                 <Button
                   type="button"
-                  variant="ghost"
-                  className="h-11"
+                  variant="link"
                   onClick={() => setShowForm(false)}
+                  className="font-sans text-[12px] text-primary h-auto p-0 hover:underline"
                 >
                   Cancel
                 </Button>
               )}
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Controller
+                name="firstName"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <CheckoutInput
+                    label="First name"
+                    required
+                    error={fieldState.error?.message}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                )}
+              />
+              <Controller
+                name="lastName"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <CheckoutInput
+                    label="Last name"
+                    required
+                    error={fieldState.error?.message}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                )}
+              />
+            </div>
+
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field, fieldState }) => (
+                <CheckoutInput
+                  label="Phone"
+                  type="tel"
+                  error={fieldState.error?.message}
+                  {...field}
+                  value={field.value || ""}
+                />
+              )}
+            />
+
+            <Controller
+              name="addressLine1"
+              control={control}
+              render={({ field, fieldState }) => (
+                <CheckoutInput
+                  label="Address line 1"
+                  required
+                  error={fieldState.error?.message}
+                  {...field}
+                  value={field.value || ""}
+                />
+              )}
+            />
+
+            <Controller
+              name="addressLine2"
+              control={control}
+              render={({ field, fieldState }) => (
+                <CheckoutInput
+                  label="Address line 2 (Optional)"
+                  error={fieldState.error?.message}
+                  {...field}
+                  value={field.value || ""}
+                />
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Controller
+                name="city"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <CheckoutInput
+                    label="City"
+                    required
+                    error={fieldState.error?.message}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                )}
+              />
+              <Controller
+                name="state"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <CheckoutInput
+                    label="State"
+                    error={fieldState.error?.message}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                )}
+              />
+              <Controller
+                name="postalCode"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <CheckoutInput
+                    label="Postal code"
+                    required
+                    error={fieldState.error?.message}
+                    {...field}
+                    value={field.value || ""}
+                  />
+                )}
+              />
+            </div>
+
+            <Controller
+              name="country"
+              control={control}
+              render={({ field, fieldState }) => (
+                <div className="flex flex-col gap-1.5">
+                  <Label
+                    htmlFor="addr-country"
+                    className="font-sans font-medium text-[11px] tracking-[0.08em] uppercase text-foreground"
+                  >
+                    Country <span className="text-primary ml-0.5">•</span>
+                  </Label>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value || ""}
+                  >
+                    <SelectTrigger
+                      id="addr-country"
+                      className="data-[size=default]:h-12 w-full bg-card border-border font-sans text-sm text-foreground focus:ring-0 focus:border-foreground"
+                    >
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {supportedCountries.map((c) => {
+                        const value = typeof c === "string" ? c : c.value;
+                        const label =
+                          typeof c === "string"
+                            ? c
+                            : typeof c.label === "string"
+                              ? c.label
+                              : value;
+                        return (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  {fieldState.error && <FormError message={fieldState.error.message} />}
+                </div>
+              )}
+            />
+
+            <div className="pt-2">
+              <Button
+                type="submit"
+                variant="default"
+                className="w-full h-14 uppercase tracking-[0.1em] text-[14px] font-medium"
+              >
+                Use this Address
+              </Button>
+            </div>
           </form>
         )}
 
-        {/* GST Toggle */}
-        {billingAddress && (
-          <div className="border-t border-border pt-4">
+        {/* Extra Options */}
+        {billingAddress && !showForm && (
+          <div className="space-y-4 pt-4 border-t border-border">
+            {/* GST Toggle */}
+            <div>
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id="gst-toggle"
+                  checked={needsGST}
+                  onCheckedChange={(v) => setNeedsGST(v as boolean)}
+                  className="border-border data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
+                />
+                <Label
+                  htmlFor="gst-toggle"
+                  className="text-[13px] font-sans text-foreground cursor-pointer flex items-center gap-2"
+                >
+                  <Building2 className="w-4 h-4 text-muted-foreground" />I need
+                  a GST invoice
+                </Label>
+              </div>
+              {needsGST && (
+                <div className="mt-3 bg-secondary border border-border rounded-[4px] p-3">
+                  <p className="text-[12px] font-sans text-muted-foreground">
+                    GST invoice will be generated with your order. Please ensure
+                    your GST details are correct in the address above.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Shipping Same as Billing */}
             <div className="flex items-center gap-3">
               <Checkbox
-                id="gst-toggle"
-                checked={needsGST}
-                onCheckedChange={(v) => setNeedsGST(v as boolean)}
+                id="shippingSame"
+                checked={sameAsShipping}
+                onCheckedChange={(state) => setSameAsShipping(state as boolean)}
+                className="border-border data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
               />
-              <Label htmlFor="gst-toggle" className="text-sm font-sans text-foreground cursor-pointer flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-muted-foreground" />
-                I need a GST invoice
+              <Label
+                htmlFor="shippingSame"
+                className="text-[13px] font-sans text-foreground cursor-pointer"
+              >
+                Shipping address same as billing
               </Label>
             </div>
-            {needsGST && (
-              <div className="mt-3 bg-primary/5 border border-primary/20 rounded-sm p-3">
-                <p className="text-xs font-sans text-muted-foreground">
-                  GST invoice will be generated with your order. Please ensure your GST details are correct in the address above.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Shipping Same as Billing */}
-        {billingAddress && (
-          <div className="flex items-center gap-3">
-            <Checkbox
-              id="shippingSame"
-              checked={sameAsShipping}
-              onCheckedChange={(state) => setSameAsShipping(state as boolean)}
-            />
-            <Label htmlFor="shippingSame" className="text-sm font-sans text-foreground cursor-pointer">
-              Shipping address same as billing
-            </Label>
-          </div>
-        )}
-
-        {/* Separate Shipping Address */}
-        {!sameAsShipping && billingAddress && (
-          <div className="bg-card border border-border rounded-sm p-5">
-            <p className="text-xs font-sans uppercase tracking-[0.08em] font-medium text-foreground mb-3">
-              Shipping address
-            </p>
-            {shippingAddress ? (
-              <div className="border border-border rounded-sm p-4">
-                <AddressItem
-                  address={shippingAddress}
-                  actions={
-                    <Button variant="outline" size="sm" onClick={() => setShippingAddress({})}>
-                      Change
-                    </Button>
-                  }
-                />
-              </div>
-            ) : user ? (
-              <div className="space-y-3">
-                {addresses && addresses.length > 0 ? (
-                  addresses.map((addr) => (
-                    <button
-                      key={addr.id}
-                      type="button"
-                      onClick={() => setShippingAddress(addr)}
-                      className="w-full text-left border border-border rounded-sm p-4 hover:border-foreground/30 transition-colors"
-                    >
-                      <AddressItem address={addr} hideActions />
-                    </button>
-                  ))
-                ) : (
-                  <CreateAddressModal
-                    callback={(addr) => setShippingAddress(addr)}
-                    skipSubmission
-                  />
-                )}
-              </div>
-            ) : (
-              <CreateAddressModal
-                disabled={!email || !!emailEditable}
-                callback={(addr) => setShippingAddress(addr)}
-                skipSubmission
-              />
-            )}
           </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};

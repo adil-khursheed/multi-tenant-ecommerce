@@ -145,14 +145,14 @@ export const RazorpayCheckout: React.FC<Props> = ({
   return (
     <div>
       {error && <Message error={error} />}
-      <Button
+      <button
+        type="button"
         onClick={handlePayment}
         disabled={isLoading}
-        variant="default"
-        className="mt-4"
+        className="mt-6 w-full h-12 bg-[#1A1714] text-[#FDFAF6] font-sans text-[11px] uppercase tracking-[0.08em] font-medium rounded-[4px] hover:bg-[#3D352F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? "Processing..." : "Pay with Razorpay"}
-      </Button>
+      </button>
     </div>
   );
 };
