@@ -25,6 +25,8 @@
     "@payloadcms/plugin-ecommerce": "3.81.0",
     "@repo/typescript-config": "workspace:*",
     "payload": "3.81.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "@types/react": "*",
+    "monaco-editor": "^0.44.0"
   }
 }
