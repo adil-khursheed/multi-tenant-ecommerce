@@ -45,6 +45,12 @@ export const StockIndicator: React.FC<Props> = ({ product }) => {
 
   return (
     <div className="flex items-center gap-2 mt-6">
+      {stockQuantity >= 10 && (
+        <>
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span className="text-[12px] text-emerald-600 font-medium">In Stock</span>
+        </>
+      )}
       {stockQuantity < 10 && stockQuantity > 0 && (
         <>
           <div className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />

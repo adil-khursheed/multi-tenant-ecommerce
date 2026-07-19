@@ -95,5 +95,15 @@ export const Categories: CollectionConfig = {
         position: "sidebar",
       },
     },
+    {
+      name: "sizeGuide",
+      type: "relationship",
+      relationTo: "sizeGuides",
+      admin: {
+        description:
+          "Default size guide for all products in this category. Products can override with their own.",
+        position: "sidebar",
+      },
+    },
   ],
 };

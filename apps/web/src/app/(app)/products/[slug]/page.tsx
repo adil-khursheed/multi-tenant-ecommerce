@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: Args) {
   const { slug } = await params;
   const { isEnabled: draft } = await draftMode();
   const caller = await serverCaller();
-  const { product, reviews } = await caller.product.getProductBySlug({
+  const { product, reviews, sizeGuide } = await caller.product.getProductBySlug({
     slug,
     draft: draft || undefined,
   });
@@ -165,12 +165,12 @@ export default async function ProductPage({ params }: Args) {
 
           {/* Right Column: Product Info */}
           <div className="w-full lg:w-[45%]">
-            <ProductInfo product={product} />
+            <ProductInfo product={product} sizeGuide={sizeGuide} />
           </div>
         </div>
 
         {/* Product Details Accordion */}
-        <ProductDetailsAccordion product={product} />
+        <ProductDetailsAccordion product={product} sizeGuide={sizeGuide} />
 
         {/* Vendor Card */}
         <VendorCard product={product} />

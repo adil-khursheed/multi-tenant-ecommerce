@@ -356,6 +356,15 @@ export const ProductsCollection: CollectionOverride = ({
               hasMany: true,
               relationTo: "products",
             },
+            {
+              name: "sizeGuide",
+              type: "relationship",
+              relationTo: "sizeGuides",
+              admin: {
+                description:
+                  "Per-product size chart. If empty, falls back to the category size guide.",
+              },
+            },
           ],
           label: "Product Details",
         },

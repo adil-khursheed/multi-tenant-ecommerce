@@ -393,7 +393,29 @@ export const productsRouter = {
         return {
           product: null,
           reviews: { docs: [], totalDocs: 0, hasNextPage: false },
+          sizeGuide: null,
         };
+      }
+
+      // Resolve size guide: product-level → category-level → null
+      let resolvedSizeGuide = null;
+      if (product.sizeGuide && typeof product.sizeGuide === "object") {
+        resolvedSizeGuide = product.sizeGuide;
+      } else if (product.categories?.length) {
+        const firstCat = product.categories[0];
+        const categoryId = typeof firstCat === "object" ? firstCat.id : firstCat;
+        if (categoryId) {
+          const firstCategory = typeof firstCat === "object"
+            ? firstCat
+            : await ctx.payload.findByID({
+                collection: "categories",
+                id: categoryId,
+                depth: 1,
+              });
+          if (firstCategory && typeof firstCategory === "object" && firstCategory.sizeGuide && typeof firstCategory.sizeGuide === "object") {
+            resolvedSizeGuide = firstCategory.sizeGuide;
+          }
+        }
       }
 
       // Fetch first page of reviews for this product
@@ -420,6 +442,7 @@ export const productsRouter = {
           totalDocs: reviewsResult.totalDocs,
           hasNextPage: reviewsResult.hasNextPage,
         },
+        sizeGuide: resolvedSizeGuide,
       };
     }),
 };

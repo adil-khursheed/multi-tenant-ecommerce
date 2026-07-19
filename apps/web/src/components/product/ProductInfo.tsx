@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import { useCurrency } from "@payloadcms/plugin-ecommerce/client/react";
 
 import {
-  FavouriteIcon,
   PackageReceiveIcon,
   RulerIcon,
   Shield01Icon,
@@ -16,6 +15,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { AddToCart } from "@/components/Cart/AddToCart";
+import { WishlistButton } from "@/components/WishlistButton";
 import { Price } from "@/components/Price";
 import { StarRating } from "@/components/StarRating";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,19 +29,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import type { Product, Variant } from "@/payload-types";
+import type { Product, SizeGuide, Variant } from "@/payload-types";
 import { StockIndicator } from "./StockIndicator";
 import { VariantSelector } from "./VariantSelector";
+import { SizeGuideTable } from "./SizeGuideTable";
 
-export const ProductInfo: React.FC<{ product: Product }> = ({ product }) => {
+export const ProductInfo: React.FC<{
+  product: Product;
+  sizeGuide?: SizeGuide | null;
+}> = ({ product, sizeGuide }) => {
   const [quantity, setQuantity] = useState(1);
   const { currency } = useCurrency();
 
@@ -97,9 +93,12 @@ export const ProductInfo: React.FC<{ product: Product }> = ({ product }) => {
           </span>
           <StarRating rating={averageRating} maxStars={1} className="gap-0" />
         </div>
-        <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors underline underline-offset-4">
+        <a
+          href="#reviews"
+          className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors underline underline-offset-4"
+        >
           {reviewCount} Reviews
-        </span>
+        </a>
       </div>
 
       <Separator />
@@ -114,66 +113,32 @@ export const ProductInfo: React.FC<{ product: Product }> = ({ product }) => {
       <VariantSelector product={product} />
 
       {/* Size Guide Trigger */}
-      <div className="flex items-center justify-end">
-        <Sheet>
-          <SheetTrigger
-            render={
-              <Button
-                variant="link"
-                className="h-auto p-0 text-xs text-muted-foreground gap-1"
-              />
-            }
-          >
-            <HugeiconsIcon icon={RulerIcon} size={14} />
-            Size Guide
-          </SheetTrigger>
-          <SheetContent className="sm:max-w-[425px]">
-            <SheetHeader>
-              <SheetTitle>Size Guide</SheetTitle>
-              <SheetDescription>
-                Find your perfect fit. Measurements are in centimeters.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="mt-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Chest</TableHead>
-                    <TableHead>Waist</TableHead>
-                    <TableHead>Hip</TableHead>
-                    <TableHead>Length</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    { size: "XS", chest: 78, waist: 62, hip: 86, length: 136 },
-                    { size: "S", chest: 82, waist: 66, hip: 90, length: 138 },
-                    { size: "M", chest: 86, waist: 70, hip: 94, length: 140 },
-                    { size: "L", chest: 90, waist: 74, hip: 98, length: 142 },
-                    { size: "XL", chest: 96, waist: 80, hip: 104, length: 144 },
-                    {
-                      size: "XXL",
-                      chest: 102,
-                      waist: 86,
-                      hip: 110,
-                      length: 146,
-                    },
-                  ].map((row) => (
-                    <TableRow key={row.size}>
-                      <TableCell className="font-medium">{row.size}</TableCell>
-                      <TableCell>{row.chest}</TableCell>
-                      <TableCell>{row.waist}</TableCell>
-                      <TableCell>{row.hip}</TableCell>
-                      <TableCell>{row.length}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+      {sizeGuide && (
+        <div className="flex items-center justify-end">
+          <Sheet>
+            <SheetTrigger
+              render={
+                <Button
+                  variant="link"
+                  className="h-auto p-0 text-xs text-muted-foreground gap-1"
+                />
+              }
+            >
+              <HugeiconsIcon icon={RulerIcon} size={14} />
+              Size Guide
+            </SheetTrigger>
+            <SheetContent className="sm:max-w-[425px]">
+              <SheetHeader>
+                <SheetTitle>Size Guide</SheetTitle>
+                <SheetDescription>
+                  Find your perfect fit.
+                </SheetDescription>
+              </SheetHeader>
+              <SizeGuideTable sizeGuide={sizeGuide} />
+            </SheetContent>
+          </Sheet>
+        </div>
+      )}
 
       {/* Quantity & Cart Actions */}
       <div className="flex flex-col gap-4 mt-2">
@@ -202,17 +167,15 @@ export const ProductInfo: React.FC<{ product: Product }> = ({ product }) => {
           <div className="flex-1">
             <AddToCart
               product={product}
+              quantity={quantity}
               data-main-add-to-cart
               className="h-12 text-base"
             />
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-12 w-12 shrink-0 rounded-md"
-          >
-            <HugeiconsIcon icon={FavouriteIcon} size={20} />
-          </Button>
+          <WishlistButton
+            productId={product.id}
+            className="flex items-center justify-center h-12 w-12 shrink-0 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+          />
         </div>
       </div>
 

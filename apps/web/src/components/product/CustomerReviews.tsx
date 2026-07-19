@@ -25,13 +25,15 @@ export const CustomerReviews: React.FC<{
   })
 
   return (
-    <div className="mt-16">
+    <div id="reviews" className="mt-16">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div>
           <h2 className="text-2xl font-heading font-medium tracking-tight mb-2">Customer Reviews</h2>
           <p className="text-muted-foreground">Based on {reviewCount} reviews</p>
         </div>
-        <Button size="lg" className="w-full md:w-auto">Write a Review</Button>
+        <Button size="lg" className="w-full md:w-auto" disabled title="Coming soon">
+          Write a Review
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">

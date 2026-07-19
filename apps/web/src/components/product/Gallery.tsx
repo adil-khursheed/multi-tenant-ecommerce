@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { DefaultDocumentIDType } from "payload";
@@ -30,6 +30,7 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
   const [isZooming, setIsZooming] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
   const [showZoomLabel, setShowZoomLabel] = useState(false);
+  const zoomLabelTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   useEffect(() => {
     if (!api) return;
@@ -83,9 +84,13 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
         onMouseEnter={() => {
           setIsZooming(true);
           setShowZoomLabel(true);
-          setTimeout(() => setShowZoomLabel(false), 2000);
+          zoomLabelTimeoutRef.current = setTimeout(() => setShowZoomLabel(false), 2000);
         }}
-        onMouseLeave={() => setIsZooming(false)}
+        onMouseLeave={() => {
+          clearTimeout(zoomLabelTimeoutRef.current);
+          setIsZooming(false);
+          setShowZoomLabel(false);
+        }}
         onMouseMove={handleMouseMove}
       >
         <AnimatePresence mode="wait">

@@ -81,6 +81,7 @@ export interface Config {
     collections: Collection;
     materials: Material;
     designs: Design;
+    sizeGuides: SizeGuide;
     reviews: Review;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -121,6 +122,7 @@ export interface Config {
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
     materials: MaterialsSelect<false> | MaterialsSelect<true>;
     designs: DesignsSelect<false> | DesignsSelect<true>;
+    sizeGuides: SizeGuidesSelect<false> | SizeGuidesSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -542,6 +544,10 @@ export interface Product {
   sku?: string | null;
   relatedProducts?: (string | Product)[] | null;
   /**
+   * Per-product size chart. If empty, falls back to the category size guide.
+   */
+  sizeGuide?: (string | null) | SizeGuide;
+  /**
    * Maps to the sleeve filter: Margie / Half / 3/4 / Full.
    */
   sleeve?: ('margie' | 'half-sleeve' | 'three-quarter-sleeve' | 'full-sleeve') | null;
@@ -922,6 +928,69 @@ export interface Category {
    * Populated by a scheduled job. Do not edit manually.
    */
   productCount?: number | null;
+  /**
+   * Default size guide for all products in this category. Products can override with their own.
+   */
+  sizeGuide?: (string | null) | SizeGuide;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Reusable size chart templates. Assign to categories as defaults, or to individual products to override.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sizeGuides".
+ */
+export interface SizeGuide {
+  id: string;
+  name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * Unit used when entering measurements. The frontend displays both cm and inches.
+   */
+  unit: 'cm' | 'inches';
+  /**
+   * Optional note shown below the size chart, e.g. "Runs slim, consider sizing up."
+   */
+  fitNote?: string | null;
+  rows?:
+    | {
+        /**
+         * The size label shown to customers, e.g. "S", "M", "L", "28", "30".
+         */
+        sizeLabel: string;
+        measurements?:
+          | {
+              /**
+               * Machine key for this measurement, e.g. "chest", "waist", "hip", "length", "sleeve", "inseam", "shoulder".
+               */
+              key: string;
+              /**
+               * Display label, e.g. "Chest", "Waist", "Hip".
+               */
+              label: string;
+              /**
+               * Measurement value in the unit selected above.
+               */
+              value: number;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Optional size equivalents in other sizing systems.
+         */
+        equivalentSizes?: {
+          us?: string | null;
+          uk?: string | null;
+          eu?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1817,6 +1886,10 @@ export interface PayloadLockedDocument {
         value: string | Design;
       } | null)
     | ({
+        relationTo: 'sizeGuides';
+        value: string | SizeGuide;
+      } | null)
+    | ({
         relationTo: 'reviews';
         value: string | Review;
       } | null)
@@ -2266,6 +2339,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   active?: T;
   isFeatured?: T;
   productCount?: T;
+  sizeGuide?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2326,6 +2400,40 @@ export interface DesignsSelect<T extends boolean = true> {
   icon?: T;
   active?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sizeGuides_select".
+ */
+export interface SizeGuidesSelect<T extends boolean = true> {
+  name?: T;
+  generateSlug?: T;
+  slug?: T;
+  unit?: T;
+  fitNote?: T;
+  rows?:
+    | T
+    | {
+        sizeLabel?: T;
+        measurements?:
+          | T
+          | {
+              key?: T;
+              label?: T;
+              value?: T;
+              id?: T;
+            };
+        equivalentSizes?:
+          | T
+          | {
+              us?: T;
+              uk?: T;
+              eu?: T;
+            };
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2587,6 +2695,7 @@ export interface ProductsSelect<T extends boolean = true> {
   variantTypes?: T;
   sku?: T;
   relatedProducts?: T;
+  sizeGuide?: T;
   sleeve?: T;
   season?: T;
   occasion?: T;

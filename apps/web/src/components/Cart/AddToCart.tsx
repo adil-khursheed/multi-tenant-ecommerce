@@ -15,10 +15,11 @@ import { cn } from "@/utilities/cn";
 type Props = {
   product: Product;
   className?: string;
+  quantity?: number;
   'data-main-add-to-cart'?: boolean;
 };
 
-export function AddToCart({ product, className, 'data-main-add-to-cart': dataMainAddToCart }: Props) {
+export function AddToCart({ product, className, quantity: quantityProp = 1, 'data-main-add-to-cart': dataMainAddToCart }: Props) {
   const { addItem, cart, isLoading } = useCart();
   const searchParams = useSearchParams();
 
@@ -50,11 +51,11 @@ export function AddToCart({ product, className, 'data-main-add-to-cart': dataMai
       addItem({
         product: product.id,
         variant: selectedVariant?.id ?? undefined,
-      }).then(() => {
+      }, quantityProp).then(() => {
         toast.success("Item added to cart.");
       });
     },
-    [addItem, product, selectedVariant],
+    [addItem, product, selectedVariant, quantityProp],
   );
 
   const disabled = useMemo<boolean>(() => {
