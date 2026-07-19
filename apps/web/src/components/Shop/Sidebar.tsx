@@ -20,21 +20,32 @@ import { cn } from "@/utilities/cn";
 import { createUrl } from "@/utilities/createUrl";
 import { SidebarGroup } from "./SidebarGroup";
 
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"];
-const COLORS = [
-  { name: "Ivory", hex: "#FDF5E6" },
-  { name: "Black", hex: "#1A1714" },
-  { name: "Camel", hex: "#C19A6B" },
-  { name: "Rust", hex: "#C4622D" },
-  { name: "Sage", hex: "#BCB88A" },
-  { name: "Blush", hex: "#F4C2C2" },
-  { name: "Burgundy", hex: "#800020" },
-  { name: "Navy", hex: "#000080" },
-  { name: "Olive", hex: "#808000" },
-  { name: "Mustard", hex: "#FFDB58" },
-  { name: "White", hex: "#FDFAF6" },
-  { name: "Grey", hex: "#808080" },
-];
+const COLOR_HEX_MAP: Record<string, string> = {
+  Ivory: "#FDF5E6",
+  Black: "#1A1714",
+  Camel: "#C19A6B",
+  Rust: "#C4622D",
+  Sage: "#BCB88A",
+  Blush: "#F4C2C2",
+  Burgundy: "#800020",
+  Navy: "#000080",
+  Olive: "#808000",
+  Mustard: "#FFDB58",
+  White: "#FDFAF6",
+  Grey: "#808080",
+  Red: "#FF0000",
+  Blue: "#0000FF",
+  Green: "#008000",
+  Yellow: "#FFFF00",
+  Pink: "#FFC0CB",
+  Purple: "#800080",
+  Orange: "#FFA500",
+  Brown: "#A52A2A",
+  Beige: "#F5F5DC",
+  Teal: "#008080",
+  Maroon: "#800000",
+  Charcoal: "#36454F",
+};
 
 export const Sidebar = () => {
   const router = useRouter();
@@ -44,7 +55,15 @@ export const Sidebar = () => {
   const trpc = useTRPC();
 
   const { data } = useSuspenseQuery(
-    trpc.category.getAllCategories.queryOptions(),
+    trpc.category.getAllCategories.queryOptions(undefined, {
+      staleTime: 5 * 60 * 1000,
+    }),
+  );
+
+  const { data: filterOptions } = useSuspenseQuery(
+    trpc.product.getFilterOptions.queryOptions(undefined, {
+      staleTime: 5 * 60 * 1000,
+    }),
   );
 
   const setQuery = useCallback(
@@ -132,12 +151,14 @@ export const Sidebar = () => {
                   </h4>
                   <ul className="space-y-1 border-l border-border/50 ml-2 pl-3">
                     {cat.children.map((child: any) => {
-                      const isActive = activeCategory === String(child.id);
+                      const isActive = activeCategory === child.slug;
                       return (
                         <li
                           key={child.id}
                           className="group flex items-center justify-between cursor-pointer"
-                          onClick={() => setQuery("category", String(child.id))}
+                          onClick={() =>
+                            setQuery("category", String(child.slug))
+                          }
                         >
                           <div
                             className={cn(
@@ -197,58 +218,62 @@ export const Sidebar = () => {
         </div>
       </SidebarGroup>
 
-      <SidebarGroup title="Size">
-        <div className="grid grid-cols-4 gap-2">
-          {SIZES.map((size) => {
-            const isActive = activeSize === size;
-            return (
-              <button
-                key={size}
-                onClick={() => size !== "Free Size" && setQuery("size", size)}
-                className={cn(
-                  "h-9 flex items-center justify-center border font-sans font-medium text-[12px] rounded-[2px] transition-all",
-                  isActive
-                    ? "bg-foreground text-background border-foreground"
-                    : size === "Free Size"
-                      ? "bg-secondary text-muted-foreground border-transparent line-through cursor-not-allowed"
-                      : "border-border text-foreground hover:border-foreground",
-                )}
-              >
-                {size}
-              </button>
-            );
-          })}
-        </div>
-      </SidebarGroup>
-
-      <SidebarGroup title="Color">
-        <TooltipProvider delay={200}>
-          <div className="grid grid-cols-6 gap-y-4 gap-x-2">
-            {COLORS.map((color) => {
-              const isActive = activeColor === color.name;
+      {filterOptions.sizes.length > 0 && (
+        <SidebarGroup title="Size">
+          <div className="grid grid-cols-4 gap-2">
+            {filterOptions.sizes.map((size) => {
+              const isActive = activeSize === size;
               return (
-                <Tooltip key={color.name}>
-                  <TooltipTrigger
-                    onClick={() => setQuery("color", color.name)}
-                    className="flex flex-col items-center gap-1 group cursor-pointer focus:outline-none"
-                  >
-                    <div
-                      className={cn(
-                        "w-6 h-6 rounded-full border border-border transition-transform group-hover:scale-110",
-                        isActive && "ring-1 ring-offset-2 ring-primary",
-                      )}
-                      style={{ backgroundColor: color.hex }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{color.name}</p>
-                  </TooltipContent>
-                </Tooltip>
+                <button
+                  key={size}
+                  onClick={() => setQuery("size", size)}
+                  className={cn(
+                    "h-9 flex items-center justify-center border font-sans font-medium text-[12px] rounded-[2px] transition-all",
+                    isActive
+                      ? "bg-foreground text-background border-foreground"
+                      : "border-border text-foreground hover:border-foreground",
+                  )}
+                >
+                  {size}
+                </button>
               );
             })}
           </div>
-        </TooltipProvider>
-      </SidebarGroup>
+        </SidebarGroup>
+      )}
+
+      {filterOptions.colors.length > 0 && (
+        <SidebarGroup title="Color">
+          <TooltipProvider delay={200}>
+            <div className="grid grid-cols-6 gap-y-4 gap-x-2">
+              {filterOptions.colors.map((colorName) => {
+                const isActive = activeColor === colorName;
+                const hex =
+                  COLOR_HEX_MAP[colorName] || "#D1D5DB";
+                return (
+                  <Tooltip key={colorName}>
+                    <TooltipTrigger
+                      onClick={() => setQuery("color", colorName)}
+                      className="flex flex-col items-center gap-1 group cursor-pointer focus:outline-none"
+                    >
+                      <div
+                        className={cn(
+                          "w-6 h-6 rounded-full border border-border transition-transform group-hover:scale-110",
+                          isActive && "ring-1 ring-offset-2 ring-primary",
+                        )}
+                        style={{ backgroundColor: hex }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{colorName}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </TooltipProvider>
+        </SidebarGroup>
+      )}
 
       <SidebarGroup title="Ratings">
         <ul className="space-y-2">
@@ -309,10 +334,10 @@ export const Sidebar = () => {
         </div>
       </SidebarGroup>
 
-      <SidebarGroup title="Fabric/Material" defaultOpen={false}>
-        <div className="space-y-3">
-          {["Cotton", "Silk & Satin", "Linen", "Georgette", "Wool"].map(
-            (item) => {
+      {filterOptions.materials.length > 0 && (
+        <SidebarGroup title="Fabric/Material" defaultOpen={false}>
+          <div className="space-y-3">
+            {filterOptions.materials.map((item) => {
               const isActive = activeMaterial === item;
               return (
                 <label
@@ -336,10 +361,42 @@ export const Sidebar = () => {
                   </span>
                 </label>
               );
-            },
-          )}
-        </div>
-      </SidebarGroup>
+            })}
+          </div>
+        </SidebarGroup>
+      )}
+
+      {filterOptions.brands.length > 0 && (
+        <SidebarGroup title="Brand" defaultOpen={false}>
+          <div className="space-y-3">
+            {filterOptions.brands.map((brand) => {
+              const isActive = activeBrand === brand;
+              return (
+                <label
+                  key={brand}
+                  className="flex items-center gap-3 cursor-pointer group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setQuery("brand", brand);
+                  }}
+                >
+                  <Checkbox checked={isActive} />
+                  <span
+                    className={cn(
+                      "font-sans text-[13px]",
+                      isActive
+                        ? "text-foreground font-medium"
+                        : "text-secondary-foreground",
+                    )}
+                  >
+                    {brand}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </SidebarGroup>
+      )}
     </aside>
   );
 };

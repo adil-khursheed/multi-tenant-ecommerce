@@ -4,6 +4,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { MobileFilterBar } from "@/components/Shop/MobileFilterBar";
 import { ShopHeader } from "@/components/Shop/ShopHeader";
 import { Sidebar } from "@/components/Shop/Sidebar";
+import { SidebarSkeleton } from "@/components/Shop/SidebarSkeleton";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 
 export default async function ShopLayout({
@@ -12,6 +13,7 @@ export default async function ShopLayout({
   children: React.ReactNode;
 }) {
   void prefetch(trpc.category.getAllCategories.queryOptions());
+  void prefetch(trpc.product.getFilterOptions.queryOptions());
 
   return (
     <Suspense fallback={null}>
@@ -32,7 +34,7 @@ export default async function ShopLayout({
           {/* Desktop Sidebar */}
           <HydrateClient>
             <ErrorBoundary fallback={<div>Something went wrong!</div>}>
-              <Suspense>
+              <Suspense fallback={<SidebarSkeleton />}>
                 <Sidebar />
               </Suspense>
             </ErrorBoundary>

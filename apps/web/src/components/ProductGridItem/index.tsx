@@ -3,8 +3,6 @@
 import React from "react";
 import Link from "next/link";
 
-import { FavouriteIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -12,6 +10,7 @@ import { Media } from "@/components/Media";
 import { Price } from "@/components/Price";
 import { StarRating } from "@/components/StarRating";
 import { Skeleton } from "@/components/ui/skeleton";
+import { WishlistButton } from "@/components/WishlistButton";
 import type { Product } from "@/payload-types";
 
 type Props = {
@@ -24,7 +23,6 @@ export const ProductGridItem: React.FC<Props> = ({
   viewMode = "grid",
 }) => {
   const [isHovered, setIsHovered] = React.useState(false);
-  const [isWishlisted, setIsWishlisted] = React.useState(false);
 
   const {
     gallery,
@@ -96,30 +94,7 @@ export const ProductGridItem: React.FC<Props> = ({
               {shortDescription}
             </p>
           )}
-          <div className="flex items-center gap-6 mb-4">
-            {/* Color swatches placeholder */}
-            <div className="flex gap-2">
-              <div
-                className="w-4 h-4 rounded-full border border-border"
-                style={{ backgroundColor: "#1A1714" }}
-              />
-              <div
-                className="w-4 h-4 rounded-full border border-border"
-                style={{ backgroundColor: "#C19A6B" }}
-              />
-            </div>
-            {/* Size options placeholder */}
-            <div className="flex gap-2">
-              {["S", "M", "L"].map((s) => (
-                <span
-                  key={s}
-                  className="w-8 h-8 flex items-center justify-center border border-border font-sans text-[11px] text-secondary-foreground"
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
+
           <div className="flex items-center gap-4">
             {ratings &&
               typeof ratings.average === "number" &&
@@ -154,9 +129,10 @@ export const ProductGridItem: React.FC<Props> = ({
             <button className="bg-primary text-primary-foreground px-8 py-2.5 font-sans font-medium text-[13px] uppercase tracking-wider rounded-[2px] hover:bg-primary/90 transition-colors">
               Add to Bag
             </button>
-            <button className="hidden md:flex border border-border text-foreground px-8 py-2.5 font-sans font-medium text-[13px] uppercase tracking-wider hover:bg-foreground hover:text-background transition-colors rounded-[2px]">
-              Save
-            </button>
+            <WishlistButton
+              productId={product.id!}
+              className="hidden md:flex border border-border text-foreground px-8 py-2.5 font-sans font-medium text-[13px] uppercase tracking-wider hover:bg-foreground hover:text-background transition-colors rounded-[2px] items-center justify-center gap-2"
+            />
           </div>
         </div>
       </motion.div>
@@ -214,53 +190,10 @@ export const ProductGridItem: React.FC<Props> = ({
                 )}
               </div>
 
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsWishlisted(!isWishlisted);
-                }}
-                className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-card/90 rounded-full border border-border/40 hover:bg-card transition-colors pointer-events-auto"
-              >
-                <motion.div
-                  animate={isWishlisted ? { scale: [1, 1.3, 1] } : {}}
-                >
-                  <HugeiconsIcon
-                    icon={FavouriteIcon}
-                    className={
-                      isWishlisted
-                        ? "text-primary fill-primary"
-                        : "text-foreground"
-                    }
-                    size={16}
-                  />
-                </motion.div>
-              </button>
-
-              <motion.div
-                initial={{ y: 40 }}
-                animate={{ y: 0 }}
-                className="absolute bottom-0 left-0 w-full pointer-events-auto"
-              >
-                <button
-                  onClick={(e) => e.preventDefault()}
-                  className="w-full h-10 bg-foreground text-background font-sans font-medium text-[12px] uppercase tracking-wider flex items-center justify-center group/btn hover:bg-primary transition-colors"
-                >
-                  <span className="group-hover/btn:hidden">Quick Add</span>
-                  <div className="hidden group-hover/btn:flex gap-4">
-                    {["S", "M", "L"].map((s, i) => (
-                      <motion.span
-                        key={s}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: i * 0.04 }}
-                        className="hover:text-white/80"
-                      >
-                        {s}
-                      </motion.span>
-                    ))}
-                  </div>
-                </button>
-              </motion.div>
+              <WishlistButton
+                productId={product.id!}
+                className="absolute top-3 right-3 size-8 flex items-center justify-center bg-card/90 rounded-full border border-border/40 hover:bg-card transition-colors pointer-events-auto"
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -277,20 +210,6 @@ export const ProductGridItem: React.FC<Props> = ({
             {title}
           </h3>
         </Link>
-
-        {/* Color swatches placeholder */}
-        <div className="flex items-center gap-2 mb-2 h-3">
-          <div className="flex gap-1">
-            <div
-              className="size-2 rounded-full border border-border"
-              style={{ backgroundColor: "#1A1714" }}
-            />
-            <div
-              className="size-2 rounded-full border border-border"
-              style={{ backgroundColor: "#C19A6B" }}
-            />
-          </div>
-        </div>
 
         {ratings &&
           typeof ratings.average === "number" &&

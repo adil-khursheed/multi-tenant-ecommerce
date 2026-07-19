@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createAccountSchema, loginSchema } from "@repo/validators";
-import { baseProcedure } from "../trpc";
+import { baseProcedure, protectedProcedure } from "../trpc";
 
 export const authRouter = {
   register: baseProcedure
@@ -120,6 +120,54 @@ export const authRouter = {
       message: "User logged out successfully",
     };
   }),
+
+  me: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.payload.findByID({
+      collection: "users",
+      id: ctx.session.user.id,
+    });
+
+    return { user };
+  }),
+
+  forgotPassword: baseProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.payload.forgotPassword({
+        collection: "users",
+        data: { email: input.email },
+        disableEmail: false,
+      });
+
+      return {
+        success: true,
+        message: "Password reset email sent",
+      };
+    }),
+
+  resetPassword: baseProcedure
+    .input(
+      z.object({
+        password: z.string().min(6),
+        passwordConfirm: z.string().min(1),
+        token: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.payload.resetPassword({
+        collection: "users",
+        data: {
+          password: input.password,
+          token: input.token,
+        },
+        overrideAccess: true,
+      });
+
+      return {
+        success: true,
+        message: "Password reset successfully",
+      };
+    }),
 
   verifyEmail: baseProcedure
     .input(z.object({ token: z.string() }))

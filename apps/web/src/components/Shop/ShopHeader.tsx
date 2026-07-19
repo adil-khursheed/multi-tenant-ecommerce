@@ -2,28 +2,62 @@
 
 import React from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+
+import { useTRPC } from "@/trpc/client";
 import { createUrl } from "@/utilities/createUrl";
+
+function buildCategorySlugMap(docs: any[]): Map<string, string> {
+  const map = new Map<string, string>();
+  const walk = (items: any[]) => {
+    for (const item of items) {
+      if (item.slug) map.set(item.slug, item.name);
+      if (item.children?.length) walk(item.children);
+    }
+  };
+  walk(docs);
+  return map;
+}
 
 export const ShopHeader = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const trpc = useTRPC();
+
+  const { data: categoriesData } = useSuspenseQuery(
+    trpc.category.getAllCategories.queryOptions(undefined, {
+      staleTime: 5 * 60 * 1000,
+    }),
+  );
+
+  const slugToName = buildCategorySlugMap(categoriesData.docs);
 
   const activeFilters = [];
   const entries = Array.from(searchParams.entries());
 
   for (const [key, value] of entries) {
     if (key === "q") activeFilters.push({ key, label: `Search: ${value}` });
-    else if (key === "category") activeFilters.push({ key, label: `Category` });
-    else if (key === "priceRange") activeFilters.push({ key, label: `Price: ${value}` });
-    else if (key === "size") activeFilters.push({ key, label: `Size: ${value}` });
-    else if (key === "color") activeFilters.push({ key, label: `Color: ${value}` });
-    else if (key === "brand") activeFilters.push({ key, label: `Brand: ${value}` });
-    else if (key === "rating") activeFilters.push({ key, label: `Rating: ${value} & Up` });
-    else if (key === "occasion") activeFilters.push({ key, label: `Occasion: ${value}` });
-    else if (key === "material") activeFilters.push({ key, label: `Material: ${value}` });
+    else if (key === "category") {
+      const name = slugToName.get(value) || value;
+      activeFilters.push({ key, label: `Category: ${name}` });
+    } else if (key === "priceRange")
+      activeFilters.push({ key, label: `Price: ${value}` });
+    else if (key === "size")
+      activeFilters.push({ key, label: `Size: ${value}` });
+    else if (key === "color")
+      activeFilters.push({ key, label: `Color: ${value}` });
+    else if (key === "brand")
+      activeFilters.push({ key, label: `Brand: ${value}` });
+    else if (key === "rating")
+      activeFilters.push({ key, label: `Rating: ${value} & Up` });
+    else if (key === "occasion")
+      activeFilters.push({ key, label: `Occasion: ${value}` });
+    else if (key === "material")
+      activeFilters.push({ key, label: `Material: ${value}` });
   }
 
   const removeFilter = (keyToRemove: string) => {
@@ -56,7 +90,11 @@ export const ShopHeader = () => {
               className="group flex items-center gap-2 bg-foreground text-background py-1.5 px-3 rounded-[2px] font-sans text-[11px] cursor-pointer"
             >
               <span>{filter.label}</span>
-              <HugeiconsIcon icon={Cancel01Icon} size={12} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+              <HugeiconsIcon
+                icon={Cancel01Icon}
+                size={12}
+                className="opacity-60 group-hover:opacity-100 transition-opacity"
+              />
             </span>
           ))}
           <button

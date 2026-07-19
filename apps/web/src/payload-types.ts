@@ -237,6 +237,7 @@ export interface User {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  wishlist?: (string | Product)[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -530,7 +531,6 @@ export interface Product {
   layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null;
   inventory?: number | null;
   enableVariants?: boolean | null;
-  variantTypes?: (string | VariantType)[] | null;
   variants?: {
     docs?: (string | Variant)[];
     hasNextPage?: boolean;
@@ -538,6 +538,7 @@ export interface Product {
   };
   priceInINREnabled?: boolean | null;
   priceInINR?: number | null;
+  variantTypes?: (string | VariantType)[] | null;
   sku?: string | null;
   relatedProducts?: (string | Product)[] | null;
   /**
@@ -1919,6 +1920,7 @@ export interface UsersSelect<T extends boolean = true> {
   orders?: T;
   cart?: T;
   addresses?: T;
+  wishlist?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -2579,10 +2581,10 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   inventory?: T;
   enableVariants?: T;
-  variantTypes?: T;
   variants?: T;
   priceInINREnabled?: T;
   priceInINR?: T;
+  variantTypes?: T;
   sku?: T;
   relatedProducts?: T;
   sleeve?: T;

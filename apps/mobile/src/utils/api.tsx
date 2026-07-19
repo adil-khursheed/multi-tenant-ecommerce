@@ -15,6 +15,8 @@ import { createTRPCContext } from "@trpc/tanstack-react-query";
 import superjson from "superjson";
 import type { AppRouter } from "@repo/api";
 
+import { getAuthToken } from "./token";
+
 // 1. Setup onlineManager to track network connectivity
 onlineManager.setEventListener((setOnline) => {
   return NetInfo.addEventListener((state) => {
@@ -81,9 +83,15 @@ export function TRPCReactProvider({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           transformer: superjson,
           url: `${getBaseUrl()}/api/trpc`,
-          headers() {
+          async headers() {
             const headers = new Headers();
             headers.set("x-trpc-source", "expo-react-native");
+
+            const token = await getAuthToken();
+            if (token) {
+              headers.set("authorization", `Bearer ${token}`);
+            }
+
             return headers;
           },
         }),

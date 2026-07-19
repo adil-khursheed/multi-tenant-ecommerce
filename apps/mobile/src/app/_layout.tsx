@@ -6,6 +6,9 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 
 import { TRPCReactProvider } from "../utils/api";
+import { AuthProvider } from "../providers/Auth";
+import { CartProvider } from "../providers/Cart";
+import { CurrencyProvider } from "../providers/Currency";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,7 +37,19 @@ export default function RootLayout() {
   return (
     <KeyboardProvider>
       <TRPCReactProvider>
-        <Stack />
+        <AuthProvider>
+          <CurrencyProvider>
+            <CartProvider>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="(modals)"
+                  options={{ headerShown: false, presentation: "modal" }}
+                />
+              </Stack>
+            </CartProvider>
+          </CurrencyProvider>
+        </AuthProvider>
       </TRPCReactProvider>
     </KeyboardProvider>
   );

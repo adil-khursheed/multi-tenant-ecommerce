@@ -170,5 +170,14 @@ export const Users: CollectionConfig = {
         defaultColumns: ["id"],
       },
     },
+    {
+      name: "wishlist",
+      type: "relationship",
+      relationTo: "products",
+      hasMany: true,
+      admin: {
+        allowCreate: false,
+      },
+    },
   ],
 };

@@ -23,6 +23,7 @@ import { LogoIcon } from "@/components/icons/logo";
 import { CMSLink } from "@/components/Link";
 import { User } from "@/payload-types";
 import { useAuth } from "@/providers/Auth";
+import { useLoginModal } from "@/providers/LoginModal";
 import { cn } from "@/utilities/cn";
 import { Logout } from "../Logout";
 import { Button, buttonVariants } from "../ui/button";
@@ -46,6 +47,7 @@ export function HeaderClient({ header, user: serverUser }: Props) {
   const menu = header.navItems || [];
   const pathname = usePathname();
   const { user: clientUser } = useAuth();
+  const { openLoginModal } = useLoginModal();
 
   // Use client user if it's been initialized (either User object or null), otherwise fallback to server user
   const user = clientUser !== undefined ? clientUser : serverUser;
@@ -93,13 +95,26 @@ export function HeaderClient({ header, user: serverUser }: Props) {
 
           <div className="flex justify-end md:w-1/3 gap-4">
             <Suspense>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="items-center hover:bg-transparent [&_svg:not([class*='size-'])]:size-5"
-              >
-                <HugeiconsIcon icon={FavouriteIcon} />
-              </Button>
+              {user ? (
+                <Link href="/wishlist">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="items-center hover:bg-transparent [&_svg:not([class*='size-'])]:size-5"
+                  >
+                    <HugeiconsIcon icon={FavouriteIcon} />
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="items-center hover:bg-transparent [&_svg:not([class*='size-'])]:size-5"
+                  onClick={openLoginModal}
+                >
+                  <HugeiconsIcon icon={FavouriteIcon} />
+                </Button>
+              )}
             </Suspense>
 
             <Suspense fallback={<OpenCartButton />}>

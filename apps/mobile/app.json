@@ -80,7 +80,8 @@
         {
           "userTrackingPermission": "DTlea uses tracking data to improve your experience by personalizing content and advertisements."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

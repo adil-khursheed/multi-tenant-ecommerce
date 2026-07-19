@@ -191,6 +191,7 @@ export const ProductsCollection: CollectionOverride = ({
     inventory: true,
     meta: true,
     tenant: true,
+    relatedProducts: true,
   },
   fields: [
     { name: "title", type: "text", required: false },
@@ -295,7 +296,27 @@ export const ProductsCollection: CollectionOverride = ({
         },
         {
           fields: [
-            ...defaultCollection.fields,
+            ...defaultCollection.fields.filter(
+              (f: any) => f.name !== "variantTypes",
+            ),
+            {
+              name: "variantTypes",
+              type: "relationship",
+              hasMany: true,
+              relationTo: "variantTypes",
+              admin: {
+                condition: ({ enableVariants }: any) => Boolean(enableVariants),
+              },
+              filterOptions: async ({ data }: any) => {
+                const tenant = data?.tenant;
+                const tenantId =
+                  typeof tenant === "object" ? tenant?.id : tenant;
+                if (tenantId) {
+                  return { tenant: { equals: tenantId } };
+                }
+                return true;
+              },
+            },
             {
               name: "sku",
               type: "text",

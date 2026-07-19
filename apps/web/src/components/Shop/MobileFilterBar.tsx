@@ -8,6 +8,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { sorting } from "@repo/types";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Drawer,
   DrawerClose,
@@ -16,12 +17,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { StarRating } from "@/components/StarRating";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@/utilities/cn";
 import { createUrl } from "@/utilities/createUrl";
 import { SidebarGroup } from "./SidebarGroup";
-
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"];
 
 export const MobileFilterBar = () => {
   const router = useRouter();
@@ -34,10 +34,17 @@ export const MobileFilterBar = () => {
   const trpc = useTRPC();
 
   const { data } = useSuspenseQuery(
-    trpc.category.getAllCategories.queryOptions(),
+    trpc.category.getAllCategories.queryOptions(undefined, {
+      staleTime: 5 * 60 * 1000,
+    }),
   );
 
-  // Count active filters (ignoring 'q' and 'sort' for the badge, but can include them)
+  const { data: filterOptions } = useSuspenseQuery(
+    trpc.product.getFilterOptions.queryOptions(undefined, {
+      staleTime: 5 * 60 * 1000,
+    }),
+  );
+
   const activeCount = Array.from(searchParams.entries()).filter(
     ([k]) => k !== "sort" && k !== "q",
   ).length;
@@ -109,15 +116,14 @@ export const MobileFilterBar = () => {
                           <ul className="grid grid-cols-2 gap-2 mt-2">
                             {cat.children.map((child: any) => {
                               const isActive =
-                                localParams.get("category") ===
-                                String(child.id);
+                                localParams.get("category") === child.slug;
                               return (
                                 <li
                                   key={child.id}
                                   onClick={() =>
                                     toggleLocalParam(
                                       "category",
-                                      String(child.id),
+                                      String(child.slug),
                                     )
                                   }
                                   className={cn(
@@ -174,31 +180,175 @@ export const MobileFilterBar = () => {
                 </div>
               </SidebarGroup>
 
-              <SidebarGroup title="Size">
-                <div className="grid grid-cols-4 gap-2">
-                  {SIZES.map((s) => {
-                    const isActive = localParams.get("size") === s;
-                    return (
-                      <button
-                        key={s}
-                        onClick={() =>
-                          s !== "Free Size" && toggleLocalParam("size", s)
-                        }
-                        className={cn(
-                          "h-10 border font-sans text-[12px] rounded-[2px]",
-                          isActive
-                            ? "bg-foreground text-background border-foreground"
-                            : s === "Free Size"
-                              ? "bg-secondary text-muted-foreground border-transparent line-through cursor-not-allowed"
+              {filterOptions.sizes.length > 0 && (
+                <SidebarGroup title="Size">
+                  <div className="grid grid-cols-4 gap-2">
+                    {filterOptions.sizes.map((s) => {
+                      const isActive = localParams.get("size") === s;
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => toggleLocalParam("size", s)}
+                          className={cn(
+                            "h-10 border font-sans text-[12px] rounded-[2px]",
+                            isActive
+                              ? "bg-foreground text-background border-foreground"
                               : "border-border text-foreground",
+                          )}
+                        >
+                          {s}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </SidebarGroup>
+              )}
+
+              {filterOptions.colors.length > 0 && (
+                <SidebarGroup title="Color">
+                  <div className="flex gap-2 flex-wrap">
+                    {filterOptions.colors.map((colorName) => {
+                      const isActive = localParams.get("color") === colorName;
+                      return (
+                        <button
+                          key={colorName}
+                          onClick={() => toggleLocalParam("color", colorName)}
+                          className={cn(
+                            "px-4 py-2 border font-sans text-[12px] rounded-[2px]",
+                            isActive
+                              ? "bg-foreground text-background border-foreground"
+                              : "border-border text-secondary-foreground",
+                          )}
+                        >
+                          {colorName}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </SidebarGroup>
+              )}
+
+              <SidebarGroup title="Ratings">
+                <div className="space-y-2">
+                  {[5, 4, 3, 2, 1].map((stars) => {
+                    const isActive =
+                      localParams.get("rating") === String(stars);
+                    return (
+                      <div
+                        key={stars}
+                        onClick={() => toggleLocalParam("rating", String(stars))}
+                        className={cn(
+                          "flex items-center gap-2 p-2 cursor-pointer rounded-[2px]",
+                          isActive
+                            ? "bg-muted border-l-2 border-primary"
+                            : "hover:bg-muted/50",
                         )}
                       >
-                        {s}
-                      </button>
+                        <StarRating rating={stars} />
+                        <span className="font-sans text-[12px] text-foreground">
+                          & up
+                        </span>
+                      </div>
                     );
                   })}
                 </div>
               </SidebarGroup>
+
+              <SidebarGroup title="Occasion">
+                <div className="grid grid-cols-2 gap-2">
+                  {["Casual", "Festive", "Wedding", "Office", "Party", "Outdoor"].map(
+                    (item) => {
+                      const isActive = localParams.get("occasion") === item;
+                      return (
+                        <label
+                          key={item}
+                          className="flex items-center gap-2 cursor-pointer"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleLocalParam("occasion", item);
+                          }}
+                        >
+                          <Checkbox checked={isActive} />
+                          <span
+                            className={cn(
+                              "font-sans text-[12px]",
+                              isActive
+                                ? "text-foreground font-medium"
+                                : "text-secondary-foreground",
+                            )}
+                          >
+                            {item}
+                          </span>
+                        </label>
+                      );
+                    },
+                  )}
+                </div>
+              </SidebarGroup>
+
+              {filterOptions.materials.length > 0 && (
+                <SidebarGroup title="Fabric/Material">
+                  <div className="grid grid-cols-2 gap-2">
+                    {filterOptions.materials.map((item) => {
+                      const isActive = localParams.get("material") === item;
+                      return (
+                        <label
+                          key={item}
+                          className="flex items-center gap-2 cursor-pointer"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleLocalParam("material", item);
+                          }}
+                        >
+                          <Checkbox checked={isActive} />
+                          <span
+                            className={cn(
+                              "font-sans text-[12px]",
+                              isActive
+                                ? "text-foreground font-medium"
+                                : "text-secondary-foreground",
+                            )}
+                          >
+                            {item}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </SidebarGroup>
+              )}
+
+              {filterOptions.brands.length > 0 && (
+                <SidebarGroup title="Brand">
+                  <div className="grid grid-cols-2 gap-2">
+                    {filterOptions.brands.map((brand) => {
+                      const isActive = localParams.get("brand") === brand;
+                      return (
+                        <label
+                          key={brand}
+                          className="flex items-center gap-2 cursor-pointer"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleLocalParam("brand", brand);
+                          }}
+                        >
+                          <Checkbox checked={isActive} />
+                          <span
+                            className={cn(
+                              "font-sans text-[12px]",
+                              isActive
+                                ? "text-foreground font-medium"
+                                : "text-secondary-foreground",
+                            )}
+                          >
+                            {brand}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </SidebarGroup>
+              )}
             </div>
 
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border z-10">

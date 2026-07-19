@@ -20,7 +20,7 @@ export type CarouselItemData =
   | {
       type: "product";
       slug: string;
-      title: string;
+      title: string | null | undefined;
       price: number;
       image: Media | null;
     }
@@ -96,7 +96,7 @@ export const CarouselClient: React.FC<{ items: CarouselItemData[] }> = ({
                 <GridTileImage
                   label={{
                     amount: item.price,
-                    title: item.title,
+                    title: item.title ? item.title : "",
                   }}
                   media={item.image as Media}
                 />

@@ -5,6 +5,77 @@ import { z } from "zod";
 import { baseProcedure } from "../trpc";
 
 export const productsRouter = {
+  getFilterOptions: baseProcedure.query(async ({ ctx }) => {
+    const [variantTypesResult, allOptionsResult, materialsResult, tenantsResult] =
+      await Promise.all([
+        ctx.payload.find({
+          collection: "variantTypes",
+          select: { label: true, name: true },
+          pagination: false,
+          depth: 0,
+        }),
+        ctx.payload.find({
+          collection: "variantOptions",
+          select: { variantType: true, label: true },
+          pagination: false,
+          depth: 0,
+        }),
+        ctx.payload.find({
+          collection: "materials",
+          where: { active: { equals: true } },
+          select: { name: true },
+          sort: "order",
+          pagination: false,
+          depth: 0,
+        }),
+        ctx.payload.find({
+          collection: "tenants",
+          where: { storeName: { exists: true } },
+          select: { storeName: true },
+          pagination: false,
+          depth: 0,
+        }),
+      ]);
+
+    const sizeTypeIds = new Set<string | number>();
+    const colorTypeIds = new Set<string | number>();
+
+    for (const vt of variantTypesResult.docs) {
+      const label = ((vt as any).label || (vt as any).name || "").toLowerCase();
+      const id = vt.id;
+      if (label.includes("size")) sizeTypeIds.add(id);
+      else if (label.includes("color") || label.includes("colour"))
+        colorTypeIds.add(id);
+    }
+
+    const sizes: string[] = [];
+    const colors: string[] = [];
+
+    for (const opt of allOptionsResult.docs) {
+      const typeId =
+        typeof (opt as any).variantType === "object"
+          ? (opt as any).variantType?.id
+          : (opt as any).variantType;
+      const label = (opt as any).label as string;
+      if (!label) continue;
+      if (sizeTypeIds.has(typeId)) sizes.push(label);
+      else if (colorTypeIds.has(typeId)) colors.push(label);
+    }
+
+    return {
+      sizes: [...new Set(sizes)].sort(),
+      colors: [...new Set(colors)].sort(),
+      materials: materialsResult.docs
+        .map((m) => (m as any).name as string)
+        .filter(Boolean)
+        .sort(),
+      brands: tenantsResult.docs
+        .map((t) => (t as any).storeName as string)
+        .filter(Boolean)
+        .sort(),
+    };
+  }),
+
   getAllProducts: baseProcedure
     .input(
       z.object({
@@ -54,10 +125,6 @@ export const productsRouter = {
         });
       }
 
-      if (category) {
-        andConstraints.push({ categories: { contains: category } });
-      }
-
       if (priceRange) {
         let cleanStr = priceRange.replace(/[^0-9\-+–]/g, "");
         cleanStr = cleanStr.replace("–", "-");
@@ -96,17 +163,100 @@ export const productsRouter = {
       }
 
       if (occasion) {
-        andConstraints.push({ occasion: { contains: occasion.toLowerCase() } });
+        andConstraints.push({
+          occasion: { in: [occasion.toLowerCase()] },
+        });
+      }
+
+      // Run all filter pre-lookups in parallel
+      const [catResult, tenantResult, matResult, sizeProductIds, colorProductIds] =
+        await Promise.all([
+          category
+            ? ctx.payload.find({
+                collection: "categories",
+                where: { slug: { equals: category } },
+                limit: 1,
+                depth: 0,
+              })
+            : null,
+          brand
+            ? ctx.payload.find({
+                collection: "tenants",
+                where: { storeName: { equals: brand } },
+                limit: 1,
+                pagination: false,
+                depth: 0,
+              })
+            : null,
+          material
+            ? ctx.payload.find({
+                collection: "materials",
+                where: { name: { equals: material } },
+                limit: 1,
+                pagination: false,
+                depth: 0,
+              })
+            : null,
+          size
+            ? (async () => {
+                const opts = await ctx.payload.find({
+                  collection: "variantOptions",
+                  where: { label: { equals: size } },
+                  pagination: false,
+                  depth: 0,
+                });
+                const optionIds = opts.docs.map((d) => d.id);
+                if (optionIds.length === 0) return [];
+                const variants = await ctx.payload.find({
+                  collection: "variants",
+                  where: { options: { in: optionIds } },
+                  select: { product: true },
+                  pagination: false,
+                  depth: 0,
+                });
+                return variants.docs.map((v) => {
+                  const p = (v as any).product;
+                  return typeof p === "string" ? p : p?.id;
+                });
+              })()
+            : null,
+          color
+            ? (async () => {
+                const opts = await ctx.payload.find({
+                  collection: "variantOptions",
+                  where: { label: { equals: color } },
+                  pagination: false,
+                  depth: 0,
+                });
+                const optionIds = opts.docs.map((d) => d.id);
+                if (optionIds.length === 0) return [];
+                const variants = await ctx.payload.find({
+                  collection: "variants",
+                  where: { options: { in: optionIds } },
+                  select: { product: true },
+                  pagination: false,
+                  depth: 0,
+                });
+                return variants.docs.map((v) => {
+                  const p = (v as any).product;
+                  return typeof p === "string" ? p : p?.id;
+                });
+              })()
+            : null,
+        ]);
+
+      if (category) {
+        if (catResult?.docs[0]) {
+          andConstraints.push({
+            categories: { contains: catResult.docs[0].id },
+          });
+        } else {
+          andConstraints.push({ categories: { contains: category } });
+        }
       }
 
       if (brand) {
-        const tenants = await ctx.payload.find({
-          collection: "tenants",
-          where: { storeName: { equals: brand } },
-          pagination: false,
-          depth: 0,
-        });
-        const tenant = tenants.docs[0];
+        const tenant = tenantResult?.docs[0];
         if (tenant) {
           andConstraints.push({ tenant: { equals: tenant.id } });
         } else {
@@ -115,13 +265,7 @@ export const productsRouter = {
       }
 
       if (material) {
-        const materials = await ctx.payload.find({
-          collection: "materials",
-          where: { name: { equals: material } },
-          pagination: false,
-          depth: 0,
-        });
-        const mat = materials.docs[0];
+        const mat = matResult?.docs[0];
         if (mat) {
           andConstraints.push({ materials: { contains: mat.id } });
         } else {
@@ -130,58 +274,9 @@ export const productsRouter = {
       }
 
       if (size || color) {
-        let sizeProductIds: string[] | undefined;
-        let colorProductIds: string[] | undefined;
-
-        if (size) {
-          const sizeOpts = await ctx.payload.find({
-            collection: "variantOptions",
-            where: { label: { equals: size } },
-            pagination: false,
-            depth: 0,
-          });
-          const optionIds = sizeOpts.docs.map((d) => d.id);
-          if (optionIds.length > 0) {
-            const variants = await ctx.payload.find({
-              collection: "variants",
-              where: { options: { in: optionIds } },
-              pagination: false,
-              depth: 0,
-            });
-            sizeProductIds = variants.docs.map((v) =>
-              typeof v.product === "string" ? v.product : v.product.id,
-            );
-          } else {
-            sizeProductIds = [];
-          }
-        }
-
-        if (color) {
-          const colorOpts = await ctx.payload.find({
-            collection: "variantOptions",
-            where: { label: { equals: color } },
-            pagination: false,
-            depth: 0,
-          });
-          const optionIds = colorOpts.docs.map((d) => d.id);
-          if (optionIds.length > 0) {
-            const variants = await ctx.payload.find({
-              collection: "variants",
-              where: { options: { in: optionIds } },
-              pagination: false,
-              depth: 0,
-            });
-            colorProductIds = variants.docs.map((v) =>
-              typeof v.product === "string" ? v.product : v.product.id,
-            );
-          } else {
-            colorProductIds = [];
-          }
-        }
-
         let intersectedIds: string[] = [];
         if (size && color) {
-          intersectedIds = (sizeProductIds || []).filter((id) =>
+          intersectedIds = (sizeProductIds || []).filter((id: string) =>
             (colorProductIds || []).includes(id),
           );
         } else if (size) {

@@ -39,7 +39,7 @@ export const ThreeItemGridItem: React.FC<Props> = ({ item, size }) => {
           label={{
             amount: price!,
             position: size === "full" ? "center" : "bottom",
-            title: item.title,
+            title: item.title ? item.title : "",
           }}
           media={item.meta?.image as Media}
         />
