@@ -13,18 +13,13 @@
     "generate:types": "turbo run generate:types --filter=@repo/web"
   },
   "devDependencies": {
-    "turbo": "^2.5.0",
-    "prettier": "^3.4.2",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
-    "prettier-plugin-tailwindcss": "^0.6.11"
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "turbo": "^2.5.0"
   },
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@11.15.0",
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp"
-    ]
   }
 }

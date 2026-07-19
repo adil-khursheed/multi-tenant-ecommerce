@@ -1,4 +1,9 @@
-import { DefaultDocumentIDType, slugField, Where } from "payload";
+import {
+  DefaultDocumentIDType,
+  slugField,
+  ValidationError,
+  Where,
+} from "payload";
 import { CollectionOverride } from "@payloadcms/plugin-ecommerce/types";
 import {
   MetaDescriptionField,
@@ -75,6 +80,39 @@ export const ProductsCollection: CollectionOverride = ({
           }
         }
         return doc;
+      },
+    ],
+    beforeValidate: [
+      ...(defaultCollection.hooks?.beforeValidate || []),
+      ({ data, operation }) => {
+        if (operation === "create" && data?._status === "published") {
+          const errors: { path: string; message: string }[] = [];
+          if (!data.title) {
+            errors.push({
+              path: "title",
+              message: "Title is required when publishing.",
+            });
+          }
+          if (!data.slug) {
+            errors.push({
+              path: "slug",
+              message: "Slug is required when publishing.",
+            });
+          }
+          if (
+            !data.categories ||
+            (Array.isArray(data.categories) && data.categories.length === 0)
+          ) {
+            errors.push({
+              path: "categories",
+              message: "At least one category is required when publishing.",
+            });
+          }
+          if (errors.length > 0) {
+            throw new ValidationError({ errors });
+          }
+        }
+        return data;
       },
     ],
     beforeChange: [
@@ -155,7 +193,7 @@ export const ProductsCollection: CollectionOverride = ({
     tenant: true,
   },
   fields: [
-    { name: "title", type: "text", required: true },
+    { name: "title", type: "text", required: false },
     {
       type: "tabs",
       tabs: [
@@ -407,7 +445,9 @@ export const ProductsCollection: CollectionOverride = ({
         },
       ],
     },
-    slugField(),
+    slugField({
+      required: false,
+    }),
     {
       name: "categories",
       type: "relationship",
@@ -418,7 +458,6 @@ export const ProductsCollection: CollectionOverride = ({
           "Product type categories (Kurtas, Tops, Bottoms, Co-ord Set…).",
       },
       hasMany: true,
-      required: true,
       index: true,
       relationTo: "categories",
     },

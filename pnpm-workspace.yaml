@@ -1,3 +1,11 @@
 packages:
   - "apps/*"
   - "packages/*"
+allowBuilds:
+  '@firebase/util': false
+  '@vercel/git-hooks': false
+  esbuild: true
+  msw: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true

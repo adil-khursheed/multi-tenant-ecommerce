@@ -500,7 +500,7 @@ export interface Order {
 export interface Product {
   id: string;
   tenant?: (string | null) | Tenant;
-  title: string;
+  title?: string | null;
   /**
    * Short description about the product
    */
@@ -569,11 +569,11 @@ export interface Product {
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
-  slug: string;
+  slug?: string | null;
   /**
    * Product type categories (Kurtas, Tops, Bottoms, Co-ord Set…).
    */
-  categories: (string | Category)[];
+  categories?: (string | Category)[] | null;
   /**
    * Occasion / seasonal collections (Festive, Wedding, etc.).
    */
