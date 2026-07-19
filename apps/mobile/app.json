@@ -16,7 +16,8 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "DTlea needs your location access.",
         "NSUserTrackingUsageDescription": "DTlea uses tracking data to improve your experience by personalizing content and advertisements.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["itms-apps"]
       }
     },
     "android": {
@@ -27,9 +28,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "com.google.android.gms.permission.AD_ID"
-      ],
+      "permissions": ["com.google.android.gms.permission.AD_ID"],
       "package": "com.dtlea.dtlea"
     },
     "web": {

@@ -1,19 +1,24 @@
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import SpInAppUpdates, {
+  IAUUpdateKind,
+  StartUpdateOptions,
+} from "sp-react-native-in-app-updates";
 
-import { TRPCReactProvider } from "../utils/api";
 import { AuthProvider } from "../providers/Auth";
 import { CartProvider } from "../providers/Cart";
 import { CurrencyProvider } from "../providers/Currency";
+import { TRPCReactProvider } from "../utils/api";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, error] = useFonts({
     "DMSans-Light": require("@/assets/fonts/DMSans-Light.ttf"),
     "DMSans-Regular": require("@/assets/fonts/DMSans-Regular.ttf"),
     "DMSans-Medium": require("@/assets/fonts/DMSans-Medium.ttf"),
@@ -26,11 +31,29 @@ export default function RootLayout() {
     "CormorantGaramond-Bold": require("@/assets/fonts/CormorantGaramond-Bold.ttf"),
   });
 
-  useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+  const inAppUpdates = new SpInAppUpdates(
+    false, // isDebug
+  );
 
-  if (!fontsLoaded) {
+  inAppUpdates.checkNeedsUpdate().then((result) => {
+    if (result.shouldUpdate) {
+      let updateOptions: StartUpdateOptions = {};
+      if (Platform.OS === "android") {
+        // android only, on iOS the user will be prompted to go to your app store page
+        updateOptions = {
+          updateType: IAUUpdateKind.FLEXIBLE,
+        };
+      }
+      inAppUpdates.startUpdate(updateOptions);
+    }
+  });
+
+  useEffect(() => {
+    if (error) throw error;
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded, error]);
+
+  if (!fontsLoaded && !error) {
     return null;
   }
 

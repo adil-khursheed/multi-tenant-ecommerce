@@ -17,6 +17,7 @@ import {
   FavouriteIcon,
   Home01Icon,
   ShoppingCart01Icon,
+  Store02Icon,
   User02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
@@ -34,6 +35,7 @@ import {
 
 const ICON_MAP: Record<string, typeof Home01Icon> = {
   index: Home01Icon,
+  shop: Store02Icon,
   cart: ShoppingCart01Icon,
   wishlist: FavouriteIcon,
   profile: User02Icon,
@@ -151,6 +153,7 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tabs.Screen name="index" options={{ title: "Home" }} />
+      <Tabs.Screen name="shop" options={{ title: "Shop" }} />
       <Tabs.Screen name="cart" options={{ title: "Cart" }} />
       <Tabs.Screen name="wishlist" options={{ title: "Wishlist" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
