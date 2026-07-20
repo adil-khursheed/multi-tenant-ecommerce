@@ -14,6 +14,7 @@ import {
   useAddresses,
   useCart,
 } from "@payloadcms/plugin-ecommerce/client/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Check, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -32,6 +33,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Address } from "@/payload-types";
 import { useAuth } from "@/providers/Auth";
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@/utilities/cn";
 
 type PaymentMethod = "razorpay" | "cod";
@@ -41,6 +43,8 @@ export const CheckoutPage: React.FC = () => {
   const { user } = useAuth();
   const { cart } = useCart();
   const { addresses } = useAddresses();
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
   const [activeStep, setActiveStep] = useState<StepId>("contact");
   const [completedSteps, setCompletedSteps] = useState<StepId[]>([]);
@@ -65,6 +69,68 @@ export const CheckoutPage: React.FC = () => {
 
   const [completedOrderId, setCompletedOrderId] = useState<string | null>(null);
   const checkoutContainerRef = useRef<HTMLDivElement>(null);
+
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountAmount: number;
+  } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
+  const applyCouponMutation = useMutation(
+    trpc.cart.applyCoupon.mutationOptions({
+      onMutate: () => {
+        setCouponLoading(true);
+        setCouponError(null);
+      },
+      onSuccess: (result) => {
+        if (result.cart) {
+          setAppliedCoupon({
+            code: result.cart.couponCode || "",
+            discountAmount: result.cart.discount || 0,
+          });
+          queryClient.invalidateQueries({ queryKey: trpc.cart.get.queryKey() });
+        }
+      },
+      onError: (err) => {
+        setCouponError(err.message || "Failed to apply coupon");
+        setAppliedCoupon(null);
+      },
+      onSettled: () => {
+        setCouponLoading(false);
+      },
+    }),
+  );
+
+  const removeCouponMutation = useMutation(
+    trpc.cart.removeCoupon.mutationOptions({
+      onMutate: () => {
+        setCouponLoading(true);
+      },
+      onSuccess: () => {
+        setAppliedCoupon(null);
+        setCouponError(null);
+        queryClient.invalidateQueries({ queryKey: trpc.cart.get.queryKey() });
+      },
+      onError: (err) => {
+        setCouponError(err.message || "Failed to remove coupon");
+      },
+      onSettled: () => {
+        setCouponLoading(false);
+      },
+    }),
+  );
+
+  const handleApplyCoupon = useCallback(
+    (code: string) => {
+      applyCouponMutation.mutate({ code });
+    },
+    [applyCouponMutation],
+  );
+
+  const handleRemoveCoupon = useCallback(() => {
+    removeCouponMutation.mutate();
+  }, [removeCouponMutation]);
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length;
 
@@ -500,14 +566,28 @@ export const CheckoutPage: React.FC = () => {
           {/* Right Column - Order Summary */}
           <aside className="w-full lg:w-[40%] hidden lg:block">
             <div className="sticky top-24">
-              <OrderSummary />
+              <OrderSummary
+                selectedPaymentMethod={selectedPaymentMethod}
+                appliedCoupon={appliedCoupon}
+                onApplyCoupon={handleApplyCoupon}
+                onRemoveCoupon={handleRemoveCoupon}
+                couponLoading={couponLoading}
+                couponError={couponError}
+              />
             </div>
           </aside>
         </div>
       </main>
 
       {/* Mobile Summary */}
-      <MobileSummary />
+      <MobileSummary
+        selectedPaymentMethod={selectedPaymentMethod}
+        appliedCoupon={appliedCoupon}
+        onApplyCoupon={handleApplyCoupon}
+        onRemoveCoupon={handleRemoveCoupon}
+        couponLoading={couponLoading}
+        couponError={couponError}
+      />
     </div>
   );
 };

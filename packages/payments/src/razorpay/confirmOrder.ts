@@ -114,6 +114,9 @@ export const confirmOrder = (props: { keyId: string; keySecret: string }) =>
           shippingAddress: transaction.billingAddress,
           status: 'processing',
           transactions: [transaction.id],
+          couponCode: (transaction as Record<string, unknown>).couponCode || undefined,
+          discount: (transaction as Record<string, unknown>).discount || 0,
+          shippingCharge: (transaction as Record<string, unknown>).shippingCharge || 0,
         },
         req,
       })

@@ -14,8 +14,25 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Media } from "@/components/Media";
 import { Price } from "@/components/Price";
+import { PriceBreakdown } from "@/components/checkout/PriceBreakdown";
 
-export const OrderSummary: React.FC = () => {
+type Props = {
+  selectedPaymentMethod?: "razorpay" | "cod";
+  appliedCoupon?: { code: string; discountAmount: number } | null;
+  onApplyCoupon: (code: string) => void;
+  onRemoveCoupon: () => void;
+  couponLoading: boolean;
+  couponError: string | null;
+};
+
+export const OrderSummary: React.FC<Props> = ({
+  selectedPaymentMethod,
+  appliedCoupon,
+  onApplyCoupon,
+  onRemoveCoupon,
+  couponLoading,
+  couponError,
+}) => {
   const { cart } = useCart();
 
   if (!cart || !cart.items || !cart.items.length) return null;
@@ -24,10 +41,6 @@ export const OrderSummary: React.FC = () => {
 
   cart.items.forEach((item) => {
     if (typeof item.product === "object" && item.product) {
-      const vendor =
-        typeof item.product.tenant === "object" && item.product.tenant
-          ? (item.product.tenant as Record<string, unknown>)
-          : null;
       const vendorId =
         (typeof item.product.tenant === "string"
           ? item.product.tenant
@@ -46,7 +59,9 @@ export const OrderSummary: React.FC = () => {
     (acc, item) => acc + (item.quantity || 1),
     0,
   );
-  const savings = 0; // In case we add savings logic later
+
+  const subtotal = cart.subtotal || 0;
+  const discount = appliedCoupon?.discountAmount || 0;
 
   return (
     <aside className="w-full">
@@ -69,15 +84,13 @@ export const OrderSummary: React.FC = () => {
         <div className="max-h-[500px] overflow-y-auto scrollbar-hide">
           {Object.entries(vendorGroups).map(([vendorId, items]) => {
             const firstProduct = items[0]?.product;
-            console.log(firstProduct);
 
             const vendorName =
               typeof firstProduct === "object" && firstProduct
-                ? typeof firstProduct.tenant === "object" && firstProduct.tenant
+                ? typeof firstProduct.tenant === "object" &&
+                  firstProduct.tenant
                   ? ((firstProduct.tenant as Record<string, unknown>)
                       .storeName as string) ||
-                    ((firstProduct.tenant as Record<string, unknown>)
-                      .name as string) ||
                     "Store"
                   : "Store"
                 : "Store";
@@ -195,42 +208,17 @@ export const OrderSummary: React.FC = () => {
         </div>
 
         {/* Price Breakdown */}
-        <div className="p-6 space-y-3 bg-card">
-          <div className="flex justify-between items-center">
-            <span className="font-sans text-[13px] text-muted-foreground">
-              Subtotal
-            </span>
-            <Price
-              amount={cart.subtotal || 0}
-              className="font-mono text-[14px] text-foreground"
-            />
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="font-sans text-[13px] text-muted-foreground">
-              Shipping (Standard)
-            </span>
-            <span className="font-mono text-[14px] text-muted-foreground">
-              Calculated next
-            </span>
-          </div>
-
-          <div className="pt-5 border-t border-border flex justify-between items-baseline">
-            <span className="font-sans font-medium text-[15px] text-foreground">
-              Total
-            </span>
-            <Price
-              amount={cart.subtotal || 0}
-              className="font-mono font-bold text-[22px] text-foreground"
-            />
-          </div>
-
-          {savings > 0 && (
-            <div className="mt-6 bg-success/10 rounded-[4px] p-3 text-center">
-              <p className="font-sans font-medium text-[12px] text-success">
-                🎉 You're saving ₹{savings.toLocaleString()} on this order
-              </p>
-            </div>
-          )}
+        <div className="p-6 bg-card">
+          <PriceBreakdown
+            subtotal={subtotal}
+            discount={discount}
+            couponCode={appliedCoupon?.code ?? (cart as Record<string, unknown>).couponCode as string | null}
+            selectedPaymentMethod={selectedPaymentMethod}
+            onApplyCoupon={onApplyCoupon}
+            onRemoveCoupon={onRemoveCoupon}
+            couponLoading={couponLoading}
+            couponError={couponError}
+          />
         </div>
 
         {/* Trust signals */}

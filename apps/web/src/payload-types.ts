@@ -79,6 +79,7 @@ export interface Config {
     commissions: Commission;
     categories: Category;
     collections: Collection;
+    coupons: Coupon;
     materials: Material;
     designs: Design;
     sizeGuides: SizeGuide;
@@ -120,6 +121,7 @@ export interface Config {
     commissions: CommissionsSelect<false> | CommissionsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
+    coupons: CouponsSelect<false> | CouponsSelect<true>;
     materials: MaterialsSelect<false> | MaterialsSelect<true>;
     designs: DesignsSelect<false> | DesignsSelect<true>;
     sizeGuides: SizeGuidesSelect<false> | SizeGuidesSelect<true>;
@@ -492,6 +494,9 @@ export interface Order {
   status?: OrderStatus;
   amount?: number | null;
   currency?: 'INR' | null;
+  couponCode?: string | null;
+  discount?: number | null;
+  shippingCharge?: number | null;
   accessToken?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1569,6 +1574,9 @@ export interface Transaction {
   cart?: (string | null) | Cart;
   amount?: number | null;
   currency?: 'INR' | null;
+  couponCode?: string | null;
+  discount?: number | null;
+  shippingCharge?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1592,6 +1600,20 @@ export interface Cart {
   status?: ('active' | 'purchased' | 'abandoned') | null;
   subtotal?: number | null;
   currency?: 'INR' | null;
+  /**
+   * Applied coupon code (auto-managed).
+   */
+  couponCode?: string | null;
+  couponDiscountType?: ('percentage' | 'fixed') | null;
+  couponDiscountValue?: number | null;
+  /**
+   * Auto-calculated discount amount.
+   */
+  discount?: number | null;
+  /**
+   * Auto-calculated: subtotal - discount.
+   */
+  total?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1694,6 +1716,45 @@ export interface Commission {
    * Required for disputes and refunds — explain the reason.
    */
   notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons".
+ */
+export interface Coupon {
+  id: string;
+  /**
+   * Unique coupon code. Stored in uppercase. Customers enter this at checkout.
+   */
+  code: string;
+  /**
+   * Internal note for admins. Not shown to customers.
+   */
+  description?: string | null;
+  discountType: 'percentage' | 'fixed';
+  /**
+   * For percentage: 0–100. For fixed: the rupee amount to deduct.
+   */
+  discountValue: number;
+  /**
+   * Minimum cart subtotal (₹) required to use this coupon. 0 = no minimum.
+   */
+  minOrderAmount?: number | null;
+  /**
+   * Maximum total redemptions allowed. Leave empty for unlimited.
+   */
+  maxUses?: number | null;
+  /**
+   * Auto-incremented each time the coupon is used.
+   */
+  usageCount?: number | null;
+  isActive?: boolean | null;
+  /**
+   * Optional expiration date. Coupon cannot be used after this date.
+   */
+  expiresAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1876,6 +1937,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collections';
         value: string | Collection;
+      } | null)
+    | ({
+        relationTo: 'coupons';
+        value: string | Coupon;
       } | null)
     | ({
         relationTo: 'materials';
@@ -2370,6 +2435,23 @@ export interface CollectionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons_select".
+ */
+export interface CouponsSelect<T extends boolean = true> {
+  code?: T;
+  description?: T;
+  discountType?: T;
+  discountValue?: T;
+  minOrderAmount?: T;
+  maxUses?: T;
+  usageCount?: T;
+  isActive?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "materials_select".
  */
 export interface MaterialsSelect<T extends boolean = true> {
@@ -2757,6 +2839,11 @@ export interface CartsSelect<T extends boolean = true> {
   status?: T;
   subtotal?: T;
   currency?: T;
+  couponCode?: T;
+  couponDiscountType?: T;
+  couponDiscountValue?: T;
+  discount?: T;
+  total?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2795,6 +2882,9 @@ export interface OrdersSelect<T extends boolean = true> {
   status?: T;
   amount?: T;
   currency?: T;
+  couponCode?: T;
+  discount?: T;
+  shippingCharge?: T;
   accessToken?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2847,6 +2937,9 @@ export interface TransactionsSelect<T extends boolean = true> {
   cart?: T;
   amount?: T;
   currency?: T;
+  couponCode?: T;
+  discount?: T;
+  shippingCharge?: T;
   updatedAt?: T;
   createdAt?: T;
 }

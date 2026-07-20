@@ -54,6 +54,9 @@ export const initiatePayment = () =>
         id: string | number
         items: CartItem[]
         subtotal?: number
+        total?: number
+        couponCode?: string | null
+        discount?: number
         customerEmail?: string
       }
       currency: string
@@ -66,7 +69,8 @@ export const initiatePayment = () =>
   }) => {
     const payload = req.payload as AnyPayload
     const { customerEmail, currency, cart, billingAddress } = data
-    const amount = cart.subtotal || 0
+    const COD_FEE = 50
+    const amount = (cart.total || cart.subtotal || 0) + COD_FEE
 
     if (!cart?.items?.length) {
       throw new Error('Cart is empty or not provided.')
@@ -95,6 +99,9 @@ export const initiatePayment = () =>
           cod: {
             codConfirmed: false,
           },
+          couponCode: (cart as Record<string, unknown>).couponCode || undefined,
+          discount: (cart as Record<string, unknown>).discount || 0,
+          shippingCharge: COD_FEE,
         },
         req,
       })

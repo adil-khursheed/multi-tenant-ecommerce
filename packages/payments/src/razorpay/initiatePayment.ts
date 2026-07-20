@@ -55,6 +55,9 @@ export const initiatePayment = (props: { keyId: string; keySecret: string }) =>
         id: string | number
         items: CartItem[]
         subtotal?: number
+        total?: number
+        couponCode?: string | null
+        discount?: number
         customerEmail?: string
       }
       currency: string
@@ -68,7 +71,7 @@ export const initiatePayment = (props: { keyId: string; keySecret: string }) =>
     const payload = req.payload as AnyPayload
     const { keyId, keySecret } = props
     const { customerEmail, currency, cart, billingAddress } = data
-    const amount = cart.subtotal || 0
+    const amount = cart.total || cart.subtotal || 0
 
     if (!keyId || !keySecret) {
       throw new Error('Razorpay credentials are required.')
@@ -112,6 +115,9 @@ export const initiatePayment = (props: { keyId: string; keySecret: string }) =>
           razorpay: {
             orderID: order.id,
           },
+          couponCode: (cart as Record<string, unknown>).couponCode || undefined,
+          discount: (cart as Record<string, unknown>).discount || 0,
+          shippingCharge: 0,
         },
         req,
       })

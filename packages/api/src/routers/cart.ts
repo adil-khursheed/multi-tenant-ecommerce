@@ -178,4 +178,123 @@ export const cartRouter = {
 
     return { cart: updated };
   }),
+
+  applyCoupon: protectedProcedure
+    .input(z.object({ code: z.string().min(1).max(50) }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const cart = await createOrGetCart(ctx, userId);
+
+      if (!cart.items?.length) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cart is empty. Add items before applying a coupon.",
+        });
+      }
+
+      const code = input.code.toUpperCase().trim();
+
+      const couponResult = await ctx.payload.find({
+        collection: "coupons",
+        where: {
+          and: [
+            { code: { equals: code } },
+            { isActive: { equals: true } },
+          ],
+        },
+        limit: 1,
+      });
+
+      const coupon = couponResult.docs[0];
+
+      if (!coupon) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invalid coupon code.",
+        });
+      }
+
+      if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This coupon has expired.",
+        });
+      }
+
+      if (
+        coupon.maxUses != null &&
+        coupon.usageCount != null &&
+        coupon.usageCount >= coupon.maxUses
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This coupon has reached its usage limit.",
+        });
+      }
+
+      const subtotal = cart.subtotal || 0;
+      if (
+        coupon.minOrderAmount != null &&
+        coupon.minOrderAmount > 0 &&
+        subtotal < coupon.minOrderAmount
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Minimum order of ₹${coupon.minOrderAmount} required for this coupon.`,
+        });
+      }
+
+      let discount = 0;
+      if (coupon.discountType === "percentage") {
+        discount = Math.round(
+          (subtotal * Math.min(coupon.discountValue, 100)) / 100,
+        );
+      } else {
+        discount = Math.min(coupon.discountValue, subtotal);
+      }
+
+      const updated = await ctx.payload.update({
+        collection: "carts",
+        id: cart.id,
+        data: {
+          couponCode: code,
+          couponDiscountType: coupon.discountType,
+          couponDiscountValue: coupon.discountValue,
+          discount,
+          total: subtotal - discount,
+        },
+        depth: CART_DEPTH,
+      });
+
+      return { cart: updated };
+    }),
+
+  removeCoupon: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const cart = await findActiveCart(ctx, userId);
+
+    if (!cart) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Cart not found",
+      });
+    }
+
+    const subtotal = cart.subtotal || 0;
+
+    const updated = await ctx.payload.update({
+      collection: "carts",
+      id: cart.id,
+      data: {
+        couponCode: null,
+        couponDiscountType: null,
+        couponDiscountValue: 0,
+        discount: 0,
+        total: subtotal,
+      },
+      depth: CART_DEPTH,
+    });
+
+    return { cart: updated };
+  }),
 };

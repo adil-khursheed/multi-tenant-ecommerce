@@ -22,6 +22,7 @@ import {
 import sharp from "sharp";
 
 import { Categories } from "@/collections/Categories";
+import { Coupons } from "@/collections/Coupons";
 import { Media } from "@/collections/Media";
 import { Pages } from "@/collections/Pages";
 import { Users } from "@/collections/Users";
@@ -80,6 +81,7 @@ export default buildConfig({
     Commissions,
     Categories,
     Collections,
+    Coupons,
     Materials,
     Designs,
     SizeGuides,

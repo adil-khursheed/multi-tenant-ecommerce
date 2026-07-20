@@ -8,6 +8,7 @@ import { ChevronUp } from "lucide-react";
 
 import { Media } from "@/components/Media";
 import { Price } from "@/components/Price";
+import { PriceBreakdown } from "@/components/checkout/PriceBreakdown";
 import {
   Drawer,
   DrawerContent,
@@ -17,7 +18,25 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-export const MobileSummary: React.FC = () => {
+const COD_FEE = 50;
+
+type Props = {
+  selectedPaymentMethod?: "razorpay" | "cod";
+  appliedCoupon?: { code: string; discountAmount: number } | null;
+  onApplyCoupon: (code: string) => void;
+  onRemoveCoupon: () => void;
+  couponLoading: boolean;
+  couponError: string | null;
+};
+
+export const MobileSummary: React.FC<Props> = ({
+  selectedPaymentMethod,
+  appliedCoupon,
+  onApplyCoupon,
+  onRemoveCoupon,
+  couponLoading,
+  couponError,
+}) => {
   const [open, setOpen] = useState(false);
   const { cart } = useCart();
 
@@ -27,6 +46,30 @@ export const MobileSummary: React.FC = () => {
     (sum, item) => sum + (item.quantity || 0),
     0,
   );
+
+  const subtotal = cart.subtotal || 0;
+  const discount = appliedCoupon?.discountAmount || 0;
+  const totalAfterDiscount = subtotal - discount;
+  const isCOD = selectedPaymentMethod === "cod";
+  const grandTotal = isCOD ? totalAfterDiscount + COD_FEE : totalAfterDiscount;
+
+  const vendorGroups: Record<string, typeof cart.items> = {};
+
+  cart.items.forEach((item) => {
+    if (typeof item.product === "object" && item.product) {
+      const vendorId =
+        (typeof item.product.tenant === "string"
+          ? item.product.tenant
+          : typeof item.product.tenant === "object" && item.product.tenant
+            ? (item.product.tenant.id as string)
+            : null) || "unknown";
+
+      if (!vendorGroups[vendorId]) {
+        vendorGroups[vendorId] = [];
+      }
+      vendorGroups[vendorId].push(item);
+    }
+  });
 
   return (
     <>
@@ -40,7 +83,7 @@ export const MobileSummary: React.FC = () => {
               <ChevronUp className="w-4 h-4 text-muted-foreground" />
             </div>
             <Price
-              amount={cart.subtotal || 0}
+              amount={grandTotal}
               className="font-serif text-[18px]"
             />
           </button>
@@ -58,103 +101,138 @@ export const MobileSummary: React.FC = () => {
             </div>
 
             <div className="p-6 overflow-y-auto">
+              {/* Items by Vendor */}
               <div className="space-y-6">
-                {cart.items.map((item, index) => {
-                  if (typeof item.product !== "object" || !item.product)
-                    return null;
-                  const { product, quantity } = item;
-                  let price = product.priceInINR;
-                  let image =
-                    product.gallery?.[0]?.image || product.meta?.image;
+                {Object.entries(vendorGroups).map(([vendorId, items]) => {
+                  const firstProduct = items[0]?.product;
 
-                  const isVariant =
-                    Boolean(item.variant) && typeof item.variant === "object";
-                  if (isVariant) {
-                    price = item.variant?.priceInINR;
-                    const imageVariant = product.gallery?.find((g: any) => {
-                      if (!g.variantOption) return false;
-                      const variantOptionID =
-                        typeof g.variantOption === "object"
-                          ? g.variantOption.id
-                          : g.variantOption;
-                      return item.variant?.options?.some((o: any) =>
-                        typeof o === "object"
-                          ? o.id === variantOptionID
-                          : o === variantOptionID,
-                      );
-                    });
-                    if (
-                      imageVariant &&
-                      typeof imageVariant.image !== "string"
-                    ) {
-                      image = imageVariant.image;
-                    }
-                  }
+                  const vendorName =
+                    typeof firstProduct === "object" && firstProduct
+                      ? typeof firstProduct.tenant === "object" &&
+                        firstProduct.tenant
+                        ? ((firstProduct.tenant as Record<string, unknown>)
+                            .storeName as string) || "Store"
+                        : "Store"
+                      : "Store";
+
+                  const vendorItemsCount = items.reduce(
+                    (acc, item) => acc + (item.quantity || 1),
+                    0,
+                  );
+                  const vendorInitial = vendorName.charAt(0).toUpperCase();
 
                   return (
-                    <div key={index} className="flex gap-4">
-                      <div className="relative w-20 h-24 rounded-[2px] border border-border overflow-hidden shrink-0 bg-secondary">
-                        {image && typeof image !== "string" && (
-                          <Media
-                            fill
-                            imgClassName="object-cover"
-                            resource={image}
-                            size="100px"
-                          />
-                        )}
-                        <div className="absolute top-0 right-0 bg-foreground text-background text-[10px] font-mono px-1.5 py-0.5 m-1 rounded-sm">
-                          {quantity}
+                    <React.Fragment key={vendorId}>
+                      <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                        <div className="w-5 h-5 rounded-full border border-border bg-muted flex items-center justify-center text-[9px] font-bold text-foreground">
+                          {vendorInitial}
                         </div>
+                        <span className="font-sans font-medium text-[11px] text-muted-foreground uppercase tracking-wider">
+                          {vendorName} — {vendorItemsCount} item
+                          {vendorItemsCount !== 1 ? "s" : ""}
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0 pt-1">
-                        <p className="font-serif text-[16px] text-foreground leading-tight mb-1 truncate">
-                          {product.title}
-                        </p>
-                        {isVariant && (
-                          <p className="font-sans text-[11px] text-muted-foreground tracking-wide mb-2">
-                            {item.variant?.options
-                              ?.map((o: any) =>
-                                typeof o === "object" ? o.label : "",
-                              )
-                              .filter(Boolean)
-                              .join(", ")}
-                          </p>
-                        )}
-                        {typeof price === "number" && (
-                          <Price
-                            amount={price * (quantity || 1)}
-                            className="font-sans text-[13px] text-foreground"
-                          />
-                        )}
-                      </div>
-                    </div>
+
+                      {items.map((item, index) => {
+                        if (
+                          typeof item.product !== "object" ||
+                          !item.product
+                        )
+                          return null;
+
+                        const { product, quantity } = item;
+                        let price = product.priceInINR;
+                        let image =
+                          product.gallery?.[0]?.image || product.meta?.image;
+
+                        const isVariant =
+                          Boolean(item.variant) &&
+                          typeof item.variant === "object";
+                        if (isVariant) {
+                          price = item.variant?.priceInINR;
+                          const imageVariant = product.gallery?.find(
+                            (g: any) => {
+                              if (!g.variantOption) return false;
+                              const variantOptionID =
+                                typeof g.variantOption === "object"
+                                  ? g.variantOption.id
+                                  : g.variantOption;
+                              return item.variant?.options?.some((o: any) =>
+                                typeof o === "object"
+                                  ? o.id === variantOptionID
+                                  : o === variantOptionID,
+                              );
+                            },
+                          );
+                          if (
+                            imageVariant &&
+                            typeof imageVariant.image !== "string"
+                          ) {
+                            image = imageVariant.image;
+                          }
+                        }
+
+                        return (
+                          <div key={index} className="flex gap-4">
+                            <div className="relative w-20 h-24 rounded-[2px] border border-border overflow-hidden shrink-0 bg-secondary">
+                              {image && typeof image !== "string" && (
+                                <Media
+                                  fill
+                                  imgClassName="object-cover"
+                                  resource={image}
+                                  size="100px"
+                                />
+                              )}
+                              <div className="absolute top-0 right-0 bg-foreground text-background text-[10px] font-mono px-1.5 py-0.5 m-1 rounded-sm">
+                                {quantity}
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0 pt-1">
+                              <p className="font-sans font-medium text-[10px] tracking-wider text-primary mb-0.5 uppercase truncate">
+                                {vendorName}
+                              </p>
+                              <p className="font-serif text-[16px] text-foreground leading-tight mb-1 truncate">
+                                {product.title}
+                              </p>
+                              {isVariant && (
+                                <p className="font-sans text-[11px] text-muted-foreground tracking-wide mb-2">
+                                  {item.variant?.options
+                                    ?.map((o: any) =>
+                                      typeof o === "object" ? o.label : "",
+                                    )
+                                    .filter(Boolean)
+                                    .join(", ")}
+                                </p>
+                              )}
+                              {typeof price === "number" && (
+                                <Price
+                                  amount={price * (quantity || 1)}
+                                  className="font-sans text-[13px] text-foreground"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </React.Fragment>
                   );
                 })}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-border space-y-3">
-                <div className="flex justify-between font-sans text-[13px] text-muted-foreground">
-                  <span>Subtotal</span>
-                  <Price amount={cart.subtotal || 0} />
-                </div>
-                <div className="flex justify-between font-sans text-[13px] text-muted-foreground">
-                  <span>Shipping</span>
-                  <span>Calculated at next step</span>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-6 border-t border-foreground">
-                <div className="flex justify-between items-end">
-                  <span className="font-sans text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-                    Total
-                  </span>
-                  <Price
-                    className="font-serif text-[28px] text-foreground leading-none"
-                    amount={cart.subtotal || 0}
-                  />
-                </div>
+              {/* Price Breakdown */}
+              <div className="mt-8 pt-6 border-t border-border">
+                <PriceBreakdown
+                  subtotal={subtotal}
+                  discount={discount}
+                  couponCode={appliedCoupon?.code ?? (cart as Record<string, unknown>).couponCode as string | null}
+                  selectedPaymentMethod={selectedPaymentMethod}
+                  onApplyCoupon={onApplyCoupon}
+                  onRemoveCoupon={onRemoveCoupon}
+                  couponLoading={couponLoading}
+                  couponError={couponError}
+                />
                 <p className="font-sans text-[11px] text-muted-foreground text-right mt-2 mb-8">
-                  Including GST
+                  Including all taxes
                 </p>
               </div>
             </div>

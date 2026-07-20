@@ -120,6 +120,34 @@ export const plugins: Plugin[] = [
         fields: [
           ...defaultCollection.fields,
           {
+            name: "couponCode",
+            type: "text",
+            admin: {
+              position: "sidebar",
+              readOnly: true,
+            },
+          },
+          {
+            name: "discount",
+            type: "number",
+            min: 0,
+            defaultValue: 0,
+            admin: {
+              position: "sidebar",
+              readOnly: true,
+            },
+          },
+          {
+            name: "shippingCharge",
+            type: "number",
+            min: 0,
+            defaultValue: 0,
+            admin: {
+              position: "sidebar",
+              readOnly: true,
+            },
+          },
+          {
             name: "accessToken",
             type: "text",
             unique: true,
@@ -149,6 +177,125 @@ export const plugins: Plugin[] = [
           ...defaultCollection.admin,
           hidden: ({ user }) => !user.roles.includes("admin"),
         },
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: "couponCode",
+            type: "text",
+            admin: {
+              readOnly: true,
+              description: "Applied coupon code (auto-managed).",
+            },
+          },
+          {
+            name: "couponDiscountType",
+            type: "select",
+            options: [
+              { label: "Percentage", value: "percentage" },
+              { label: "Fixed", value: "fixed" },
+            ],
+            admin: {
+              readOnly: true,
+              hidden: true,
+            },
+          },
+          {
+            name: "couponDiscountValue",
+            type: "number",
+            min: 0,
+            defaultValue: 0,
+            admin: {
+              readOnly: true,
+              hidden: true,
+            },
+          },
+          {
+            name: "discount",
+            type: "number",
+            min: 0,
+            defaultValue: 0,
+            admin: {
+              readOnly: true,
+              description: "Auto-calculated discount amount.",
+            },
+          },
+          {
+            name: "total",
+            type: "number",
+            min: 0,
+            defaultValue: 0,
+            admin: {
+              readOnly: true,
+              description: "Auto-calculated: subtotal - discount.",
+            },
+          },
+        ],
+        hooks: {
+          ...defaultCollection.hooks,
+          beforeChange: [
+            ...(defaultCollection.hooks?.beforeChange || []),
+            ({ data }: { data: any }) => {
+              if (!data) return data;
+
+              const subtotal = data.subtotal || 0;
+              const discountType = data.couponDiscountType;
+              const discountValue = data.couponDiscountValue || 0;
+
+              let discount = 0;
+
+              if (discountType && discountValue > 0) {
+                if (discountType === "percentage") {
+                  discount = Math.round(
+                    (subtotal * Math.min(discountValue, 100)) / 100,
+                  );
+                } else {
+                  discount = Math.min(discountValue, subtotal);
+                }
+              }
+
+              data.discount = discount;
+              data.total = subtotal - discount;
+
+              return data;
+            },
+          ],
+        },
+      }),
+    },
+    transactions: {
+      transactionsCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: "couponCode",
+            type: "text",
+            admin: {
+              position: "sidebar",
+              readOnly: true,
+            },
+          },
+          {
+            name: "discount",
+            type: "number",
+            min: 0,
+            defaultValue: 0,
+            admin: {
+              position: "sidebar",
+              readOnly: true,
+            },
+          },
+          {
+            name: "shippingCharge",
+            type: "number",
+            min: 0,
+            defaultValue: 0,
+            admin: {
+              position: "sidebar",
+              readOnly: true,
+            },
+          },
+        ],
       }),
     },
     payments: {
