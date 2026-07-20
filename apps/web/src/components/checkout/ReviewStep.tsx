@@ -3,17 +3,25 @@
 import React from 'react'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { MapPin, CreditCard, Banknote, ShieldCheck } from 'lucide-react'
+import { defaultCountries as supportedCountries } from '@payloadcms/plugin-ecommerce/client/react'
 
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import { Address } from '@/payload-types'
 import { StepHeader } from '@/components/checkout/ui/StepHeader'
 
+const getCountryLabel = (code: string): string => {
+  const country = supportedCountries.find((c) =>
+    typeof c === "string" ? c === code : c.value === code,
+  );
+  if (!country) return code;
+  return typeof country === "string" ? country : country.label;
+};
+
 type Props = {
   billingAddress?: Partial<Address>
   shippingAddress?: Partial<Address>
   paymentMethod: 'razorpay' | 'cod'
-  paymentSubMethod?: string
   isCompleted?: boolean
   onEdit?: (step: 'address' | 'payment') => void
 }
@@ -22,7 +30,6 @@ export const ReviewStep: React.FC<Props> = ({
   billingAddress,
   shippingAddress,
   paymentMethod,
-  paymentSubMethod,
   isCompleted,
   onEdit,
 }) => {
@@ -62,7 +69,7 @@ export const ReviewStep: React.FC<Props> = ({
               <p>
                 {billingAddress.city}, {billingAddress.state} {billingAddress.postalCode}
               </p>
-              <p>{billingAddress.country}</p>
+              <p>{getCountryLabel(billingAddress.country || "")}</p>
               {billingAddress.phone && (
                 <p className="mt-2 text-foreground">{billingAddress.phone}</p>
               )}
@@ -94,9 +101,7 @@ export const ReviewStep: React.FC<Props> = ({
           <p className="text-[13px] font-sans font-medium text-foreground pl-7">
             {paymentMethod === 'cod'
               ? 'Cash on Delivery'
-              : paymentSubMethod === 'upi'
-                ? 'UPI'
-                : 'Credit / Debit Card'}
+              : 'Razorpay'}
           </p>
         </div>
 

@@ -196,7 +196,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const flattenedItems: FlattenedCartItem[] = useMemo(() => {
     if (status === "loggedIn") {
-      return (serverCart?.items ?? []).reduce<FlattenedCartItem[]>(
+      return ((serverCart?.items ?? []) as ServerCartItem[]).reduce<FlattenedCartItem[]>(
         (acc, item) => {
           const flat = flattenServerItem(item);
           if (flat) acc.push(flat);
@@ -355,7 +355,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [status, serverCart, removeItemMutation, updateQuantityMutation, persistGuestItems],
   );
 
-  const clearCart = useCallback(async () => {
+  const clearCart = useCallback<CartContext["clearCart"]>(async () => {
     if (status === "loggedIn") {
       await clearCartMutation.mutateAsync();
       return;
@@ -368,7 +368,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   return (
     <CartContext.Provider
       value={{
-        cart,
+        cart: serverCart,
         isLoading,
         addItem,
         removeItem,

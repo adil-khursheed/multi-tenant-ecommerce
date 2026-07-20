@@ -2,12 +2,13 @@
 
 import React, { useCallback, useState } from 'react'
 import { usePayments } from '@payloadcms/plugin-ecommerce/client/react'
-import { CreditCard, Smartphone, Banknote, AlertCircle, ShieldCheck } from 'lucide-react'
+import { Banknote, AlertCircle, ShieldCheck } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utilities/cn'
 
 type PaymentMethod = 'razorpay' | 'cod'
+type PaymentTab = 'razorpay' | 'cod'
 
 type Props = {
   isCompleted?: boolean
@@ -19,12 +20,9 @@ type Props = {
 }
 
 const paymentMethods = [
-  { id: 'card' as const, label: 'Card', icon: CreditCard, description: 'Credit or Debit card' },
-  { id: 'upi' as const, label: 'UPI', icon: Smartphone, description: 'Google Pay, PhonePe, etc.' },
+  { id: 'razorpay' as const, label: 'Razorpay', icon: ShieldCheck, description: 'Cards, UPI, Netbanking & Wallets' },
   { id: 'cod' as const, label: 'Cash on Delivery', icon: Banknote, description: 'Pay on delivery' },
 ]
-
-type PaymentTab = 'card' | 'upi' | 'cod'
 
 export const PaymentStep: React.FC<Props> = ({
   isCompleted,
@@ -34,7 +32,7 @@ export const PaymentStep: React.FC<Props> = ({
   shippingAddress,
   email,
 }) => {
-  const [activeTab, setActiveTab] = useState<PaymentTab>('card')
+  const [activeTab, setActiveTab] = useState<PaymentTab>('razorpay')
   const [isInitiating, setIsInitiating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { initiatePayment } = usePayments()
@@ -50,12 +48,11 @@ export const PaymentStep: React.FC<Props> = ({
             ...(email ? { customerEmail: email } : {}),
             billingAddress,
             shippingAddress,
-            ...(method === 'razorpay' ? { paymentMethod: activeTab } : {}),
           },
         })) as Record<string, unknown> | null
 
         if (data) {
-          onPaymentReady(method, activeTab, data)
+          onPaymentReady(method, method, data)
         }
       } catch (err) {
         const errorData = err instanceof Error
@@ -70,7 +67,7 @@ export const PaymentStep: React.FC<Props> = ({
         setIsInitiating(false)
       }
     },
-    [activeTab, email, billingAddress, shippingAddress, initiatePayment, onPaymentReady],
+    [email, billingAddress, shippingAddress, initiatePayment, onPaymentReady],
   )
 
   const handleRazorpaySubmit = useCallback(() => {
@@ -119,37 +116,27 @@ export const PaymentStep: React.FC<Props> = ({
         </div>
 
         {/* Right Content */}
-        <div className="flex-1 max-w-[400px]">
-          {activeTab === 'card' && (
+        <div className="flex-1 max-w-none md:max-w-[400px]">
+          {activeTab === 'razorpay' && (
             <div className="space-y-6">
               <div className="bg-secondary border border-border rounded-[4px] p-6 text-center">
                 <ShieldCheck className="w-8 h-8 text-success mx-auto mb-3" />
-                <h4 className="font-serif text-[18px] text-foreground mb-2">Secure Card Payment</h4>
+                <h4 className="font-serif text-[18px] text-foreground mb-2">Pay with Razorpay</h4>
                 <p className="font-sans text-[13px] text-muted-foreground leading-relaxed">
-                  You will be securely redirected to our payment gateway to enter your card details. We do not store your card information.
+                  You will be securely redirected to Razorpay where you can pay using Credit/Debit Card, UPI, Netbanking, or Wallets.
                 </p>
               </div>
 
-              <Button
-                disabled={isInitiating}
-                onClick={handleRazorpaySubmit}
-                variant="default"
-                className="w-full h-14 uppercase tracking-[0.1em] text-[14px] font-medium"
-              >
-                {isInitiating ? 'Processing...' : 'Proceed to Pay'}
-              </Button>
-            </div>
-          )}
-
-          {activeTab === 'upi' && (
-            <div className="space-y-6">
-              <div className="bg-secondary border border-border rounded-[4px] p-6 text-center">
-                <Smartphone className="w-8 h-8 text-success mx-auto mb-3" />
-                <h4 className="font-serif text-[18px] text-foreground mb-2">Pay via UPI</h4>
-                <p className="font-sans text-[13px] text-muted-foreground leading-relaxed">
-                  You will be securely redirected to our payment gateway where you can enter your UPI ID or scan a QR code.
-                </p>
-              </div>
+              <ul className="space-y-3 font-sans text-[13px] text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  Supports Cards, UPI, Netbanking &amp; Wallets
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  256-bit SSL encrypted &amp; secure
+                </li>
+              </ul>
 
               <Button
                 disabled={isInitiating}
@@ -171,7 +158,7 @@ export const PaymentStep: React.FC<Props> = ({
                   Pay in cash when your order arrives. A convenience fee of ₹50 applies to all COD orders.
                 </p>
               </div>
-              
+
               <ul className="space-y-3 font-sans text-[13px] text-muted-foreground">
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />

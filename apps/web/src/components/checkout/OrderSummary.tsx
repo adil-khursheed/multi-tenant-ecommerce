@@ -65,7 +65,7 @@ export const OrderSummary: React.FC<Props> = ({
 
   return (
     <aside className="w-full">
-      <div className="md:sticky md:top-8 border border-border rounded-[4px] bg-card overflow-hidden">
+      <div className="md:sticky md:top-8 border border-border rounded-[4px] bg-card overflow-hidden flex flex-col max-h-[calc(100vh-8rem)]">
         <div className="bg-foreground px-6 py-5 flex items-center justify-between">
           <div className="flex items-baseline gap-2">
             <h2 className="font-serif text-[22px] text-background">
@@ -81,7 +81,7 @@ export const OrderSummary: React.FC<Props> = ({
         </div>
 
         {/* Items by Vendor */}
-        <div className="max-h-[500px] overflow-y-auto scrollbar-hide">
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide">
           {Object.entries(vendorGroups).map(([vendorId, items]) => {
             const firstProduct = items[0]?.product;
 
@@ -208,7 +208,7 @@ export const OrderSummary: React.FC<Props> = ({
         </div>
 
         {/* Price Breakdown */}
-        <div className="p-6 bg-card">
+        <div className="p-6 bg-card shrink-0">
           <PriceBreakdown
             subtotal={subtotal}
             discount={discount}
@@ -222,7 +222,7 @@ export const OrderSummary: React.FC<Props> = ({
         </div>
 
         {/* Trust signals */}
-        <div className="px-6 py-8 border-t border-border bg-muted/50 grid grid-cols-2 gap-y-5 gap-x-4">
+        <div className="px-6 py-8 border-t border-border bg-muted/50 grid grid-cols-2 gap-y-5 gap-x-4 shrink-0">
           <div className="flex items-start gap-2">
             <HugeiconsIcon
               icon={Shield01Icon}

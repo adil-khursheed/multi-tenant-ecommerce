@@ -477,9 +477,7 @@ export const CheckoutPage: React.FC = () => {
                       <p className="font-sans text-[13px] text-muted-foreground">
                         {selectedPaymentMethod === "cod"
                           ? "Cash on Delivery"
-                          : selectedPaymentSubMethod === "upi"
-                            ? "UPI"
-                            : "Card"}
+                          : "Razorpay"}
                       </p>
                     </div>
                   )
@@ -499,7 +497,6 @@ export const CheckoutPage: React.FC = () => {
                     billingAddress={billingAddress}
                     shippingAddress={effectiveShippingAddress}
                     paymentMethod={selectedPaymentMethod}
-                    paymentSubMethod={selectedPaymentSubMethod}
                     onEdit={(step) => setActiveStep(step as StepId)}
                   />
 

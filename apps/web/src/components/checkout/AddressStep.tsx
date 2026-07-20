@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { Controller, useForm } from "react-hook-form";
 
 import {
   defaultCountries as supportedCountries,
   useAddresses,
 } from "@payloadcms/plugin-ecommerce/client/react";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Plus } from "lucide-react";
+import * as z from "zod";
 
 import { CheckoutInput } from "@/components/checkout/ui/CheckoutInput";
 import { FormError } from "@/components/forms/FormError";
@@ -26,6 +26,14 @@ import {
 } from "@/components/ui/select";
 import { Address } from "@/payload-types";
 import { cn } from "@/utilities/cn";
+
+const getCountryLabel = (code: string): string => {
+  const country = supportedCountries.find((c) =>
+    typeof c === "string" ? c === code : c.value === code,
+  );
+  if (!country) return code;
+  return typeof country === "string" ? country : country.label;
+};
 
 const addressSchema = z.object({
   title: z.string().nullable().optional(),
@@ -77,11 +85,7 @@ export const AddressStep: React.FC<Props> = ({
     null,
   );
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-  } = useForm<AddressFormValues>({
+  const { control, handleSubmit, reset } = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
       firstName: billingAddress?.firstName || "",
@@ -93,7 +97,7 @@ export const AddressStep: React.FC<Props> = ({
       postalCode: billingAddress?.postalCode || "",
       country: billingAddress?.country || "",
       phone: billingAddress?.phone || "",
-    }
+    },
   });
 
   useEffect(() => {
@@ -136,7 +140,7 @@ export const AddressStep: React.FC<Props> = ({
                     key={addr.id}
                     onClick={() => handleSelectAddress(addr)}
                     className={cn(
-                      "border rounded-[4px] p-4 relative cursor-pointer transition-colors",
+                      "border rounded-lg p-4 relative cursor-pointer transition-colors",
                       isSelected
                         ? "border-foreground bg-card"
                         : "border-border bg-transparent hover:border-foreground",
@@ -173,7 +177,7 @@ export const AddressStep: React.FC<Props> = ({
                       <br />
                       {addr.city}, {addr.state} {addr.postalCode}
                       <br />
-                      {addr.country}
+                      {getCountryLabel(addr.country || "")}
                     </p>
                     <div className="flex items-center gap-4 border-t border-border pt-3">
                       <Button
@@ -355,7 +359,7 @@ export const AddressStep: React.FC<Props> = ({
                   </Label>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value || ""}
+                    value={field.value || ""}
                   >
                     <SelectTrigger
                       id="addr-country"
@@ -380,7 +384,9 @@ export const AddressStep: React.FC<Props> = ({
                       })}
                     </SelectContent>
                   </Select>
-                  {fieldState.error && <FormError message={fieldState.error.message} />}
+                  {fieldState.error && (
+                    <FormError message={fieldState.error.message} />
+                  )}
                 </div>
               )}
             />
@@ -418,7 +424,7 @@ export const AddressStep: React.FC<Props> = ({
                 </Label>
               </div>
               {needsGST && (
-                <div className="mt-3 bg-secondary border border-border rounded-[4px] p-3">
+                <div className="mt-3 bg-secondary border border-border rounded-lg p-3">
                   <p className="text-[12px] font-sans text-muted-foreground">
                     GST invoice will be generated with your order. Please ensure
                     your GST details are correct in the address above.
