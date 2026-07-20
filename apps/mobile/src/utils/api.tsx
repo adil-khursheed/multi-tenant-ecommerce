@@ -1,20 +1,21 @@
-import { useState, useEffect } from "react";
-import { AppState, Platform } from "react-native";
+import { useEffect, useState } from "react";
 import type { AppStateStatus } from "react-native";
-import Constants from "expo-constants";
+import { AppState, Platform } from "react-native";
+
 import NetInfo from "@react-native-community/netinfo";
 import {
   defaultShouldDehydrateQuery,
-  QueryClient,
-  QueryClientProvider,
   focusManager,
   onlineManager,
+  QueryClient,
+  QueryClientProvider,
 } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
+import Constants from "expo-constants";
 import superjson from "superjson";
-import type { AppRouter } from "@repo/api";
 
+import type { AppRouter } from "@repo/api";
 import { getAuthToken } from "./token";
 
 // 1. Setup onlineManager to track network connectivity
@@ -56,10 +57,10 @@ const getBaseUrl = () => {
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
-  
+
   const debuggerHost = Constants.expoConfig?.hostUri;
   const localhost = debuggerHost?.split(":")[0];
-  
+
   if (!localhost) {
     return "http://localhost:3000";
   }

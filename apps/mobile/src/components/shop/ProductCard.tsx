@@ -1,11 +1,16 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated from "react-native-reanimated";
-import { Image } from "expo-image";
 
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { useCurrency } from "@/providers/Currency";
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
 
 export type ShopProduct = {
   id: string | number;
@@ -18,12 +23,19 @@ export type ShopProduct = {
   enableVariants?: boolean | null;
   minEffectivePrice?: number | null;
   maxEffectivePrice?: number | null;
-  gallery?: {
-    image: string | { url: string; [k: string]: unknown };
-    id?: string | null;
-  }[] | null;
-  categories?: (string | { name?: string | null; id?: string | number })[] | null;
-  tenant?: (string | null) | { storeName?: string | null; storeSlug?: string | null } | null;
+  gallery?:
+    | {
+        image: string | { url: string; [k: string]: unknown };
+        id?: string | null;
+      }[]
+    | null;
+  categories?:
+    | (string | { name?: string | null; id?: string | number })[]
+    | null;
+  tenant?:
+    | (string | null)
+    | { storeName?: string | null; storeSlug?: string | null }
+    | null;
   ratings?: { average?: number | null; count?: number | null } | null;
   flags?: {
     isNewArrival?: boolean | null;
@@ -100,7 +112,9 @@ function PriceDisplay({
       <Text style={styles.price}>{formatPrice(effective)}</Text>
       {hasDiscount && (
         <>
-          <Text style={styles.originalPrice}>{formatPrice(originalAmount!)}</Text>
+          <Text style={styles.originalPrice}>
+            {formatPrice(originalAmount!)}
+          </Text>
           <Text style={styles.discountBadge}>{discountPercent}% off</Text>
         </>
       )}
@@ -120,11 +134,17 @@ function getRibbon(
 function getRibbonStyle(ribbon: string) {
   switch (ribbon) {
     case "NEW":
-      return { backgroundColor: colors.primary, color: colors.primaryForeground };
+      return {
+        backgroundColor: colors.primary,
+        color: colors.primaryForeground,
+      };
     case "SALE":
       return { backgroundColor: colors.foreground, color: colors.background };
     case "TRENDING":
-      return { backgroundColor: colors.accentForeground, color: colors.background };
+      return {
+        backgroundColor: colors.accentForeground,
+        color: colors.background,
+      };
     default:
       return { backgroundColor: colors.muted, color: colors.foreground };
   }
@@ -160,10 +180,13 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
     image && typeof image === "object" && "url" in image
       ? (image as { url: string }).url
       : null;
+  console.log(imageUrl);
 
   const ribbon = getRibbon(flags);
   const categoryName =
-    categories?.[0] && typeof categories[0] === "object" && "name" in categories[0]
+    categories?.[0] &&
+    typeof categories[0] === "object" &&
+    "name" in categories[0]
       ? (categories[0] as { name: string }).name
       : null;
 
@@ -173,7 +196,6 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
       : null;
 
   const navigateToProduct = () => {
-    // @ts-expect-error — typed routes don't include dynamic (shop) routes yet
     router.push(`/(shop)/${slug}`);
   };
 
@@ -193,13 +215,13 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               <View style={[styles.listImage, styles.listImagePlaceholder]} />
             )}
             {ribbon && (
-              <View
-                style={[
-                  styles.listRibbon,
-                  getRibbonStyle(ribbon),
-                ]}
-              >
-                <Text style={[styles.ribbonText, { color: getRibbonStyle(ribbon).color }]}>
+              <View style={[styles.listRibbon, getRibbonStyle(ribbon)]}>
+                <Text
+                  style={[
+                    styles.ribbonText,
+                    { color: getRibbonStyle(ribbon).color },
+                  ]}
+                >
                   {ribbon}
                 </Text>
               </View>
@@ -265,7 +287,12 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           )}
           {ribbon && (
             <View style={[styles.gridRibbon, getRibbonStyle(ribbon)]}>
-              <Text style={[styles.ribbonText, { color: getRibbonStyle(ribbon).color }]}>
+              <Text
+                style={[
+                  styles.ribbonText,
+                  { color: getRibbonStyle(ribbon).color },
+                ]}
+              >
                 {ribbon}
               </Text>
             </View>

@@ -1,17 +1,21 @@
 import { useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
-  withDelay,
   Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from "react-native-reanimated";
 
-import { colors, spacing } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, radii, spacing } from "@/constants/theme";
 
 type ProductCardSkeletonProps = {
   viewMode?: "grid" | "list";
@@ -31,8 +35,17 @@ function SkeletonRect({
   useEffect(() => {
     opacity.value = withRepeat(
       withSequence(
-        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-        withDelay(200, withTiming(0.4, { duration: 800, easing: Easing.inOut(Easing.ease) })),
+        withTiming(1, {
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        withDelay(
+          200,
+          withTiming(0.4, {
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ),
       ),
       -1,
     );
@@ -58,16 +71,33 @@ function SkeletonRect({
   );
 }
 
-export function ProductCardSkeleton({ viewMode = "grid" }: ProductCardSkeletonProps) {
+export function ProductCardSkeleton({
+  viewMode = "grid",
+}: ProductCardSkeletonProps) {
   if (viewMode === "list") {
     return (
       <View style={styles.listContainer}>
-        <SkeletonRect width={horizontalScale(120)} height={verticalScale(160)} style={styles.listImage} />
+        <SkeletonRect
+          width={horizontalScale(120)}
+          height={verticalScale(160)}
+          style={styles.gridImage}
+        />
         <View style={styles.listContent}>
-          <SkeletonRect width="30%" height={verticalScale(10)} />
-          <SkeletonRect width="80%" height={verticalScale(16)} />
+          <View style={styles.listBadges}>
+            <SkeletonRect
+              width={horizontalScale(50)}
+              height={verticalScale(14)}
+              style={styles.listBadge}
+            />
+            <SkeletonRect
+              width={horizontalScale(40)}
+              height={verticalScale(10)}
+            />
+          </View>
+          <SkeletonRect width="85%" height={verticalScale(18)} />
           <SkeletonRect width="60%" height={verticalScale(12)} />
-          <SkeletonRect width="40%" height={verticalScale(14)} />
+          <SkeletonRect width="35%" height={verticalScale(10)} />
+          <SkeletonRect width="45%" height={verticalScale(14)} />
         </View>
       </View>
     );
@@ -75,11 +105,11 @@ export function ProductCardSkeleton({ viewMode = "grid" }: ProductCardSkeletonPr
 
   return (
     <View style={styles.gridContainer}>
-      <SkeletonRect width="100%" height={verticalScale(200)} />
+      <SkeletonRect width="100%" height={0} style={styles.gridImage} />
       <View style={styles.gridContent}>
-        <SkeletonRect width="40%" height={verticalScale(8)} />
+        <SkeletonRect width="35%" height={verticalScale(8)} />
         <SkeletonRect width="90%" height={verticalScale(14)} />
-        <SkeletonRect width="30%" height={verticalScale(10)} />
+        <SkeletonRect width="35%" height={verticalScale(10)} />
         <SkeletonRect width="50%" height={verticalScale(14)} />
       </View>
     </View>
@@ -91,9 +121,13 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: verticalScale(spacing[6]),
   },
+  gridImage: {
+    aspectRatio: 3 / 4,
+    borderRadius: 0,
+  },
   gridContent: {
     marginTop: verticalScale(spacing[3]),
-    gap: verticalScale(spacing[1.5]),
+    gap: verticalScale(spacing[1]),
   },
   listContainer: {
     flexDirection: "row",
@@ -103,11 +137,19 @@ const styles = StyleSheet.create({
     gap: horizontalScale(spacing[4]),
   },
   listImage: {
-    borderRadius: moderateScale(2),
+    borderRadius: radii.sm,
   },
   listContent: {
     flex: 1,
     justifyContent: "center",
-    gap: verticalScale(spacing[2]),
+    gap: verticalScale(spacing[1.5]),
+  },
+  listBadges: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[2]),
+  },
+  listBadge: {
+    borderRadius: radii.sm,
   },
 });
