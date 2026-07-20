@@ -19,6 +19,7 @@
     "@trpc/server": "^11.18.0",
     "@trpc/tanstack-react-query": "^11.18.0",
     "babel-plugin-module-resolver": "^5.0.3",
+    "babel-preset-expo": "~56.0.17",
     "expo": "~56.0.16",
     "expo-constants": "~56.0.21",
     "expo-dev-client": "~56.0.23",

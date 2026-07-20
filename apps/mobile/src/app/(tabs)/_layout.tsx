@@ -23,7 +23,8 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Tabs } from "expo-router";
 
-import { moderateScale, verticalScale } from "@/constants/responsive";
+import { useCart } from "@/providers/Cart";
+import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
 import {
   colors,
   fonts,
@@ -51,6 +52,7 @@ type TabBarProps = any;
 function CustomTabBar({ state, navigation, descriptors }: TabBarProps) {
   const { bottom } = useSafeAreaInsets();
   const [tabLayouts, setTabLayouts] = useState<TabLayout[]>([]);
+  const { itemCount } = useCart();
 
   const indicatorX = useSharedValue(0);
   const indicatorWidth = useSharedValue(0);
@@ -111,6 +113,8 @@ function CustomTabBar({ state, navigation, descriptors }: TabBarProps) {
               }
             };
 
+            const isCartTab = route.name === "cart";
+
             return (
               <Pressable
                 key={route.key}
@@ -118,12 +122,21 @@ function CustomTabBar({ state, navigation, descriptors }: TabBarProps) {
                 onLayout={(e) => handleTabLayout(index, e)}
                 style={styles.tabButton}
               >
-                <HugeiconsIcon
-                  icon={Icon}
-                  size={22}
-                  color={isFocused ? colors.primary : colors.mutedForeground}
-                  strokeWidth={1.5}
-                />
+                <View>
+                  <HugeiconsIcon
+                    icon={Icon}
+                    size={22}
+                    color={isFocused ? colors.primary : colors.mutedForeground}
+                    strokeWidth={1.5}
+                  />
+                  {isCartTab && itemCount > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>
+                        {itemCount > 99 ? "99+" : itemCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
                 <Text
                   style={[
                     styles.tabLabel,
@@ -188,5 +201,23 @@ const styles = StyleSheet.create({
     height: verticalScale(3),
     backgroundColor: colors.primary,
     borderRadius: radii.full,
+  },
+  badge: {
+    position: "absolute",
+    top: -verticalScale(4),
+    right: -horizontalScale(8),
+    backgroundColor: colors.destructive,
+    borderRadius: radii.full,
+    minWidth: moderateScale(18),
+    height: moderateScale(18),
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: moderateScale(spacing[1]),
+  },
+  badgeText: {
+    fontFamily: fonts.sans.bold,
+    fontSize: moderateScale(10),
+    color: colors.destructiveForeground,
+    textAlign: "center",
   },
 });

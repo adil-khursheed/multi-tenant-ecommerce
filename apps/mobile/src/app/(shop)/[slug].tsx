@@ -1,18 +1,35 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Image } from "expo-image";
+import { MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
 
 import { useQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/utils/api";
 import { useCurrency } from "@/providers/Currency";
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
+import { useCart } from "@/providers/Cart";
+import {
+  colors,
+  fonts,
+  fontSizes,
+  radii,
+  spacing,
+} from "@/constants/theme";
+import {
+  verticalScale,
+  horizontalScale,
+  moderateScale,
+} from "@/constants/responsive";
 
 export default function ProductDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const trpc = useTRPC();
   const { formatPrice } = useCurrency();
+  const { addItem } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  const [adding, setAdding] = useState(false);
 
   const { data, isLoading } = useQuery(
     trpc.product.getProductBySlug.queryOptions({ slug: slug! }),
@@ -51,58 +68,121 @@ export default function ProductDetailScreen() {
       ? (image as { url: string }).url
       : null;
 
+  const price = product.effectivePrice ?? product.priceInINR ?? 0;
+  const totalPrice = price * quantity;
+
+  const handleAddToCart = async () => {
+    setAdding(true);
+    try {
+      await addItem({
+        productId: product.id,
+        productTitle: product.title ?? "Product",
+        productSlug: product.slug ?? slug,
+        productImageUrl: imageUrl ?? null,
+        priceInINR: price,
+      });
+      setQuantity(1);
+      Alert.alert("Added to cart", product.title + " has been added to your cart.");
+    } catch {
+      Alert.alert("Error", "Failed to add item to cart. Please try again.");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const categoriesText =
+    product.categories
+      ?.filter((c): c is { name: string } => typeof c === "object" && c !== null)
+      .map((c) => c.name)
+      .filter(Boolean)
+      .join(", ") || null;
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
-      {imageUrl ? (
-        <Image
-          source={{ uri: imageUrl }}
-          style={styles.image}
-          contentFit="cover"
-          transition={300}
-        />
-      ) : (
-        <View style={[styles.image, styles.imagePlaceholder]} />
-      )}
-
-      <View style={styles.details}>
-        {product.categories?.[0] &&
-          typeof product.categories[0] === "object" &&
-          "name" in product.categories[0] && (
-            <Text style={styles.category}>
-              {(product.categories[0] as { name: string }).name}
-            </Text>
-          )}
-
-        <Text style={styles.title}>{product.title}</Text>
-
-        {product.shortDescription && (
-          <Text style={styles.description}>{product.shortDescription}</Text>
+    <View style={styles.wrapper}>
+      <View style={styles.scrollArea}>
+        {imageUrl ? (
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.image}
+            contentFit="cover"
+            transition={300}
+          />
+        ) : (
+          <View style={[styles.image, styles.imagePlaceholder]} />
         )}
 
-        <Text style={styles.price}>
-          {formatPrice(product.effectivePrice ?? product.priceInINR ?? 0)}
-        </Text>
+        <View style={styles.details}>
+          {categoriesText && (
+            <Text style={styles.category}>{categoriesText}</Text>
+          )}
 
-        <View style={styles.placeholderSection}>
-          <Text style={styles.placeholderText}>
-            Product details coming soon...
-          </Text>
+          <Text style={styles.title}>{product.title}</Text>
+
+          {product.shortDescription && (
+            <Text style={styles.description}>{product.shortDescription}</Text>
+          )}
+
+          <Text style={styles.price}>{formatPrice(price)}</Text>
+
+          <View style={styles.quantitySection}>
+            <Text style={styles.quantityLabel}>Quantity</Text>
+            <View style={styles.quantityControl}>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => setQuantity(Math.max(1, quantity - 1))}
+              >
+                <HugeiconsIcon
+                  icon={MinusSignIcon}
+                  size={16}
+                  color={colors.foreground}
+                  strokeWidth={2}
+                />
+              </TouchableOpacity>
+              <Text style={styles.quantityValue}>{quantity}</Text>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => setQuantity(quantity + 1)}
+              >
+                <HugeiconsIcon
+                  icon={PlusSignIcon}
+                  size={16}
+                  color={colors.foreground}
+                  strokeWidth={2}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </View>
-    </ScrollView>
+
+      <View style={styles.stickyBottom}>
+        <View style={styles.stickyRow}>
+          <View>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalPrice}>{formatPrice(totalPrice)}</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.addToCartButton, adding && styles.addToCartDisabled]}
+            onPress={handleAddToCart}
+            disabled={adding}
+          >
+            <Text style={styles.addToCartText}>
+              {adding ? "Adding..." : "Add to Bag"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
     backgroundColor: colors.background,
   },
-  content: {
-    paddingBottom: verticalScale(spacing[10]),
+  scrollArea: {
+    flex: 1,
   },
   image: {
     width: "100%",
@@ -112,14 +192,25 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     backgroundColor: colors.muted,
   },
+  contentSkeleton: {
+    padding: moderateScale(spacing[4]),
+    gap: verticalScale(spacing[3]),
+  },
+  skeletonLine: {
+    height: verticalScale(16),
+    backgroundColor: colors.muted,
+    borderRadius: radii.sm,
+    width: "80%",
+  },
   details: {
     padding: moderateScale(spacing[4]),
     gap: verticalScale(spacing[2]),
+    paddingBottom: verticalScale(spacing[16]),
   },
   category: {
     fontFamily: fonts.sans.regular,
     fontSize: moderateScale(10),
-    color: colors.accentForeground,
+    color: colors.mutedForeground,
     textTransform: "uppercase",
     letterSpacing: 0.1,
   },
@@ -137,46 +228,94 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(spacing[2]),
   },
   price: {
-    fontFamily: fonts.sans.medium,
+    fontFamily: fonts.sans.semiBold,
     fontSize: moderateScale(fontSizes.xl),
     color: colors.primary,
     marginTop: verticalScale(spacing[2]),
   },
-  placeholderSection: {
+  quantitySection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginTop: verticalScale(spacing[6]),
-    padding: moderateScale(spacing[4]),
-    backgroundColor: colors.muted,
-    borderRadius: radii.md,
+    paddingTop: verticalScale(spacing[4]),
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
-  placeholderText: {
+  quantityLabel: {
+    fontFamily: fonts.sans.medium,
+    fontSize: moderateScale(fontSizes.sm),
+    color: colors.foreground,
+  },
+  quantityControl: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[2]),
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.md,
+    padding: verticalScale(spacing[1]),
+  },
+  quantityButton: {
+    width: horizontalScale(32),
+    height: verticalScale(32),
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.muted,
+    borderRadius: radii.sm,
+  },
+  quantityValue: {
+    fontFamily: fonts.sans.medium,
+    fontSize: moderateScale(fontSizes.base),
+    color: colors.foreground,
+    minWidth: horizontalScale(24),
+    textAlign: "center",
+  },
+  stickyBottom: {
+    backgroundColor: colors.card,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+    paddingHorizontal: horizontalScale(spacing[4]),
+    paddingVertical: verticalScale(spacing[3]),
+    paddingBottom: verticalScale(spacing[4]),
+  },
+  stickyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  totalLabel: {
     fontFamily: fonts.sans.regular,
     fontSize: moderateScale(fontSizes.sm),
     color: colors.mutedForeground,
-    textAlign: "center",
   },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
+  totalPrice: {
+    fontFamily: fonts.sans.semiBold,
+    fontSize: moderateScale(fontSizes.xl),
+    color: colors.foreground,
   },
-  imageSkeleton: {
-    width: "100%",
-    aspectRatio: 3 / 4,
-    backgroundColor: colors.muted,
+  addToCartButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: verticalScale(spacing[3]),
+    paddingHorizontal: horizontalScale(spacing[6]),
+    borderRadius: radii.full,
   },
-  contentSkeleton: {
-    padding: moderateScale(spacing[4]),
-    gap: verticalScale(spacing[3]),
+  addToCartDisabled: {
+    opacity: 0.5,
   },
-  skeletonLine: {
-    height: verticalScale(16),
-    backgroundColor: colors.muted,
-    borderRadius: radii.sm,
-    width: "80%",
+  addToCartText: {
+    fontFamily: fonts.sans.medium,
+    fontSize: moderateScale(fontSizes.base),
+    color: colors.primaryForeground,
   },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
     backgroundColor: colors.background,
   },
   emptyText: {
