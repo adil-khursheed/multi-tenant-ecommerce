@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import type { ReadonlyURLSearchParams } from "next/navigation";
 
 import { useCurrency } from "@payloadcms/plugin-ecommerce/client/react";
 
@@ -40,6 +41,7 @@ export const ProductInfo: React.FC<{
 }> = ({ product, sizeGuide }) => {
   const [quantity, setQuantity] = useState(1);
   const { currency } = useCurrency();
+  const searchParams = useSearchParams();
 
   const tenant = typeof product.tenant === "object" ? product.tenant : null;
   const averageRating = product.ratings?.average || 0;
@@ -143,23 +145,12 @@ export const ProductInfo: React.FC<{
       {/* Quantity & Cart Actions */}
       <div className="flex flex-col gap-4 mt-2">
         <div className="flex items-center gap-4">
-          <div className="flex items-center border border-border rounded-md h-12 w-32">
-            <button
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-10 h-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors rounded-l-md"
-            >
-              -
-            </button>
-            <div className="flex-1 h-full flex items-center justify-center font-medium text-sm">
-              {quantity}
-            </div>
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-10 h-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors rounded-r-md"
-            >
-              +
-            </button>
-          </div>
+          <QuantitySelector
+            product={product}
+            quantity={quantity}
+            setQuantity={setQuantity}
+            searchParams={searchParams}
+          />
           <StockIndicator product={product} />
         </div>
 
@@ -309,5 +300,58 @@ function ProductPrice({
       discountPercent={discountPercent}
       className="text-2xl font-semibold"
     />
+  );
+}
+
+function QuantitySelector({
+  product,
+  quantity,
+  setQuantity,
+  searchParams,
+}: {
+  product: Product;
+  quantity: number;
+  setQuantity: (n: number) => void;
+  searchParams: ReadonlyURLSearchParams;
+}) {
+  const maxQuantity = useMemo(() => {
+    if (product.enableVariants && product.variants?.docs) {
+      const variantId = searchParams.get("variant");
+      if (variantId) {
+        const variant = product.variants.docs.find(
+          (v) => typeof v === "object" && String(v.id) === variantId,
+        ) as Variant | undefined;
+        if (variant) {
+          return variant.inventory ?? 0;
+        }
+      }
+      return 0;
+    }
+    return product.inventory ?? 0;
+  }, [product, searchParams]);
+
+  const isAtMax = quantity >= maxQuantity && maxQuantity > 0;
+
+  return (
+    <div className="flex items-center border border-border rounded-md h-12 w-32">
+      <button
+        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+        className="w-10 h-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors rounded-l-md"
+      >
+        -
+      </button>
+      <div className="flex-1 h-full flex items-center justify-center font-medium text-sm">
+        {quantity}
+      </div>
+      <button
+        onClick={() => {
+          if (!isAtMax) setQuantity(quantity + 1);
+        }}
+        disabled={isAtMax}
+        className="w-10 h-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors rounded-r-md disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        +
+      </button>
+    </div>
   );
 }

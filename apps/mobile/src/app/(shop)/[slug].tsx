@@ -12,7 +12,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   MinusSignIcon,
   PlusSignIcon,
-  HeartAddIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useQuery } from "@tanstack/react-query";
@@ -36,6 +35,8 @@ import { TrustSignals } from "@/components/product/TrustSignals";
 import { ProductDetailsSection } from "@/components/product/ProductDetailsSection";
 import { VendorCard } from "@/components/product/VendorCard";
 import { CustomerReviews } from "@/components/product/CustomerReviews";
+import { RelatedProducts } from "@/components/product/RelatedProducts";
+import { WishlistButton } from "@/components/product/WishlistButton";
 
 export default function ProductDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -86,6 +87,16 @@ export default function ProductDetailScreen() {
     }
     return product.inventory ?? 0;
   }, [product, selectedVariant]);
+
+  const maxQuantity = useMemo(() => {
+    if (!product) return 0;
+    if (product.enableVariants && selectedVariant) {
+      return (selectedVariant as any).inventory ?? 0;
+    }
+    return product.inventory ?? 0;
+  }, [product, selectedVariant]);
+
+  const isAtMax = maxQuantity > 0 && quantity >= maxQuantity;
 
   const handleOptionSelect = useCallback(
     (typeName: string, optionId: string) => {
@@ -173,6 +184,13 @@ export default function ProductDetailScreen() {
     );
   }, [product]);
 
+  const relatedProducts = useMemo(() => {
+    if (!product?.relatedProducts) return [];
+    return product.relatedProducts
+      .filter((rp: any) => typeof rp === "object" && rp !== null)
+      .slice(0, 4);
+  }, [product]);
+
   // --- Loading state ---
   if (isLoading) {
     return (
@@ -217,6 +235,7 @@ export default function ProductDetailScreen() {
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        scrollIndicatorInsets={{ bottom: 70 }}
       >
         {/* Image Gallery */}
         <ImageGallery
@@ -299,8 +318,11 @@ export default function ProductDetailScreen() {
               </TouchableOpacity>
               <Text style={styles.quantityValue}>{quantity}</Text>
               <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={() => setQuantity(quantity + 1)}
+                style={[styles.quantityButton, isAtMax && { opacity: 0.4 }]}
+                onPress={() => {
+                  if (!isAtMax) setQuantity(quantity + 1);
+                }}
+                disabled={isAtMax}
               >
                 <HugeiconsIcon
                   icon={PlusSignIcon}
@@ -331,14 +353,13 @@ export default function ProductDetailScreen() {
                     : "Add to Bag"}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.wishlistButton}>
-              <HugeiconsIcon
-                icon={HeartAddIcon}
-                size={moderateScale(20)}
-                color={colors.foreground}
-                strokeWidth={1.5}
+            {product && (
+              <WishlistButton
+                productId={String(product.id)}
+                size={20}
+                style={styles.wishlistButton}
               />
-            </TouchableOpacity>
+            )}
           </View>
 
           {/* Trust Signals */}
@@ -371,8 +392,12 @@ export default function ProductDetailScreen() {
           />
         </View>
 
-        {/* Related Products placeholder - would need additional data fetching */}
+        {/* Related Products */}
         <View style={styles.sectionPadding}>
+          <RelatedProducts
+            products={relatedProducts as any}
+            onShopAll={() => router.push("/shop")}
+          />
           <View style={styles.bottomSpacer} />
         </View>
       </ScrollView>
@@ -415,7 +440,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: verticalScale(spacing[20]),
+    paddingBottom: verticalScale(spacing[20]) + verticalScale(70),
   },
   details: {
     padding: moderateScale(spacing[4]),

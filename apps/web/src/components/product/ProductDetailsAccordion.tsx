@@ -58,10 +58,6 @@ export const ProductDetailsAccordion: React.FC<{
                 <span className="text-[10px] uppercase font-medium text-muted-foreground block mb-1">Country of Origin</span>
                 <span className="text-sm font-medium">{product.countryOfOrigin || 'Not specified'}</span>
              </div>
-             <div className="bg-muted/50 p-4 rounded-lg">
-                <span className="text-[10px] uppercase font-medium text-muted-foreground block mb-1">Care</span>
-                <span className="text-sm font-medium">{product.careInstructions || 'Not specified'}</span>
-             </div>
           </div>
         </AccordionContent>
       </AccordionItem>

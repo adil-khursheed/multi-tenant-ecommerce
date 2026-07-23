@@ -11,6 +11,7 @@ export const wishlistRouter = {
       const user = await ctx.payload.findByID({
         collection: "users",
         id: userId,
+        depth: 0,
         select: { wishlist: true },
       });
 
@@ -47,6 +48,7 @@ export const wishlistRouter = {
       const user = await ctx.payload.findByID({
         collection: "users",
         id: ctx.session.user.id,
+        depth: 0,
         select: { wishlist: true },
       });
 

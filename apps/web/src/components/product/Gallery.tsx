@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { DefaultDocumentIDType } from "payload";
@@ -13,9 +13,13 @@ import {
   CarouselApi,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
 import type { Product } from "@/payload-types";
 import { cn } from "@/utilities/cn";
+
+import { ImageLightbox } from "./ImageLightbox";
 
 type Props = {
   gallery: NonNullable<Product["gallery"]>;
@@ -32,9 +36,8 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
   const [showZoomLabel, setShowZoomLabel] = useState(false);
   const zoomLabelTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
-  useEffect(() => {
-    if (!api) return;
-  }, [api]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const values = Array.from(searchParams.values());
@@ -71,6 +74,34 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
     if (isZooming) setShowZoomLabel(false);
   }, [isZooming]);
 
+  const handleGalleryKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "ArrowLeft" && current > 0) {
+        e.preventDefault();
+        const newIndex = current - 1;
+        setCurrent(newIndex);
+        api?.scrollTo(newIndex, true);
+      } else if (e.key === "ArrowRight" && current < gallery.length - 1) {
+        e.preventDefault();
+        const newIndex = current + 1;
+        setCurrent(newIndex);
+        api?.scrollTo(newIndex, true);
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setLightboxOpen(true);
+      }
+    },
+    [current, gallery.length, api],
+  );
+
+  const handleThumbnailClick = useCallback(
+    (index: number) => {
+      setCurrent(index);
+      api?.scrollTo(index, true);
+    },
+    [api],
+  );
+
   const currentImageResource = gallery[current]?.image;
   const currentImageUrl =
     typeof currentImageResource === "object" && currentImageResource !== null
@@ -80,11 +111,19 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
   return (
     <div className="w-full">
       <div
+        ref={containerRef}
         className="relative aspect-9/16 max-h-[650px] w-full bg-muted border border-border rounded-lg overflow-hidden cursor-zoom-in group mb-4"
+        tabIndex={0}
+        role="button"
+        aria-label="View product images in fullscreen"
+        onKeyDown={handleGalleryKeyDown}
         onMouseEnter={() => {
           setIsZooming(true);
           setShowZoomLabel(true);
-          zoomLabelTimeoutRef.current = setTimeout(() => setShowZoomLabel(false), 2000);
+          zoomLabelTimeoutRef.current = setTimeout(
+            () => setShowZoomLabel(false),
+            2000,
+          );
         }}
         onMouseLeave={() => {
           clearTimeout(zoomLabelTimeoutRef.current);
@@ -92,6 +131,7 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
           setShowZoomLabel(false);
         }}
         onMouseMove={handleMouseMove}
+        onClick={() => setLightboxOpen(true)}
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -123,7 +163,7 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
             exit={{ opacity: 0 }}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur-md border border-border px-3 py-1 text-[9px] font-mono text-muted-foreground rounded-full pointer-events-none z-10"
           >
-            Hover to zoom
+            Click to view fullscreen
           </motion.div>
         )}
 
@@ -140,44 +180,59 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
         )}
       </div>
 
-      <Carousel
-        setApi={setApi}
-        className="w-full"
-        opts={{ align: "start", loop: false }}
-      >
-        <CarouselContent className="-ml-2">
-          {gallery.map((item, i) => {
-            if (typeof item.image !== "object") return null;
+      <div className="relative">
+        <Carousel
+          setApi={setApi}
+          className="w-full"
+          opts={{ align: "start", loop: false }}
+        >
+          <CarouselContent className="-ml-2">
+            {gallery.map((item, i) => {
+              if (typeof item.image !== "object") return null;
 
-            return (
-              <CarouselItem
-                className="basis-1/4 sm:basis-1/5 pl-2"
-                key={`${item.image.id}-${i}`}
-                onClick={() => setCurrent(i)}
-              >
-                <div
-                  className={cn(
-                    "relative cursor-pointer overflow-hidden rounded-md transition-all duration-200 w-full aspect-square bg-muted",
-                    current === i
-                      ? "ring-2 ring-primary ring-offset-2 opacity-100"
-                      : "opacity-70 hover:opacity-100 border border-border",
-                  )}
+              return (
+                <CarouselItem
+                  className="basis-1/4 sm:basis-1/5 pl-2"
+                  key={`${item.image.id}-${i}`}
+                  onClick={() => handleThumbnailClick(i)}
                 >
-                  <Media
-                    resource={item.image}
-                    className="w-full h-full"
-                    imgClassName="w-full h-full object-contain"
-                  />
-                </div>
-              </CarouselItem>
-            );
-          })}
-        </CarouselContent>
-      </Carousel>
+                  <div
+                    className={cn(
+                      "relative cursor-pointer overflow-hidden rounded-md transition-all duration-200 w-full aspect-square bg-muted",
+                      current === i
+                        ? "ring-2 ring-primary ring-offset-2 opacity-100"
+                        : "opacity-70 hover:opacity-100 border border-border",
+                    )}
+                  >
+                    <Media
+                      resource={item.image}
+                      className="w-full h-full"
+                      imgClassName="w-full h-full object-contain"
+                    />
+                  </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+          <CarouselPrevious className="-left-3 top-1/2" />
+          <CarouselNext className="-right-3 top-1/2" />
+        </Carousel>
+      </div>
 
       <div className="flex items-center justify-between mt-4 text-[10px] font-mono text-muted-foreground">
         <span>{gallery.length} photos</span>
       </div>
+
+      <ImageLightbox
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+        gallery={gallery as { image: NonNullable<Product["gallery"]>[number]["image"] }[]}
+        initialIndex={current}
+        onIndexChange={(index) => {
+          setCurrent(index);
+          api?.scrollTo(index, true);
+        }}
+      />
     </div>
   );
 };

@@ -96,21 +96,9 @@ export default async function ProductPage({ params }: Args) {
       })
     : product.inventory! > 0;
 
-  let price = product.priceInINR;
-
-  if (product.enableVariants && product?.variants?.docs?.length) {
-    price = product?.variants?.docs?.reduce((acc, variant) => {
-      if (
-        typeof variant === "object" &&
-        variant?.priceInINR &&
-        acc &&
-        variant?.priceInINR > acc
-      ) {
-        return variant.priceInINR;
-      }
-      return acc;
-    }, price);
-  }
+  const price = product.enableVariants
+    ? (product.minEffectivePrice ?? product.priceInINR)
+    : (product.effectivePrice ?? product.priceInINR);
 
   const productJsonLd = {
     name: product.title,

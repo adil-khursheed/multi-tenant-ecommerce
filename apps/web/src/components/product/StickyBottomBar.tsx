@@ -39,24 +39,29 @@ export const StickyBottomBar: React.FC<{ product: Product }> = ({
   }, [product, currency.code, searchParams]);
 
   useEffect(() => {
-    // We observe the main AddToCart button in ProductInfo
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry) {
-          // If the main add to cart button is out of view (above the viewport), show sticky bar
           setIsVisible(entry.boundingClientRect.y < 0 && !entry.isIntersecting);
         }
       },
-      { threshold: 0 },
+      { threshold: 0, rootMargin: "-10px" },
     );
 
-    // Wait a moment for DOM to paint
-    setTimeout(() => {
+    let retryCount = 0;
+    const maxRetries = 60;
+
+    const findAndObserve = () => {
       const mainAddToCart = document.querySelector("[data-main-add-to-cart]");
       if (mainAddToCart) {
         observer.observe(mainAddToCart);
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        requestAnimationFrame(findAndObserve);
       }
-    }, 500);
+    };
+
+    requestAnimationFrame(findAndObserve);
 
     return () => observer.disconnect();
   }, []);

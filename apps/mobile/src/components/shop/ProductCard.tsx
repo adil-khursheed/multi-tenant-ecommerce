@@ -11,6 +11,7 @@ import {
 } from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { useCurrency } from "@/providers/Currency";
+import { WishlistButton } from "@/components/product/WishlistButton";
 
 export type ShopProduct = {
   id: string | number;
@@ -202,7 +203,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   if (viewMode === "list") {
     return (
       <Animated.View style={styles.listContainer}>
-        <Pressable style={styles.listRow} onPress={navigateToProduct}>
+        <View style={styles.listRow}>
           <View style={styles.listImageContainer}>
             {imageUrl ? (
               <Image
@@ -226,9 +227,14 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
                 </Text>
               </View>
             )}
+            <WishlistButton
+              productId={String(product.id)}
+              size={14}
+              style={styles.listWishlistOverlay}
+            />
           </View>
 
-          <View style={styles.listContent}>
+          <Pressable style={styles.listContent} onPress={navigateToProduct}>
             <View style={styles.listBadges}>
               {tenantName && (
                 <View style={styles.badge}>
@@ -265,66 +271,73 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               minEffectivePrice={minEffectivePrice}
               maxEffectivePrice={maxEffectivePrice}
             />
-          </View>
-        </Pressable>
+          </Pressable>
+        </View>
       </Animated.View>
     );
   }
 
   return (
     <Animated.View style={styles.gridContainer}>
-      <Pressable onPress={navigateToProduct}>
-        <View style={styles.gridImageContainer}>
-          {imageUrl ? (
-            <Image
-              source={{ uri: imageUrl }}
-              style={styles.gridImage}
-              contentFit="cover"
-              transition={300}
-            />
-          ) : (
-            <View style={[styles.gridImage, styles.gridImagePlaceholder]} />
-          )}
-          {ribbon && (
-            <View style={[styles.gridRibbon, getRibbonStyle(ribbon)]}>
-              <Text
-                style={[
-                  styles.ribbonText,
-                  { color: getRibbonStyle(ribbon).color },
-                ]}
-              >
-                {ribbon}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.gridContent}>
-          {categoryName && (
-            <Text style={styles.categoryLabel}>{categoryName}</Text>
-          )}
-
-          <Text style={styles.gridTitle} numberOfLines={2}>
-            {title}
-          </Text>
-
-          {ratings &&
-            typeof ratings.average === "number" &&
-            ratings.count &&
-            ratings.count > 0 && (
-              <StarRatingRow rating={ratings.average} count={ratings.count} />
+      <View>
+        <Pressable onPress={navigateToProduct}>
+          <View style={styles.gridImageContainer}>
+            {imageUrl ? (
+              <Image
+                source={{ uri: imageUrl }}
+                style={styles.gridImage}
+                contentFit="cover"
+                transition={300}
+              />
+            ) : (
+              <View style={[styles.gridImage, styles.gridImagePlaceholder]} />
             )}
+            {ribbon && (
+              <View style={[styles.gridRibbon, getRibbonStyle(ribbon)]}>
+                <Text
+                  style={[
+                    styles.ribbonText,
+                    { color: getRibbonStyle(ribbon).color },
+                  ]}
+                >
+                  {ribbon}
+                </Text>
+              </View>
+            )}
+          </View>
+        </Pressable>
+        <WishlistButton
+          productId={String(product.id)}
+          size={16}
+          style={styles.gridWishlistOverlay}
+        />
+      </View>
 
-          <PriceDisplay
-            amount={effectivePrice}
-            originalAmount={priceInINR}
-            discountPercent={discountPercent}
-            enableVariants={enableVariants}
-            minEffectivePrice={minEffectivePrice}
-            maxEffectivePrice={maxEffectivePrice}
-          />
-        </View>
-      </Pressable>
+      <View style={styles.gridContent}>
+        {categoryName && (
+          <Text style={styles.categoryLabel}>{categoryName}</Text>
+        )}
+
+        <Text style={styles.gridTitle} numberOfLines={2}>
+          {title}
+        </Text>
+
+        {ratings &&
+          typeof ratings.average === "number" &&
+          ratings.count &&
+          ratings.count > 0 && (
+            <StarRatingRow rating={ratings.average} count={ratings.count} />
+          )}
+
+        <PriceDisplay
+          amount={effectivePrice}
+          originalAmount={priceInINR}
+          discountPercent={discountPercent}
+          enableVariants={enableVariants}
+          minEffectivePrice={minEffectivePrice}
+          maxEffectivePrice={maxEffectivePrice}
+        />
+      </View>
     </Animated.View>
   );
 }
@@ -353,6 +366,14 @@ const styles = StyleSheet.create({
     left: 0,
     paddingHorizontal: horizontalScale(spacing[2]),
     paddingVertical: verticalScale(spacing[1]),
+  },
+  gridWishlistOverlay: {
+    position: "absolute",
+    top: horizontalScale(spacing[2]),
+    right: horizontalScale(spacing[2]),
+    backgroundColor: `${colors.background}CC`,
+    borderRadius: radii.full,
+    padding: horizontalScale(spacing[1]),
   },
   gridContent: {
     marginTop: verticalScale(spacing[3]),
@@ -394,6 +415,14 @@ const styles = StyleSheet.create({
     left: 0,
     paddingHorizontal: horizontalScale(spacing[2]),
     paddingVertical: verticalScale(spacing[1]),
+  },
+  listWishlistOverlay: {
+    position: "absolute",
+    top: horizontalScale(spacing[1]),
+    right: horizontalScale(spacing[1]),
+    backgroundColor: `${colors.background}CC`,
+    borderRadius: radii.full,
+    padding: horizontalScale(spacing[0.5]),
   },
   listContent: {
     flex: 1,

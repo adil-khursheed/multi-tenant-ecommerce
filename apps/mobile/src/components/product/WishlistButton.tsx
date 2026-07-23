@@ -1,26 +1,42 @@
-"use client";
+import { useCallback } from "react";
+import { Pressable, StyleSheet, ViewStyle } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from "react-native-reanimated";
 
-import React from "react";
-
-import { FavouriteIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  FavouriteIcon,
+  HeartAddIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { motion } from "motion/react";
+import { useRouter } from "expo-router";
 
+import {
+  horizontalScale,
+  moderateScale,
+} from "@/constants/responsive";
+import { colors } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
-import { useLoginModal } from "@/providers/LoginModal";
-import { useTRPC } from "@/trpc/client";
+import { useTRPC } from "@/utils/api";
 
 type Props = {
   productId: string;
-  className?: string;
+  size?: number;
+  style?: ViewStyle;
 };
 
-export const WishlistButton: React.FC<Props> = ({ productId, className }) => {
-  const { user } = useAuth();
-  const { openLoginModal } = useLoginModal();
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+export function WishlistButton({ productId, size = 20, style }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const router = useRouter();
+  const scale = useSharedValue(1);
 
   const { data } = useQuery(
     trpc.wishlist.check.queryOptions(
@@ -70,32 +86,43 @@ export const WishlistButton: React.FC<Props> = ({ productId, className }) => {
     }),
   );
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+  const handlePress = useCallback(() => {
     if (!user) {
-      openLoginModal();
+      router.push("/(modals)/login");
       return;
     }
 
+    scale.value = withSequence(
+      withSpring(1.3, { damping: 10, stiffness: 400 }),
+      withSpring(1, { damping: 10, stiffness: 400 }),
+    );
+
     toggle({ productId });
-  };
+  }, [user, router, toggle, productId, scale]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
-    <button onClick={handleClick} className={className}>
-      <motion.div
-        animate={isWishlisted ? { scale: [1, 1.3, 1] } : {}}
-        transition={{ duration: 0.3 }}
-      >
-        <HugeiconsIcon
-          icon={FavouriteIcon}
-          className={
-            isWishlisted ? "text-primary fill-primary" : "text-foreground"
-          }
-          size={16}
-        />
-      </motion.div>
-    </button>
+    <AnimatedPressable
+      onPress={handlePress}
+      style={[styles.container, style, animatedStyle]}
+      hitSlop={8}
+    >
+      <HugeiconsIcon
+        icon={isWishlisted ? FavouriteIcon : HeartAddIcon}
+        size={moderateScale(size)}
+        color={isWishlisted ? colors.primary : colors.foreground}
+        strokeWidth={1.5}
+      />
+    </AnimatedPressable>
   );
-};
+}
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
