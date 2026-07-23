@@ -4,15 +4,14 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AnimatedLegendList } from "@legendapp/list/reanimated";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-
 import {
+  FavouriteIcon,
   GridViewIcon,
   Menu01Icon,
-  FavouriteIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import { AnimatedLegendList } from "@legendapp/list/reanimated";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ProductCard, type ShopProduct } from "@/components/shop/ProductCard";
 import { ProductCardSkeleton } from "@/components/shop/ProductCardSkeleton";
@@ -21,7 +20,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/utils/api";
 
@@ -61,7 +60,10 @@ export default function WishlistScreen() {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View
-          style={[styles.header, { paddingTop: top + verticalScale(spacing[4]) }]}
+          style={[
+            styles.header,
+            { paddingTop: top + verticalScale(spacing[4]) },
+          ]}
         >
           <Text style={styles.headerTitle}>Wishlist</Text>
         </View>
@@ -199,6 +201,8 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(spacing[3]),
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
+    borderBottomLeftRadius: moderateScale(radii["2xl"]),
+    borderBottomRightRadius: moderateScale(radii["2xl"]),
   },
   headerRow: {
     flexDirection: "row",

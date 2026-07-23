@@ -4,6 +4,7 @@ import Animated from "react-native-reanimated";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 
+import { WishlistButton } from "@/components/product/WishlistButton";
 import {
   horizontalScale,
   moderateScale,
@@ -11,7 +12,6 @@ import {
 } from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { useCurrency } from "@/providers/Currency";
-import { WishlistButton } from "@/components/product/WishlistButton";
 
 export type ShopProduct = {
   id: string | number;
@@ -179,9 +179,8 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
   const imageUrl =
     image && typeof image === "object" && "url" in image
-      ? `https://right-mayfly-vocal.ngrok-free.app${(image as { url: string }).url}`
+      ? `${process.env.EXPO_PUBLIC_API_URL}${(image as { url: string }).url}`
       : null;
-  console.log(imageUrl);
 
   const ribbon = getRibbon(flags);
   const categoryName =

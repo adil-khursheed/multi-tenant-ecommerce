@@ -9,34 +9,40 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  MinusSignIcon,
-  PlusSignIcon,
-} from "@hugeicons/core-free-icons";
+import { MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
+import { CustomerReviews } from "@/components/product/CustomerReviews";
+import { getImageUrl, ImageGallery } from "@/components/product/ImageGallery";
+import { ProductDetailsSection } from "@/components/product/ProductDetailsSection";
+import { ProductPrice } from "@/components/product/ProductPrice";
+import { RelatedProducts } from "@/components/product/RelatedProducts";
+import { StockIndicator } from "@/components/product/StockIndicator";
+import { TrustSignals } from "@/components/product/TrustSignals";
+import {
+  getSelectedVariantId,
+  VariantSelector,
+} from "@/components/product/VariantSelector";
+import { VendorCard } from "@/components/product/VendorCard";
+import { WishlistButton } from "@/components/product/WishlistButton";
 import {
   horizontalScale,
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing, shadows } from "@/constants/theme";
+import {
+  colors,
+  fonts,
+  fontSizes,
+  radii,
+  shadows,
+  spacing,
+} from "@/constants/theme";
 import { useCart } from "@/providers/Cart";
 import { useCurrency } from "@/providers/Currency";
 import { useTRPC } from "@/utils/api";
-
-import { ImageGallery, getImageUrl } from "@/components/product/ImageGallery";
-import { VariantSelector, getSelectedVariantId } from "@/components/product/VariantSelector";
-import { ProductPrice } from "@/components/product/ProductPrice";
-import { StockIndicator } from "@/components/product/StockIndicator";
-import { TrustSignals } from "@/components/product/TrustSignals";
-import { ProductDetailsSection } from "@/components/product/ProductDetailsSection";
-import { VendorCard } from "@/components/product/VendorCard";
-import { CustomerReviews } from "@/components/product/CustomerReviews";
-import { RelatedProducts } from "@/components/product/RelatedProducts";
-import { WishlistButton } from "@/components/product/WishlistButton";
 
 export default function ProductDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -48,7 +54,9 @@ export default function ProductDetailScreen() {
 
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedOptions, setSelectedOptions] = useState<
+    Record<string, string>
+  >({});
 
   const { data, isLoading } = useQuery(
     trpc.product.getProductBySlug.queryOptions({ slug: String(slug) }),
@@ -66,9 +74,14 @@ export default function ProductDetailScreen() {
 
   const selectedVariant = useMemo(() => {
     if (!selectedVariantId || !product?.variants?.docs) return null;
-    return product.variants.docs.find(
-      (v: any) => typeof v === "object" && v !== null && String(v.id) === selectedVariantId,
-    ) ?? null;
+    return (
+      product.variants.docs.find(
+        (v: any) =>
+          typeof v === "object" &&
+          v !== null &&
+          String(v.id) === selectedVariantId,
+      ) ?? null
+    );
   }, [selectedVariantId, product]);
 
   // Price computation
@@ -123,10 +136,11 @@ export default function ProductDetailScreen() {
         productTitle: product.title ?? "Product",
         productSlug: product.slug ?? "",
         productImageUrl: imageUrl ?? null,
-        priceInINR:
-          selectedVariant
-            ? ((selectedVariant as any).effectivePrice ?? (selectedVariant as any).priceInINR ?? priceData.effectivePrice)
-            : priceData.effectivePrice,
+        priceInINR: selectedVariant
+          ? ((selectedVariant as any).effectivePrice ??
+            (selectedVariant as any).priceInINR ??
+            priceData.effectivePrice)
+          : priceData.effectivePrice,
       });
       setQuantity(1);
       Alert.alert(
@@ -176,7 +190,8 @@ export default function ProductDetailScreen() {
     return (
       product.categories
         ?.filter(
-          (c: any): c is { name: string } => typeof c === "object" && c !== null,
+          (c: any): c is { name: string } =>
+            typeof c === "object" && c !== null,
         )
         .map((c: any) => c.name)
         .filter(Boolean)
@@ -230,7 +245,7 @@ export default function ProductDetailScreen() {
   const variants = product.variants?.docs ?? null;
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: bottom }]}>
+    <View style={styles.wrapper}>
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
@@ -369,7 +384,7 @@ export default function ProductDetailScreen() {
         {/* Product Details Accordion */}
         <View style={styles.sectionPadding}>
           <ProductDetailsSection
-            description={product.description as string}
+            description={product.description}
             countryOfOrigin={product.countryOfOrigin}
             careInstructions={product.careInstructions}
             materials={product.materials as any}
@@ -403,7 +418,7 @@ export default function ProductDetailScreen() {
       </ScrollView>
 
       {/* Sticky Bottom Bar */}
-      <View style={styles.stickyBottom}>
+      <View style={[styles.stickyBottom, { paddingBottom: bottom }]}>
         <View style={styles.stickyRow}>
           <View style={styles.stickyInfo}>
             <Text style={styles.totalLabel}>Total</Text>

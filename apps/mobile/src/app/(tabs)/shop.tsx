@@ -20,7 +20,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { useTRPC } from "@/utils/api";
 
 type FilterParams = {
@@ -317,6 +317,8 @@ const styles = StyleSheet.create({
   },
   listHeaderWrapper: {
     backgroundColor: colors.primary,
+    borderBottomLeftRadius: moderateScale(radii["2xl"]),
+    borderBottomRightRadius: moderateScale(radii["2xl"]),
   },
   listHeader: {
     paddingVertical: verticalScale(spacing[3]),

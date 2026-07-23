@@ -10,6 +10,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
 import { AccordionGroup } from "@/components/shop/AccordionGroup";
+import { RichText } from "@/components/rich-text/RichText";
 import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
 import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
@@ -46,7 +47,7 @@ type Tenant = {
 } | null;
 
 type ProductDetailsSectionProps = {
-  description?: string | null;
+  description?: unknown | null;
   countryOfOrigin?: string | null;
   careInstructions?: string | null;
   materials?: { name?: string | null }[] | null;
@@ -83,7 +84,7 @@ export function ProductDetailsSection({
       >
         <View style={styles.sectionContent}>
           {description ? (
-            <Text style={styles.descriptionText}>{description}</Text>
+            <RichText data={description} />
           ) : (
             <Text style={styles.noDataText}>No description available.</Text>
           )}
@@ -148,20 +149,24 @@ export function ProductDetailsSection({
         <View style={styles.sectionContent}>
           <View style={styles.policySection}>
             <Text style={styles.subTitle}>Shipping Policy</Text>
-            <Text style={styles.descriptionText}>
-              {typeof tenant?.shippingPolicy === "string"
-                ? tenant.shippingPolicy
-                : "Shipping and delivery information will be provided by the seller."}
-            </Text>
+            {tenant?.shippingPolicy ? (
+              <RichText data={tenant.shippingPolicy} />
+            ) : (
+              <Text style={styles.descriptionText}>
+                Shipping and delivery information will be provided by the seller.
+              </Text>
+            )}
           </View>
 
           <View style={styles.policySection}>
             <Text style={styles.subTitle}>Return & Exchange Policy</Text>
-            <Text style={styles.descriptionText}>
-              {typeof tenant?.returnAndExchangePolicy === "string"
-                ? tenant.returnAndExchangePolicy
-                : "Returns are accepted within 30 days of purchase. Items must be in their original condition with tags attached."}
-            </Text>
+            {tenant?.returnAndExchangePolicy ? (
+              <RichText data={tenant.returnAndExchangePolicy} />
+            ) : (
+              <Text style={styles.descriptionText}>
+                Returns are accepted within 30 days of purchase. Items must be in their original condition with tags attached.
+              </Text>
+            )}
           </View>
         </View>
       </AccordionGroup>

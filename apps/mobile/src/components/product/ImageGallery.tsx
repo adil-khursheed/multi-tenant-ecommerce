@@ -1,11 +1,17 @@
 import { useCallback, useRef, useState } from "react";
 import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
-import Carousel, { type ICarouselInstance } from "react-native-reanimated-carousel";
+import Carousel, {
+  type ICarouselInstance,
+} from "react-native-reanimated-carousel";
 
 import { Image } from "expo-image";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, spacing } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -23,13 +29,16 @@ type ImageGalleryProps = {
   onImagePress?: (index: number) => void;
 };
 
-function getImageUrl(
-  image: GalleryItem["image"],
-): string | null {
+function getImageUrl(image: GalleryItem["image"]): string | null {
   if (!image) return null;
-  if (typeof image === "string") return image;
-  if (typeof image === "object" && "url" in image && typeof image.url === "string") {
-    return image.url;
+  if (typeof image === "string")
+    return `${process.env.EXPO_PUBLIC_API_URL}${image}`;
+  if (
+    typeof image === "object" &&
+    "url" in image &&
+    typeof image.url === "string"
+  ) {
+    return `${process.env.EXPO_PUBLIC_API_URL}${image.url}`;
   }
   return null;
 }
