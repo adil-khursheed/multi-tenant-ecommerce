@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearTransition } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { AnimatedLegendList } from "@legendapp/list/reanimated";
@@ -213,22 +213,31 @@ export default function ShopScreen() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <BottomSheetModalProvider>
-        <View style={[styles.container, { paddingTop: top }]}>
-          <ShopHeader
-            activeFilters={activeFilters}
-            onRemoveFilter={handleRemoveFilter}
-            onClearAll={handleClearAllFilters}
-          />
+        <View style={[styles.container]}>
+          <View
+            style={[
+              styles.listHeaderWrapper,
+              {
+                paddingTop: top,
+              },
+            ]}
+          >
+            <ShopHeader
+              activeFilters={activeFilters}
+              onRemoveFilter={handleRemoveFilter}
+              onClearAll={handleClearAllFilters}
+            />
 
-          <FilterBar
-            activeFilterCount={activeFilterCount}
-            totalProducts={totalDocs}
-            viewMode={viewMode}
-            currentSortTitle={currentSortTitle}
-            onFilterPress={() => filterDrawerRef.current?.present()}
-            onSortPress={() => sortDrawerRef.current?.present()}
-            onViewModeChange={setViewMode}
-          />
+            <FilterBar
+              activeFilterCount={activeFilterCount}
+              totalProducts={totalDocs}
+              viewMode={viewMode}
+              currentSortTitle={currentSortTitle}
+              onFilterPress={() => filterDrawerRef.current?.present()}
+              onSortPress={() => sortDrawerRef.current?.present()}
+              onViewModeChange={setViewMode}
+            />
+          </View>
 
           {productsQuery.isLoading ? (
             <View style={styles.skeletonGrid}>
@@ -300,10 +309,14 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: horizontalScale(spacing[4]),
+    paddingTop: verticalScale(spacing[4]),
     paddingBottom: verticalScale(spacing[10]),
   },
   columnWrapper: {
     gap: horizontalScale(spacing[3]),
+  },
+  listHeaderWrapper: {
+    backgroundColor: colors.primary,
   },
   listHeader: {
     paddingVertical: verticalScale(spacing[3]),

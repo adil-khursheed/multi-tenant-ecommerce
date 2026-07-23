@@ -178,7 +178,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
 
   const imageUrl =
     image && typeof image === "object" && "url" in image
-      ? (image as { url: string }).url
+      ? `https://right-mayfly-vocal.ngrok-free.app${(image as { url: string }).url}`
       : null;
   console.log(imageUrl);
 

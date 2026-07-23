@@ -69,6 +69,7 @@ export default function RootLayout() {
                   name="(modals)"
                   options={{ headerShown: false, presentation: "modal" }}
                 />
+                <Stack.Screen name="(shop)" options={{ headerShown: false }} />
               </Stack>
             </CartProvider>
           </CurrencyProvider>

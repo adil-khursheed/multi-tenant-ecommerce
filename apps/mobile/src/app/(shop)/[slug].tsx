@@ -1,55 +1,194 @@
-import { useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import { Image } from "expo-image";
-import { MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
+import { useCallback, useMemo, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import {
+  MinusSignIcon,
+  PlusSignIcon,
+  HeartAddIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-
 import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { useTRPC } from "@/utils/api";
-import { useCurrency } from "@/providers/Currency";
-import { useCart } from "@/providers/Cart";
 import {
-  colors,
-  fonts,
-  fontSizes,
-  radii,
-  spacing,
-} from "@/constants/theme";
-import {
-  verticalScale,
   horizontalScale,
   moderateScale,
+  verticalScale,
 } from "@/constants/responsive";
+import { colors, fonts, fontSizes, radii, spacing, shadows } from "@/constants/theme";
+import { useCart } from "@/providers/Cart";
+import { useCurrency } from "@/providers/Currency";
+import { useTRPC } from "@/utils/api";
+
+import { ImageGallery, getImageUrl } from "@/components/product/ImageGallery";
+import { VariantSelector, getSelectedVariantId } from "@/components/product/VariantSelector";
+import { ProductPrice } from "@/components/product/ProductPrice";
+import { StockIndicator } from "@/components/product/StockIndicator";
+import { TrustSignals } from "@/components/product/TrustSignals";
+import { ProductDetailsSection } from "@/components/product/ProductDetailsSection";
+import { VendorCard } from "@/components/product/VendorCard";
+import { CustomerReviews } from "@/components/product/CustomerReviews";
 
 export default function ProductDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
+  const router = useRouter();
   const trpc = useTRPC();
   const { formatPrice } = useCurrency();
   const { addItem } = useCart();
+  const { bottom } = useSafeAreaInsets();
+
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
   const { data, isLoading } = useQuery(
-    trpc.product.getProductBySlug.queryOptions({ slug: slug! }),
+    trpc.product.getProductBySlug.queryOptions({ slug: String(slug) }),
   );
 
+  const product = data?.product;
+  const reviews = data?.reviews?.docs ?? [];
+  const sizeGuide = data?.sizeGuide ?? null;
+
+  // Resolve selected variant
+  const selectedVariantId = useMemo(() => {
+    if (!product?.variants?.docs) return null;
+    return getSelectedVariantId(selectedOptions, product.variants.docs);
+  }, [selectedOptions, product]);
+
+  const selectedVariant = useMemo(() => {
+    if (!selectedVariantId || !product?.variants?.docs) return null;
+    return product.variants.docs.find(
+      (v: any) => typeof v === "object" && v !== null && String(v.id) === selectedVariantId,
+    ) ?? null;
+  }, [selectedVariantId, product]);
+
+  // Price computation
+  const priceData = useMemo(() => {
+    if (!product) return { effectivePrice: 0, basePrice: 0 };
+    const base = product.priceInINR ?? 0;
+    const effective = product.effectivePrice ?? base;
+    return { effectivePrice: effective, basePrice: base };
+  }, [product]);
+
+  // Stock computation
+  const stockQuantity = useMemo(() => {
+    if (!product) return 0;
+    if (product.enableVariants && selectedVariant) {
+      return (selectedVariant as any).inventory ?? 0;
+    }
+    return product.inventory ?? 0;
+  }, [product, selectedVariant]);
+
+  const handleOptionSelect = useCallback(
+    (typeName: string, optionId: string) => {
+      setSelectedOptions((prev) => {
+        const next = { ...prev };
+        if (next[typeName] === optionId) {
+          delete next[typeName];
+        } else {
+          next[typeName] = optionId;
+        }
+        return next;
+      });
+    },
+    [],
+  );
+
+  const handleAddToCart = useCallback(async () => {
+    if (!product) return;
+    setAdding(true);
+    try {
+      const imageUrl = getImageUrl(product.gallery?.[0]?.image);
+      await addItem({
+        productId: String(product.id),
+        productTitle: product.title ?? "Product",
+        productSlug: product.slug ?? "",
+        productImageUrl: imageUrl ?? null,
+        priceInINR:
+          selectedVariant
+            ? ((selectedVariant as any).effectivePrice ?? (selectedVariant as any).priceInINR ?? priceData.effectivePrice)
+            : priceData.effectivePrice,
+      });
+      setQuantity(1);
+      Alert.alert(
+        "Added to cart",
+        `${product.title} has been added to your cart.`,
+      );
+    } catch {
+      Alert.alert("Error", "Failed to add item to cart. Please try again.");
+    } finally {
+      setAdding(false);
+    }
+  }, [product, selectedVariant, priceData, addItem]);
+
+  const handleImagePress = useCallback(
+    (index: number) => {
+      if (!product?.gallery) return;
+      const imageUrls = product.gallery
+        .map((item: any) => getImageUrl(item.image))
+        .filter(Boolean);
+      if (imageUrls.length === 0) return;
+      router.push({
+        pathname: "/(modals)/gallery" as any,
+        params: {
+          images: JSON.stringify(imageUrls),
+          index: String(index),
+        },
+      });
+    },
+    [product, router],
+  );
+
+  const currentPrice = useMemo(() => {
+    if (selectedVariant) {
+      return (
+        (selectedVariant as any).effectivePrice ??
+        (selectedVariant as any).priceInINR ??
+        priceData.effectivePrice
+      );
+    }
+    return priceData.effectivePrice;
+  }, [selectedVariant, priceData]);
+
+  const totalPrice = currentPrice * quantity;
+
+  const categoriesText = useMemo(() => {
+    if (!product?.categories) return null;
+    return (
+      product.categories
+        ?.filter(
+          (c: any): c is { name: string } => typeof c === "object" && c !== null,
+        )
+        .map((c: any) => c.name)
+        .filter(Boolean)
+        .join(", ") || null
+    );
+  }, [product]);
+
+  // --- Loading state ---
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <View style={styles.imageSkeleton} />
         <View style={styles.contentSkeleton}>
+          <View style={[styles.skeletonLine, { width: "40%" }]} />
           <View style={styles.skeletonLine} />
           <View style={[styles.skeletonLine, { width: "60%" }]} />
-          <View style={[styles.skeletonLine, { width: "40%" }]} />
+          <View style={[styles.skeletonLine, { width: "50%" }]} />
         </View>
       </View>
     );
   }
 
-  const product = data?.product;
-
+  // --- Empty state ---
   if (!product) {
     return (
       <View style={styles.emptyContainer}>
@@ -58,59 +197,35 @@ export default function ProductDetailScreen() {
     );
   }
 
-  const image =
-    product.gallery?.[0]?.image && typeof product.gallery[0].image !== "string"
-      ? product.gallery[0].image
+  // Tenant
+  const tenant =
+    typeof product.tenant === "object" && product.tenant !== null
+      ? product.tenant
       : null;
 
-  const imageUrl =
-    image && typeof image === "object" && "url" in image
-      ? (image as { url: string }).url
-      : null;
+  // Ratings
+  const averageRating = product.ratings?.average ?? 0;
+  const reviewCount = product.ratings?.count ?? 0;
 
-  const price = product.effectivePrice ?? product.priceInINR ?? 0;
-  const totalPrice = price * quantity;
-
-  const handleAddToCart = async () => {
-    setAdding(true);
-    try {
-      await addItem({
-        productId: product.id,
-        productTitle: product.title ?? "Product",
-        productSlug: product.slug ?? slug,
-        productImageUrl: imageUrl ?? null,
-        priceInINR: price,
-      });
-      setQuantity(1);
-      Alert.alert("Added to cart", product.title + " has been added to your cart.");
-    } catch {
-      Alert.alert("Error", "Failed to add item to cart. Please try again.");
-    } finally {
-      setAdding(false);
-    }
-  };
-
-  const categoriesText =
-    product.categories
-      ?.filter((c): c is { name: string } => typeof c === "object" && c !== null)
-      .map((c) => c.name)
-      .filter(Boolean)
-      .join(", ") || null;
+  // Variant types
+  const variantTypes = product.variantTypes ?? null;
+  const variants = product.variants?.docs ?? null;
 
   return (
-    <View style={styles.wrapper}>
-      <View style={styles.scrollArea}>
-        {imageUrl ? (
-          <Image
-            source={{ uri: imageUrl }}
-            style={styles.image}
-            contentFit="cover"
-            transition={300}
-          />
-        ) : (
-          <View style={[styles.image, styles.imagePlaceholder]} />
-        )}
+    <View style={[styles.wrapper, { paddingBottom: bottom }]}>
+      <ScrollView
+        style={styles.scrollArea}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Image Gallery */}
+        <ImageGallery
+          gallery={(product.gallery ?? []) as any}
+          isBestseller={product.flags?.isBestseller}
+          onImagePress={handleImagePress}
+        />
 
+        {/* Product Info */}
         <View style={styles.details}>
           {categoriesText && (
             <Text style={styles.category}>{categoriesText}</Text>
@@ -119,11 +234,55 @@ export default function ProductDetailScreen() {
           <Text style={styles.title}>{product.title}</Text>
 
           {product.shortDescription && (
-            <Text style={styles.description}>{product.shortDescription}</Text>
+            <Text style={styles.shortDescription}>
+              {product.shortDescription}
+            </Text>
           )}
 
-          <Text style={styles.price}>{formatPrice(price)}</Text>
+          {/* Rating */}
+          {reviewCount > 0 && (
+            <View style={styles.ratingRow}>
+              <View style={styles.ratingBadge}>
+                <Text style={styles.ratingNumber}>
+                  {averageRating.toFixed(1)}
+                </Text>
+                <Text style={styles.ratingStar}>{"\u2605"}</Text>
+              </View>
+              <Text style={styles.reviewCount}>{reviewCount} Reviews</Text>
+            </View>
+          )}
 
+          <View style={styles.separator} />
+
+          {/* Price */}
+          <ProductPrice
+            effectivePrice={product.effectivePrice}
+            basePrice={product.priceInINR}
+            discountPercent={product.discountPercent}
+            minEffectivePrice={product.minEffectivePrice}
+            maxEffectivePrice={product.maxEffectivePrice}
+            enableVariants={product.enableVariants}
+            selectedVariant={selectedVariant as any}
+          />
+          <Text style={styles.taxNote}>Inclusive of all taxes</Text>
+
+          {/* Variant Selector */}
+          <VariantSelector
+            variantTypes={variantTypes}
+            variants={variants}
+            enableVariants={product.enableVariants}
+            selectedOptions={selectedOptions}
+            onOptionSelect={handleOptionSelect}
+          />
+
+          {/* Stock Indicator */}
+          {product.enableVariants && selectedVariant ? (
+            <StockIndicator inventory={stockQuantity} />
+          ) : !product.enableVariants ? (
+            <StockIndicator inventory={stockQuantity} />
+          ) : null}
+
+          {/* Quantity */}
           <View style={styles.quantitySection}>
             <Text style={styles.quantityLabel}>Quantity</Text>
             <View style={styles.quantityControl}>
@@ -152,22 +311,93 @@ export default function ProductDetailScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </View>
 
+          {/* Add to Bag + Wishlist */}
+          <View style={styles.cartRow}>
+            <TouchableOpacity
+              style={[
+                styles.addToCartButton,
+                adding && styles.addToCartDisabled,
+                stockQuantity === 0 && styles.addToCartDisabled,
+              ]}
+              onPress={handleAddToCart}
+              disabled={adding || stockQuantity === 0}
+            >
+              <Text style={styles.addToCartText}>
+                {adding
+                  ? "Adding..."
+                  : stockQuantity === 0
+                    ? "Out of Stock"
+                    : "Add to Bag"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.wishlistButton}>
+              <HugeiconsIcon
+                icon={HeartAddIcon}
+                size={moderateScale(20)}
+                color={colors.foreground}
+                strokeWidth={1.5}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Trust Signals */}
+          <TrustSignals />
+        </View>
+
+        {/* Product Details Accordion */}
+        <View style={styles.sectionPadding}>
+          <ProductDetailsSection
+            description={product.description as string}
+            countryOfOrigin={product.countryOfOrigin}
+            careInstructions={product.careInstructions}
+            materials={product.materials as any}
+            sizeGuide={sizeGuide as any}
+            tenant={tenant as any}
+          />
+        </View>
+
+        {/* Vendor Card */}
+        <View style={styles.sectionPadding}>
+          <VendorCard tenant={tenant as any} />
+        </View>
+
+        {/* Customer Reviews */}
+        <View style={styles.sectionPadding}>
+          <CustomerReviews
+            reviews={reviews as any}
+            averageRating={averageRating}
+            reviewCount={reviewCount}
+          />
+        </View>
+
+        {/* Related Products placeholder - would need additional data fetching */}
+        <View style={styles.sectionPadding}>
+          <View style={styles.bottomSpacer} />
+        </View>
+      </ScrollView>
+
+      {/* Sticky Bottom Bar */}
       <View style={styles.stickyBottom}>
         <View style={styles.stickyRow}>
-          <View>
+          <View style={styles.stickyInfo}>
             <Text style={styles.totalLabel}>Total</Text>
             <Text style={styles.totalPrice}>{formatPrice(totalPrice)}</Text>
           </View>
           <TouchableOpacity
-            style={[styles.addToCartButton, adding && styles.addToCartDisabled]}
+            style={[
+              styles.stickyCartButton,
+              (adding || stockQuantity === 0) && styles.addToCartDisabled,
+            ]}
             onPress={handleAddToCart}
-            disabled={adding}
+            disabled={adding || stockQuantity === 0}
           >
-            <Text style={styles.addToCartText}>
-              {adding ? "Adding..." : "Add to Bag"}
+            <Text style={styles.stickyCartText}>
+              {adding
+                ? "Adding..."
+                : stockQuantity === 0
+                  ? "Out of Stock"
+                  : "Add to Bag"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -184,28 +414,15 @@ const styles = StyleSheet.create({
   scrollArea: {
     flex: 1,
   },
-  image: {
-    width: "100%",
-    aspectRatio: 3 / 4,
-    backgroundColor: colors.muted,
-  },
-  imagePlaceholder: {
-    backgroundColor: colors.muted,
-  },
-  contentSkeleton: {
-    padding: moderateScale(spacing[4]),
-    gap: verticalScale(spacing[3]),
-  },
-  skeletonLine: {
-    height: verticalScale(16),
-    backgroundColor: colors.muted,
-    borderRadius: radii.sm,
-    width: "80%",
+  scrollContent: {
+    paddingBottom: verticalScale(spacing[20]),
   },
   details: {
     padding: moderateScale(spacing[4]),
     gap: verticalScale(spacing[2]),
-    paddingBottom: verticalScale(spacing[16]),
+  },
+  sectionPadding: {
+    paddingHorizontal: moderateScale(spacing[4]),
   },
   category: {
     fontFamily: fonts.sans.regular,
@@ -220,25 +437,59 @@ const styles = StyleSheet.create({
     color: colors.foreground,
     lineHeight: moderateScale(fontSizes["2xl"] * 1.3),
   },
-  description: {
+  shortDescription: {
     fontFamily: fonts.sans.regular,
     fontSize: moderateScale(fontSizes.sm),
     color: colors.mutedForeground,
     lineHeight: moderateScale(fontSizes.sm * 1.5),
-    marginTop: verticalScale(spacing[2]),
   },
-  price: {
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[3]),
+    marginTop: verticalScale(spacing[1]),
+  },
+  ratingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[1]),
+    backgroundColor: colors.muted,
+    paddingHorizontal: horizontalScale(spacing[2]),
+    paddingVertical: verticalScale(spacing[1]),
+    borderRadius: radii.full,
+  },
+  ratingNumber: {
     fontFamily: fonts.sans.semiBold,
-    fontSize: moderateScale(fontSizes.xl),
+    fontSize: moderateScale(fontSizes.xs),
+    color: colors.foreground,
+  },
+  ratingStar: {
+    fontSize: moderateScale(fontSizes.xs),
     color: colors.primary,
-    marginTop: verticalScale(spacing[2]),
+  },
+  reviewCount: {
+    fontFamily: fonts.sans.regular,
+    fontSize: moderateScale(fontSizes.xs),
+    color: colors.mutedForeground,
+    textDecorationLine: "underline",
+    textDecorationColor: colors.mutedForeground,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginVertical: verticalScale(spacing[2]),
+  },
+  taxNote: {
+    fontFamily: fonts.sans.regular,
+    fontSize: moderateScale(10),
+    color: colors.mutedForeground,
   },
   quantitySection: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: verticalScale(spacing[6]),
-    paddingTop: verticalScale(spacing[4]),
+    marginTop: verticalScale(spacing[3]),
+    paddingTop: verticalScale(spacing[3]),
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
@@ -271,18 +522,58 @@ const styles = StyleSheet.create({
     minWidth: horizontalScale(24),
     textAlign: "center",
   },
+  cartRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[3]),
+    marginTop: verticalScale(spacing[3]),
+  },
+  addToCartButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: verticalScale(spacing[3]),
+    borderRadius: radii.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addToCartDisabled: {
+    opacity: 0.5,
+  },
+  addToCartText: {
+    fontFamily: fonts.sans.semiBold,
+    fontSize: moderateScale(fontSizes.base),
+    color: colors.primaryForeground,
+  },
+  wishlistButton: {
+    width: moderateScale(48),
+    height: moderateScale(48),
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.sm,
+    backgroundColor: colors.card,
+  },
   stickyBottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: colors.card,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
     paddingHorizontal: horizontalScale(spacing[4]),
     paddingVertical: verticalScale(spacing[3]),
-    paddingBottom: verticalScale(spacing[4]),
+    ...shadows.md,
   },
   stickyRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: horizontalScale(spacing[3]),
+  },
+  stickyInfo: {
+    flex: 1,
   },
   totalLabel: {
     fontFamily: fonts.sans.regular,
@@ -291,31 +582,46 @@ const styles = StyleSheet.create({
   },
   totalPrice: {
     fontFamily: fonts.sans.semiBold,
-    fontSize: moderateScale(fontSizes.xl),
+    fontSize: moderateScale(fontSizes.lg),
     color: colors.foreground,
   },
-  addToCartButton: {
+  stickyCartButton: {
     backgroundColor: colors.primary,
     paddingVertical: verticalScale(spacing[3]),
     paddingHorizontal: horizontalScale(spacing[6]),
     borderRadius: radii.full,
   },
-  addToCartDisabled: {
-    opacity: 0.5,
-  },
-  addToCartText: {
-    fontFamily: fonts.sans.medium,
+  stickyCartText: {
+    fontFamily: fonts.sans.semiBold,
     fontSize: moderateScale(fontSizes.base),
     color: colors.primaryForeground,
+  },
+  bottomSpacer: {
+    height: verticalScale(spacing[8]),
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  imageSkeleton: {
+    width: "100%",
+    aspectRatio: 3 / 4,
+    backgroundColor: colors.muted,
+  },
+  contentSkeleton: {
+    padding: moderateScale(spacing[4]),
+    gap: verticalScale(spacing[3]),
+  },
+  skeletonLine: {
+    height: verticalScale(16),
+    backgroundColor: colors.muted,
+    borderRadius: radii.sm,
+    width: "80%",
   },
   emptyContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.background,
-  },
-  loadingContainer: {
-    flex: 1,
     backgroundColor: colors.background,
   },
   emptyText: {

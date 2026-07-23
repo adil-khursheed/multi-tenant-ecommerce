@@ -10,19 +10,21 @@ import Animated, {
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
 
 type AccordionGroupProps = {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  icon?: React.ReactNode;
 };
 
 export function AccordionGroup({
   title,
   children,
   defaultOpen = true,
+  icon,
 }: AccordionGroupProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const rotation = useSharedValue(defaultOpen ? 0 : -90);
@@ -44,7 +46,10 @@ export function AccordionGroup({
   return (
     <View style={styles.container}>
       <Pressable style={styles.header} onPress={toggle}>
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.titleRow}>
+          {icon}
+          <Text style={styles.title}>{title}</Text>
+        </View>
         <Animated.View style={chevronStyle}>
           <HugeiconsIcon
             icon={ArrowDown01Icon}
@@ -70,6 +75,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
     marginBottom: verticalScale(spacing[4]),
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[2]),
   },
   title: {
     fontFamily: fonts.sans.medium,

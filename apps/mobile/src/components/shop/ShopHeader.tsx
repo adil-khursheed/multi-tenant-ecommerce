@@ -1,10 +1,14 @@
-import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 
 export type FilterParam = {
   key: string;
@@ -67,7 +71,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: fonts.serif.regular,
     fontSize: moderateScale(fontSizes["3xl"]),
-    color: colors.foreground,
+    color: colors.background,
     marginBottom: verticalScale(spacing[2]),
   },
   filtersContainer: {

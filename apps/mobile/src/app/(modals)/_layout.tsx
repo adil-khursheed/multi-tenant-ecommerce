@@ -5,6 +5,7 @@ export default function ModalsLayout() {
     <Stack screenOptions={{ headerShown: false, presentation: "modal" }}>
       <Stack.Screen name="login" />
       <Stack.Screen name="register" />
+      <Stack.Screen name="gallery" />
     </Stack>
   );
 }

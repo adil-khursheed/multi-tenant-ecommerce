@@ -13,6 +13,7 @@
     "@repo/types": "workspace:*",
     "@trpc/server": "^11.0.0-rc.366",
     "@trpc/client": "^11.0.0-rc.366",
+    "razorpay": "^2.9.6",
     "superjson": "^2.2.1",
     "zod": "^3.23.8"
   },

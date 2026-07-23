@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
   ArrowDown01Icon,
@@ -8,8 +8,12 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 
 type FilterBarProps = {
   activeFilterCount: number;
@@ -73,7 +77,7 @@ export function FilterBar({
             <HugeiconsIcon
               icon={GridViewIcon}
               size={moderateScale(18)}
-              color={viewMode === "grid" ? colors.foreground : colors.mutedForeground}
+              color={viewMode === "grid" ? colors.foreground : colors.muted}
               strokeWidth={1.5}
             />
           </Pressable>
@@ -90,7 +94,7 @@ export function FilterBar({
             <HugeiconsIcon
               icon={Menu01Icon}
               size={moderateScale(18)}
-              color={viewMode === "list" ? colors.foreground : colors.mutedForeground}
+              color={viewMode === "list" ? colors.foreground : colors.muted}
               strokeWidth={1.5}
             />
           </Pressable>
@@ -151,7 +155,7 @@ const styles = StyleSheet.create({
   resultCount: {
     fontFamily: fonts.sans.regular,
     fontSize: moderateScale(fontSizes.xs),
-    color: colors.mutedForeground,
+    color: colors.muted,
     textTransform: "uppercase",
     letterSpacing: 0.1 * fontSizes.xs,
   },

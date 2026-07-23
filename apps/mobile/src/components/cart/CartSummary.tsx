@@ -19,7 +19,7 @@ export function CartSummary() {
 
   const handleCheckout = () => {
     if (isLoggedIn) {
-      router.push("/checkout");
+      router.push("/(shop)/checkout");
     } else {
       router.push("/(modals)/login");
     }

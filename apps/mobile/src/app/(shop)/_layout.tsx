@@ -29,6 +29,13 @@ export default function ShopLayout() {
           headerBackTitle: "Shop",
         }}
       />
+      <Stack.Screen
+        name="checkout"
+        options={{
+          headerShown: false,
+          presentation: "card",
+        }}
+      />
     </Stack>
   );
 }
