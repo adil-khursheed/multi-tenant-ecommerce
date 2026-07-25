@@ -17,6 +17,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
 import { CustomerReviews } from "@/components/product/CustomerReviews";
 import { getImageUrl, ImageGallery } from "@/components/product/ImageGallery";
@@ -47,8 +48,7 @@ export default function ProductDetailScreen() {
   const trpc = useTRPC();
   const { formatPrice } = useCurrency();
   const { addItem } = useCart();
-  const { top } = useSafeAreaInsets();
-  const { bottom } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
 
   const scrollY = useSharedValue(0);
   const detailsLayoutY = useSharedValue(0);
@@ -267,6 +267,7 @@ export default function ProductDetailScreen() {
 
   return (
     <View style={styles.wrapper}>
+      <StatusBar style="dark" />
       {/* Animated Header */}
       <Animated.View
         style={[
@@ -295,7 +296,7 @@ export default function ProductDetailScreen() {
 
       <Animated.ScrollView
         style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: top }]}
         showsVerticalScrollIndicator={false}
         scrollIndicatorInsets={{ bottom: 70 }}
         onScroll={scrollHandler}

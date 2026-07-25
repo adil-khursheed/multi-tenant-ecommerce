@@ -1,13 +1,16 @@
-import { Dimensions, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
   runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+import {
+  height as SCREEN_HEIGHT,
+  width as SCREEN_WIDTH,
+} from "@/constants/responsive";
 
 const MAX_SCALE = 5;
 const MIN_SCALE = 1;

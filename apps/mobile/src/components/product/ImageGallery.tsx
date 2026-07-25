@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Carousel, {
   type ICarouselInstance,
 } from "react-native-reanimated-carousel";
@@ -9,11 +9,10 @@ import { Image } from "expo-image";
 import {
   horizontalScale,
   moderateScale,
+  width as SCREEN_WIDTH,
   verticalScale,
 } from "@/constants/responsive";
 import { colors, fonts, radii, spacing } from "@/constants/theme";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 type GalleryItem = {
   image: string | { url: string; id?: string | number; [k: string]: unknown };

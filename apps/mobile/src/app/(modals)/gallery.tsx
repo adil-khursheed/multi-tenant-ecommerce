@@ -1,24 +1,22 @@
 import { useCallback, useMemo, useState } from "react";
-import {
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Carousel from "react-native-reanimated-carousel";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Carousel from "react-native-reanimated-carousel";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { ZoomableImage } from "@/components/product/ZoomableImage";
+import {
+  horizontalScale,
+  moderateScale,
+  height as SCREEN_HEIGHT,
+  width as SCREEN_WIDTH,
+  verticalScale,
+} from "@/constants/responsive";
 import { fonts, radii } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function GalleryScreen() {
   const { images, index: initialIndex } = useLocalSearchParams<{
