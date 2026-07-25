@@ -20,7 +20,7 @@ import { useTRPC } from "@/utils/api";
 import { StepHeader } from "@/components/checkout/StepHeader";
 import { AddressCard } from "@/components/checkout/AddressCard";
 import { CheckoutInput } from "@/components/checkout/CheckoutInput";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type AddressForm = {
@@ -344,7 +344,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderStyle: "dashed",
-    borderRadius: radii.md,
     paddingVertical: verticalScale(spacing[3]),
     marginBottom: verticalScale(spacing[4]),
   },
@@ -396,7 +395,6 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: colors.foreground,
-    borderRadius: radii.sm,
     paddingVertical: verticalScale(spacing[3]),
     alignItems: "center",
     marginTop: verticalScale(spacing[2]),
@@ -424,7 +422,6 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     backgroundColor: colors.foreground,
-    borderRadius: radii.sm,
     paddingVertical: verticalScale(spacing[4]),
     alignItems: "center",
   },

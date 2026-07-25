@@ -200,7 +200,6 @@ const styles = StyleSheet.create({
     top: 0,
     height: verticalScale(3),
     backgroundColor: colors.primary,
-    borderRadius: radii.full,
   },
   badge: {
     position: "absolute",

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 type VariantOption = {
@@ -259,7 +259,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(spacing[3]),
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     overflow: "hidden",
   },
   textOptionActive: {

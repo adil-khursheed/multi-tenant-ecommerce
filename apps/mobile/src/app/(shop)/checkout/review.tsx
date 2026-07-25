@@ -25,7 +25,7 @@ import { useCheckout } from "@/providers/Checkout";
 import { useTRPC } from "@/utils/api";
 import { StepHeader } from "@/components/checkout/StepHeader";
 import { OrderSummaryItems } from "@/components/checkout/OrderSummaryItems";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 export default function CheckoutReview() {
@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.destructive}10`,
     borderWidth: 1,
     borderColor: `${colors.destructive}30`,
-    borderRadius: radii.sm,
     padding: horizontalScale(spacing[3]),
     marginBottom: verticalScale(spacing[4]),
   },
@@ -291,7 +290,6 @@ const styles = StyleSheet.create({
   section: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.md,
     backgroundColor: colors.card,
     marginBottom: verticalScale(spacing[3]),
     overflow: "hidden",
@@ -381,7 +379,6 @@ const styles = StyleSheet.create({
   },
   payButton: {
     backgroundColor: colors.foreground,
-    borderRadius: radii.sm,
     paddingVertical: verticalScale(spacing[4]),
     alignItems: "center",
   },
@@ -398,7 +395,6 @@ const styles = StyleSheet.create({
   backButton: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     paddingVertical: verticalScale(spacing[3]),
     alignItems: "center",
   },

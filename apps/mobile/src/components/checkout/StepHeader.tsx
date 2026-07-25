@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type Props = {
@@ -72,7 +72,6 @@ const styles = StyleSheet.create({
   numberBadge: {
     width: moderateScale(28),
     height: moderateScale(28),
-    borderRadius: radii.sm,
     backgroundColor: colors.muted,
     alignItems: "center",
     justifyContent: "center",

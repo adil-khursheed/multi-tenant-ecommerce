@@ -4,7 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react-native";
 
 import { useCart } from "@/providers/Cart";
 import { useCurrency } from "@/providers/Currency";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type Props = {

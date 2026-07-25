@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(spacing[8]),
     borderWidth: 1,
     borderColor: colors.primary,
-    borderRadius: radii.full,
     overflow: "hidden",
   },
 });

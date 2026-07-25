@@ -10,11 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import {
-  horizontalScale,
-  moderateScale,
-  verticalScale,
-} from "@/constants/responsive";
+import { horizontalScale, verticalScale } from "@/constants/responsive";
 import { colors, radii, spacing } from "@/constants/theme";
 
 type ProductCardSkeletonProps = {
@@ -62,7 +58,6 @@ function SkeletonRect({
           width,
           height,
           backgroundColor: colors.muted,
-          borderRadius: moderateScale(2),
         },
         animatedStyle,
         style,
@@ -80,7 +75,7 @@ export function ProductCardSkeleton({
         <SkeletonRect
           width={horizontalScale(120)}
           height={verticalScale(160)}
-          style={styles.gridImage}
+          style={styles.listImage}
         />
         <View style={styles.listContent}>
           <View style={styles.listBadges}>
@@ -94,10 +89,26 @@ export function ProductCardSkeleton({
               height={verticalScale(10)}
             />
           </View>
-          <SkeletonRect width="85%" height={verticalScale(18)} />
-          <SkeletonRect width="60%" height={verticalScale(12)} />
-          <SkeletonRect width="35%" height={verticalScale(10)} />
-          <SkeletonRect width="45%" height={verticalScale(14)} />
+          <SkeletonRect
+            width="85%"
+            height={verticalScale(18)}
+            style={styles.content}
+          />
+          <SkeletonRect
+            width="60%"
+            height={verticalScale(12)}
+            style={styles.content}
+          />
+          <SkeletonRect
+            width="35%"
+            height={verticalScale(10)}
+            style={styles.content}
+          />
+          <SkeletonRect
+            width="45%"
+            height={verticalScale(14)}
+            style={styles.content}
+          />
         </View>
       </View>
     );
@@ -105,12 +116,28 @@ export function ProductCardSkeleton({
 
   return (
     <View style={styles.gridContainer}>
-      <SkeletonRect width="100%" height={0} style={styles.gridImage} />
-      <View style={styles.gridContent}>
-        <SkeletonRect width="35%" height={verticalScale(8)} />
-        <SkeletonRect width="90%" height={verticalScale(14)} />
-        <SkeletonRect width="35%" height={verticalScale(10)} />
-        <SkeletonRect width="50%" height={verticalScale(14)} />
+      <SkeletonRect width="100%" height={verticalScale(170)} />
+      <View style={styles.gridContentWrapper}>
+        <SkeletonRect
+          width="35%"
+          height={verticalScale(8)}
+          style={styles.content}
+        />
+        <SkeletonRect
+          width="90%"
+          height={verticalScale(14)}
+          style={styles.content}
+        />
+        <SkeletonRect
+          width="35%"
+          height={verticalScale(10)}
+          style={styles.content}
+        />
+        <SkeletonRect
+          width="50%"
+          height={verticalScale(14)}
+          style={styles.content}
+        />
       </View>
     </View>
   );
@@ -121,13 +148,12 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: verticalScale(spacing[6]),
   },
-  gridImage: {
-    aspectRatio: 3 / 4,
-    borderRadius: 0,
-  },
-  gridContent: {
+  gridContentWrapper: {
     marginTop: verticalScale(spacing[3]),
     gap: verticalScale(spacing[1]),
+  },
+  content: {
+    borderRadius: radii.full,
   },
   listContainer: {
     flexDirection: "row",
@@ -136,9 +162,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     gap: horizontalScale(spacing[4]),
   },
-  listImage: {
-    borderRadius: radii.sm,
-  },
+  listImage: {},
   listContent: {
     flex: 1,
     justifyContent: "center",
@@ -149,7 +173,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: horizontalScale(spacing[2]),
   },
-  listBadge: {
-    borderRadius: radii.sm,
-  },
+  listBadge: {},
 });

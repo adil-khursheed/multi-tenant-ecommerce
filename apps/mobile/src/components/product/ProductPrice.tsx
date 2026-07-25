@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 import { useCurrency } from "@/providers/Currency";
 
@@ -109,7 +109,6 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.primary}15`,
     paddingHorizontal: horizontalScale(spacing[1.5]),
     paddingVertical: verticalScale(1),
-    borderRadius: radii.sm,
   },
   discountText: {
     fontFamily: fonts.sans.medium,

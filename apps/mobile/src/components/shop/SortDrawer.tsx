@@ -4,7 +4,7 @@ import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/
 
 import { sorting } from "@repo/types";
 
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
 
 type SortDrawerProps = {
@@ -96,7 +96,6 @@ const styles = StyleSheet.create({
   option: {
     paddingHorizontal: horizontalScale(spacing[4]),
     paddingVertical: verticalScale(spacing[3.5]),
-    borderRadius: radii.sm,
   },
   optionActive: {
     backgroundColor: colors.primary,

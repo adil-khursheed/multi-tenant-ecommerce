@@ -14,7 +14,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/providers/Auth";
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -154,13 +154,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.md,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
   },
   button: {
     backgroundColor: colors.primary,
-    borderRadius: radii.md,
     paddingVertical: spacing[3.5],
     alignItems: "center",
     marginTop: spacing[2],

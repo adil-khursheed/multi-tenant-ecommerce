@@ -79,7 +79,6 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.md,
     padding: horizontalScale(spacing[4]),
     backgroundColor: colors.card,
   },
@@ -124,7 +123,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.muted,
     paddingHorizontal: horizontalScale(spacing[2]),
     paddingVertical: verticalScale(spacing[0.5]),
-    borderRadius: radii.sm,
   },
   defaultBadgeText: {
     fontFamily: fonts.sans.medium,

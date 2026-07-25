@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 const COD_FEE = 50;
@@ -119,7 +119,6 @@ const styles = StyleSheet.create({
     height: verticalScale(36),
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     backgroundColor: colors.card,
     paddingHorizontal: horizontalScale(spacing[3]),
     fontFamily: fonts.sans.regular,
@@ -132,7 +131,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(spacing[3]),
     height: verticalScale(36),
     backgroundColor: colors.foreground,
-    borderRadius: radii.sm,
     alignItems: "center",
     justifyContent: "center",
   },

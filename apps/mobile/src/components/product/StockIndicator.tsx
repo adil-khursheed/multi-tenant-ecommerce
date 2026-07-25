@@ -9,7 +9,7 @@ import Animated, {
   cancelAnimation,
 } from "react-native-reanimated";
 
-import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { moderateScale, horizontalScale } from "@/constants/responsive";
 
 type Props = {
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   dot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: radii.full,
   },
   dotSuccess: {
     backgroundColor: colors.success,

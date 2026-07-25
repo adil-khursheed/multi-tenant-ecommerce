@@ -102,7 +102,6 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.muted}40`,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     padding: moderateScale(spacing[4]),
     marginTop: verticalScale(spacing[6]),
     gap: verticalScale(spacing[4]),
@@ -115,7 +114,6 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: moderateScale(56),
     height: moderateScale(56),
-    borderRadius: radii.md,
     overflow: "hidden",
     borderWidth: 2,
     borderColor: colors.background,
@@ -177,7 +175,6 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(spacing[3]),
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
   },
   visitButtonText: {
     fontFamily: fonts.sans.medium,

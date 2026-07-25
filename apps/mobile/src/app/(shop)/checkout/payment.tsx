@@ -191,7 +191,6 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.destructive}10`,
     borderWidth: 1,
     borderColor: `${colors.destructive}30`,
-    borderRadius: radii.sm,
     padding: horizontalScale(spacing[3]),
     marginBottom: verticalScale(spacing[4]),
   },
@@ -210,7 +209,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.muted,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     padding: horizontalScale(spacing[4]),
     alignItems: "center",
     marginBottom: verticalScale(spacing[4]),
@@ -260,7 +258,6 @@ const styles = StyleSheet.create({
   },
   proceedButton: {
     backgroundColor: colors.foreground,
-    borderRadius: radii.sm,
     paddingVertical: verticalScale(spacing[4]),
     alignItems: "center",
   },

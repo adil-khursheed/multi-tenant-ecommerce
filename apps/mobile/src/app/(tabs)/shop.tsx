@@ -176,6 +176,14 @@ export default function ShopScreen() {
 
   const keyExtractor = useCallback((item: ShopProduct) => String(item.id), []);
 
+  const productSkeletonArray = useMemo(() => {
+    return Array.from({ length: 6 }).map((_, i) => i);
+  }, []);
+
+  const productSkeletonRender = useCallback(() => {
+    return <ProductCardSkeleton viewMode={viewMode} />;
+  }, [viewMode]);
+
   const ListFooter = useCallback(() => {
     if (!productsQuery.hasNextPage || productsQuery.isFetchingNextPage) {
       return (
@@ -240,11 +248,21 @@ export default function ShopScreen() {
           </View>
 
           {productsQuery.isLoading ? (
-            <View style={styles.skeletonGrid}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <ProductCardSkeleton key={i} viewMode={viewMode} />
-              ))}
-            </View>
+            <AnimatedLegendList
+              data={productSkeletonArray}
+              renderItem={productSkeletonRender}
+              keyExtractor={(item) => String(item)}
+              numColumns={viewMode === "grid" ? 2 : 1}
+              estimatedItemSize={viewMode === "grid" ? 280 : 200}
+              drawDistance={300}
+              recycleItems
+              maintainVisibleContentPosition
+              contentContainerStyle={styles.listContent}
+              columnWrapperStyle={
+                viewMode === "grid" ? styles.columnWrapper : undefined
+              }
+              key={viewMode}
+            />
           ) : (
             <AnimatedLegendList
               data={products}
@@ -317,8 +335,8 @@ const styles = StyleSheet.create({
   },
   listHeaderWrapper: {
     backgroundColor: colors.primary,
-    borderBottomLeftRadius: moderateScale(radii["2xl"]),
-    borderBottomRightRadius: moderateScale(radii["2xl"]),
+    borderBottomLeftRadius: radii["2xl"],
+    borderBottomRightRadius: radii["2xl"],
   },
   listHeader: {
     paddingVertical: verticalScale(spacing[3]),

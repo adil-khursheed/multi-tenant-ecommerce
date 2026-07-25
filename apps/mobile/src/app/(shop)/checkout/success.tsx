@@ -172,7 +172,6 @@ const styles = StyleSheet.create({
   timelineIcon: {
     width: moderateScale(40),
     height: moderateScale(40),
-    borderRadius: radii.md,
     backgroundColor: colors.muted,
     alignItems: "center",
     justifyContent: "center",
@@ -219,7 +218,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.foreground,
     textAlign: "center",
     paddingVertical: verticalScale(spacing[3]),
-    borderRadius: radii.sm,
     textTransform: "uppercase",
     letterSpacing: 0.5,
     overflow: "hidden",

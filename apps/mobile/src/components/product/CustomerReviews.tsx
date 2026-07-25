@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 type Review = {
@@ -241,13 +241,11 @@ const styles = StyleSheet.create({
     flex: 1,
     height: moderateScale(8),
     backgroundColor: colors.muted,
-    borderRadius: radii.sm,
     overflow: "hidden",
   },
   barFill: {
     height: "100%",
     backgroundColor: colors.primary,
-    borderRadius: radii.sm,
   },
   distributionCount: {
     fontFamily: fonts.sans.regular,
@@ -260,7 +258,6 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(spacing[8]),
     alignItems: "center",
     backgroundColor: `${colors.muted}30`,
-    borderRadius: radii.sm,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: `${colors.border}50`,
   },

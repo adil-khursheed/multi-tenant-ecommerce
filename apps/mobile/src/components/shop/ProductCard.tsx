@@ -399,7 +399,6 @@ const styles = StyleSheet.create({
     height: verticalScale(160),
     backgroundColor: colors.muted,
     overflow: "hidden",
-    borderRadius: radii.sm,
   },
   listImage: {
     width: "100%",
@@ -451,7 +450,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     paddingHorizontal: horizontalScale(spacing[2]),
     paddingVertical: verticalScale(spacing[0.5]),
-    borderRadius: radii.sm,
   },
   badgeText: {
     fontFamily: fonts.sans.medium,
@@ -510,7 +508,6 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.primary}15`,
     paddingHorizontal: horizontalScale(spacing[1.5]),
     paddingVertical: verticalScale(1),
-    borderRadius: radii.sm,
   },
   ribbonText: {
     fontFamily: fonts.sans.medium,

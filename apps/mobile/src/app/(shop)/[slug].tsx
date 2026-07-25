@@ -496,7 +496,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.muted,
     paddingHorizontal: horizontalScale(spacing[2]),
     paddingVertical: verticalScale(spacing[1]),
-    borderRadius: radii.full,
   },
   ratingNumber: {
     fontFamily: fonts.sans.semiBold,
@@ -544,7 +543,6 @@ const styles = StyleSheet.create({
     gap: horizontalScale(spacing[2]),
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.md,
     padding: verticalScale(spacing[1]),
   },
   quantityButton: {
@@ -553,7 +551,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.muted,
-    borderRadius: radii.sm,
   },
   quantityValue: {
     fontFamily: fonts.sans.medium,
@@ -572,7 +569,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.primary,
     paddingVertical: verticalScale(spacing[3]),
-    borderRadius: radii.full,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -591,7 +587,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     backgroundColor: colors.card,
   },
   stickyBottom: {
@@ -629,7 +624,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingVertical: verticalScale(spacing[3]),
     paddingHorizontal: horizontalScale(spacing[6]),
-    borderRadius: radii.full,
   },
   stickyCartText: {
     fontFamily: fonts.sans.semiBold,
@@ -655,7 +649,6 @@ const styles = StyleSheet.create({
   skeletonLine: {
     height: verticalScale(16),
     backgroundColor: colors.muted,
-    borderRadius: radii.sm,
     width: "80%",
   },
   emptyContainer: {

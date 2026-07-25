@@ -7,7 +7,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
-import { colors, fonts, spacing, radii } from "@/constants/theme";
+import { colors, fonts, spacing } from "@/constants/theme";
 import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 const signals = [
@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
     gap: verticalScale(spacing[1.5]),
     paddingVertical: verticalScale(spacing[3]),
     backgroundColor: `${colors.muted}80`,
-    borderRadius: radii.sm,
   },
   label: {
     fontFamily: fonts.sans.medium,

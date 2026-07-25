@@ -13,7 +13,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 
 type FilterBarProps = {
   activeFilterCount: number;
@@ -126,7 +126,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.card,
-    borderRadius: radii.sm,
   },
   sortButton: {
     flexDirection: "row",
@@ -138,7 +137,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.card,
-    borderRadius: radii.sm,
   },
   buttonText: {
     fontFamily: fonts.sans.medium,

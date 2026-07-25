@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@/providers/Auth";
 import { useCart } from "@/providers/Cart";
 import { useCurrency } from "@/providers/Currency";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
 
 export function CartSummary() {
@@ -81,7 +81,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     textAlign: "center",
     paddingVertical: verticalScale(spacing[3]),
-    borderRadius: radii.full,
     overflow: "hidden",
   },
   buttonOutlined: {

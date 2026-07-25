@@ -357,7 +357,6 @@ const styles = StyleSheet.create({
     backgroundColor: `${colors.muted}80`,
     paddingHorizontal: 4,
     paddingVertical: 2,
-    borderRadius: 4,
   },
   list: {
     marginVertical: verticalScale(spacing[2]),
@@ -388,7 +387,6 @@ const styles = StyleSheet.create({
   quoteBar: {
     width: 3,
     backgroundColor: colors.primary,
-    borderRadius: 2,
     marginRight: moderateScale(spacing[2]),
   },
   quoteContent: {

@@ -5,7 +5,7 @@ import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@g
 import type { RouterOutputs } from "@repo/api";
 
 import { AccordionGroup } from "./AccordionGroup";
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
 
 type FilterOptions = RouterOutputs["product"]["getFilterOptions"];
@@ -370,7 +370,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingVertical: verticalScale(spacing[3.5]),
     alignItems: "center",
-    borderRadius: radii.sm,
   },
   applyButtonDisabled: {
     opacity: 0.6,
@@ -411,7 +410,6 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(spacing[2]),
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     backgroundColor: colors.card,
   },
   chipActive: {
@@ -445,7 +443,6 @@ const styles = StyleSheet.create({
     gap: horizontalScale(spacing[2]),
     paddingVertical: verticalScale(spacing[2]),
     paddingHorizontal: horizontalScale(spacing[2]),
-    borderRadius: radii.sm,
   },
   ratingRowActive: {
     backgroundColor: colors.muted,
@@ -485,7 +482,6 @@ const styles = StyleSheet.create({
     height: moderateScale(18),
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.card,

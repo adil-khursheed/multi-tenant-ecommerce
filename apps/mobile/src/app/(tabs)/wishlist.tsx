@@ -201,8 +201,8 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(spacing[3]),
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
-    borderBottomLeftRadius: moderateScale(radii["2xl"]),
-    borderBottomRightRadius: moderateScale(radii["2xl"]),
+    borderBottomLeftRadius: radii["2xl"],
+    borderBottomRightRadius: radii["2xl"],
   },
   headerRow: {
     flexDirection: "row",

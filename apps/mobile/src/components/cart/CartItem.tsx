@@ -5,7 +5,7 @@ import { HugeiconsIcon } from "@hugeicons/react-native";
 
 import { useCurrency } from "@/providers/Currency";
 import { type FlattenedCartItem, useCart } from "@/providers/Cart";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
 
 type Props = {
@@ -114,7 +114,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: horizontalScale(64),
     height: verticalScale(80),
-    borderRadius: radii.md,
     overflow: "hidden",
     backgroundColor: colors.muted,
   },
@@ -152,7 +151,6 @@ const styles = StyleSheet.create({
     gap: horizontalScale(spacing[1.5]),
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.md,
     paddingVertical: verticalScale(spacing[1]),
     paddingHorizontal: horizontalScale(spacing[1.5]),
   },
@@ -161,7 +159,6 @@ const styles = StyleSheet.create({
     height: verticalScale(28),
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: radii.sm,
     backgroundColor: colors.muted,
   },
   quantityValue: {

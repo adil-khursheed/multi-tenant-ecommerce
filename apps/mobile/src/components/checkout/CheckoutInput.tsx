@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TextInput, TextInputProps, View } from "react-native";
 
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type Props = TextInputProps & {
@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     height: verticalScale(48),
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
     backgroundColor: colors.card,
     paddingHorizontal: horizontalScale(spacing[3]),
     fontFamily: fonts.sans.regular,

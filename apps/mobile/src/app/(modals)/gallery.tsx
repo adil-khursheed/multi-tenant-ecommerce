@@ -15,7 +15,7 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
 import { ZoomableImage } from "@/components/product/ZoomableImage";
-import { fonts } from "@/constants/theme";
+import { fonts, radii } from "@/constants/theme";
 import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 22,
+    borderRadius: radii.full,
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   counter: {
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
     paddingHorizontal: horizontalScale(12),
     paddingVertical: verticalScale(4),
-    borderRadius: 14,
+    borderRadius: radii.full,
     overflow: "hidden",
   },
   pagination: {
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   dot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: radii.full,
     backgroundColor: "rgba(255,255,255,0.4)",
   },
   dotActive: {

@@ -11,7 +11,7 @@ import { HugeiconsIcon } from "@hugeicons/react-native";
 
 import { AccordionGroup } from "@/components/shop/AccordionGroup";
 import { RichText } from "@/components/rich-text/RichText";
-import { colors, fonts, fontSizes, spacing, radii } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 const CM_TO_INCHES = 0.3937;
@@ -372,7 +372,6 @@ const styles = StyleSheet.create({
   metaCard: {
     backgroundColor: `${colors.muted}80`,
     padding: moderateScale(spacing[3]),
-    borderRadius: radii.sm,
   },
   metaLabel: {
     fontFamily: fonts.sans.medium,

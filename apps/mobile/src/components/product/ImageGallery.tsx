@@ -11,7 +11,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, spacing } from "@/constants/theme";
+import { colors, fonts, radii, spacing } from "@/constants/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   dot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: radii.full,
     backgroundColor: colors.border,
   },
   dotActive: {

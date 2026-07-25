@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 
 import { useCurrency } from "@/providers/Currency";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type CartItem = {
@@ -71,7 +71,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: horizontalScale(56),
     height: verticalScale(72),
-    borderRadius: radii.sm,
     overflow: "hidden",
     backgroundColor: colors.muted,
     position: "relative",
@@ -90,7 +89,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.foreground,
     paddingHorizontal: horizontalScale(spacing[1]),
     paddingVertical: verticalScale(1),
-    borderRadius: radii.sm,
     margin: 4,
   },
   quantityText: {

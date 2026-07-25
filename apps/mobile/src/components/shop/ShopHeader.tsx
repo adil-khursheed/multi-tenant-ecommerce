@@ -8,7 +8,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 
 export type FilterParam = {
   key: string;
@@ -88,7 +88,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.foreground,
     paddingHorizontal: horizontalScale(spacing[3]),
     paddingVertical: verticalScale(spacing[1.5]),
-    borderRadius: radii.full,
   },
   chipText: {
     fontFamily: fonts.sans.medium,
