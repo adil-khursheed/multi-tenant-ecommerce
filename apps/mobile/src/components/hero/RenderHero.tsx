@@ -1,9 +1,7 @@
-import React from "react";
-
 import { HeroSlider } from "@/components/hero/HeroSlider";
 import { HighImpactHero } from "@/components/hero/HighImpactHero";
-import { MediumImpactHero } from "@/components/hero/MediumImpactHero";
 import { LowImpactHero } from "@/components/hero/LowImpactHero";
+import { MediumImpactHero } from "@/components/hero/MediumImpactHero";
 
 type HeroSlide = {
   id?: string | null;

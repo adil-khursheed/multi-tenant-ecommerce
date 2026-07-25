@@ -2,7 +2,9 @@ import { z } from "zod";
 
 import { baseProcedure } from "../trpc";
 
-type RawMedia = { url: string; caption?: unknown; id?: string | number } | string;
+type RawMedia =
+  | { url: string; caption?: unknown; id?: string | number }
+  | string;
 
 type RawLink = {
   link: {
@@ -23,16 +25,18 @@ type RawHero = {
   richText?: unknown;
   media?: RawMedia;
   links?: RawLink[];
-  featuredProduct?: {
-    title?: string;
-    slug?: string;
-    priceInINR?: number;
-    effectivePrice?: number;
-    discountPercent?: number;
-    gallery?: {
-      image: { url: string } | string;
-    }[];
-  } | string;
+  featuredProduct?:
+    | {
+        title?: string;
+        slug?: string;
+        priceInINR?: number;
+        effectivePrice?: number;
+        discountPercent?: number;
+        gallery?: {
+          image: { url: string } | string;
+        }[];
+      }
+    | string;
   slides?: {
     id?: string | null;
     media: RawMedia;
@@ -70,7 +74,10 @@ function resolveLink(rawLink: RawLink | undefined): {
     typeof link.reference.value === "object" &&
     link.reference.value.slug
   ) {
-    const prefix = link.reference.relationTo === "pages" ? "" : `/${link.reference.relationTo}`;
+    const prefix =
+      link.reference.relationTo === "pages"
+        ? ""
+        : `/${link.reference.relationTo}`;
     href = `${prefix}/${link.reference.value.slug}`;
   }
 
@@ -113,9 +120,9 @@ export const pagesRouter = {
       const hero = page.hero as RawHero;
       if (!hero?.type || hero.type === "none") return null;
 
-      const resolvedLinks = hero.links
-        ?.map(resolveLink)
-        .filter(Boolean) as { href: string; label: string; appearance: string }[] | undefined;
+      const resolvedLinks = hero.links?.map(resolveLink).filter(Boolean) as
+        | { href: string; label: string; appearance: string }[]
+        | undefined;
 
       switch (hero.type) {
         case "heroSlider": {
@@ -124,7 +131,7 @@ export const pagesRouter = {
             const link = resolveLink(slide.links?.[0]);
             return {
               id: slide.id,
-              mediaUrl: resolveMediaUrl(slide.media),
+              mediaUrl: slide.media,
               heading: slide.heading ?? null,
               subheading: slide.subheading ?? null,
               linkHref: link?.href ?? null,

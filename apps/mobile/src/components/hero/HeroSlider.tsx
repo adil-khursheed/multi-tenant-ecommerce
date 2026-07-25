@@ -1,18 +1,17 @@
 import { useCallback, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
 import Carousel, {
   type ICarouselInstance,
 } from "react-native-reanimated-carousel";
 
-import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 
 import {
   horizontalScale,
   moderateScale,
-  verticalScale,
   width as SCREEN_WIDTH,
+  verticalScale,
 } from "@/constants/responsive";
 import { colors, fonts, radii, spacing } from "@/constants/theme";
 
@@ -44,7 +43,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
 
   if (validSlides.length === 0) return null;
 
-  const slideHeight = SCREEN_WIDTH * (4 / 3);
+  const slideHeight = SCREEN_WIDTH * (5 / 3);
 
   return (
     <View style={styles.container}>
@@ -60,51 +59,53 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           pagingEnabled
           snapEnabled
           onSnapToItem={handleSnap}
-          renderItem={({ item }) => (
-            <Pressable
-              style={styles.slide}
-              onPress={() => {
-                if (item.linkHref) {
-                  if (item.linkHref.startsWith("http")) {
-                    // external link
-                  } else {
-                    router.push(item.linkHref as any);
+          renderItem={({ item }) => {
+            const imageUrl =
+              item.mediaUrl &&
+              typeof item.mediaUrl === "object" &&
+              "url" in item.mediaUrl
+                ? `${process.env.EXPO_PUBLIC_API_URL}${(item.mediaUrl as { url: string }).url}`
+                : null;
+
+            return (
+              <Pressable
+                style={styles.slide}
+                onPress={() => {
+                  if (item.linkHref) {
+                    if (item.linkHref.startsWith("http")) {
+                      // external link
+                    } else {
+                      router.push(item.linkHref as any);
+                    }
                   }
-                }
-              }}
-            >
-              {item.mediaUrl && (
-                <Image
-                  source={{ uri: item.mediaUrl }}
-                  style={styles.slideImage}
-                  contentFit="cover"
-                  transition={300}
-                />
-              )}
+                }}
+              >
+                {imageUrl && (
+                  <Image
+                    source={{ uri: imageUrl }}
+                    style={styles.slideImage}
+                    contentFit="cover"
+                    transition={300}
+                  />
+                )}
 
-              {/* Gradient overlay for text readability */}
-              <LinearGradient
-                colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.2)", "transparent"]}
-                locations={[0, 0.4, 1]}
-                style={styles.gradientOverlay}
-              />
-
-              {/* Text overlay — bottom-left */}
-              <View style={styles.textOverlay}>
-                {item.heading && (
-                  <Text style={styles.heading}>{item.heading}</Text>
-                )}
-                {item.subheading && (
-                  <Text style={styles.subheading}>{item.subheading}</Text>
-                )}
-                {item.linkLabel && (
-                  <View style={styles.ctaBadge}>
-                    <Text style={styles.ctaText}>{item.linkLabel}</Text>
-                  </View>
-                )}
-              </View>
-            </Pressable>
-          )}
+                {/* Text overlay — bottom-left */}
+                <View style={styles.textOverlay}>
+                  {item.heading && (
+                    <Text style={styles.heading}>{item.heading}</Text>
+                  )}
+                  {item.subheading && (
+                    <Text style={styles.subheading}>{item.subheading}</Text>
+                  )}
+                  {item.linkLabel && (
+                    <View style={styles.ctaBadge}>
+                      <Text style={styles.ctaText}>{item.linkLabel}</Text>
+                    </View>
+                  )}
+                </View>
+              </Pressable>
+            );
+          }}
         />
 
         {/* Pagination dots */}
@@ -126,6 +127,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+    position: "relative",
   },
   carouselContainer: {
     position: "relative",
@@ -145,6 +147,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    zIndex: 10,
   },
   textOverlay: {
     position: "absolute",
