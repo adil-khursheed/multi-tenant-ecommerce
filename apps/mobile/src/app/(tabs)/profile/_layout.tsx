@@ -6,7 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react-native";
 
 import { useAuth } from "@/providers/Auth";
 import { ProfileHeader } from "@/components/profile";
-import { MaterialTopTabs } from "@/components/shared/MaterialTopTabsConfig";
+import { TopTabs } from "expo-router/js-top-tabs";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
 
@@ -43,9 +43,9 @@ export default function ProfileLayout() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ProfileHeader name={user.name ?? ""} email={user.email ?? ""} />
 
-      <MaterialTopTabs
+      <TopTabs
         style={styles.tabs}
-        screenOptions={({ route }) => ({
+        screenOptions={{
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.mutedForeground,
           tabBarIndicatorStyle: {
@@ -62,12 +62,12 @@ export default function ProfileLayout() {
             borderBottomWidth: StyleSheet.hairlineWidth,
             borderBottomColor: colors.border,
           },
-          tabBarLabel:
-            route.name === "index"
-              ? "Profile"
-              : route.name.charAt(0).toUpperCase() + route.name.slice(1),
-        })}
-      />
+        }}
+      >
+        <TopTabs.Screen name="index" options={{ tabBarLabel: "Profile" }} />
+        <TopTabs.Screen name="addresses" options={{ tabBarLabel: "Addresses" }} />
+        <TopTabs.Screen name="orders" options={{ tabBarLabel: "Orders" }} />
+      </TopTabs>
     </View>
   );
 }
