@@ -736,7 +736,7 @@ export interface Page {
   title: string;
   publishedOn?: string | null;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
+    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'heroSlider';
     richText?: {
       root: {
         type: string;
@@ -773,6 +773,33 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
     featuredProduct?: (string | null) | Product;
+    slides?:
+      | {
+          media: string | Media;
+          heading?: string | null;
+          subheading?: string | null;
+          links?:
+            | {
+                link: {
+                  type?: ('reference' | 'custom') | null;
+                  newTab?: boolean | null;
+                  reference?: {
+                    relationTo: 'pages';
+                    value: string | Page;
+                  } | null;
+                  url?: string | null;
+                  label: string;
+                  /**
+                   * Choose how the link should be rendered.
+                   */
+                  appearance?: ('default' | 'outline') | null;
+                };
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   layout: (
     | CallToActionBlock
@@ -2107,6 +2134,29 @@ export interface PagesSelect<T extends boolean = true> {
             };
         media?: T;
         featuredProduct?: T;
+        slides?:
+          | T
+          | {
+              media?: T;
+              heading?: T;
+              subheading?: T;
+              links?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          appearance?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+            };
       };
   layout?:
     | T

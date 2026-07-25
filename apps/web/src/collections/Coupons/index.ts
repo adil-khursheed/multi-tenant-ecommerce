@@ -3,6 +3,7 @@ import type { CollectionConfig } from "payload";
 export const Coupons: CollectionConfig = {
   slug: "coupons",
   admin: {
+    group: "Ecommerce",
     useAsTitle: "code",
     defaultColumns: [
       "code",
@@ -12,6 +13,7 @@ export const Coupons: CollectionConfig = {
       "usageCount",
       "expiresAt",
     ],
+    hidden: ({ user }) => !user.roles.includes("admin"),
   },
   access: {
     read: () => true,
@@ -32,7 +34,8 @@ export const Coupons: CollectionConfig = {
       },
       hooks: {
         beforeValidate: [
-          ({ value }) => (typeof value === "string" ? value.toUpperCase() : value),
+          ({ value }) =>
+            typeof value === "string" ? value.toUpperCase() : value,
         ],
       },
     },

@@ -34,6 +34,10 @@ export const hero: Field = {
           label: "Low Impact",
           value: "lowImpact",
         },
+        {
+          label: "Hero Slider",
+          value: "heroSlider",
+        },
       ],
       required: true,
     },
@@ -73,6 +77,37 @@ export const hero: Field = {
         condition: (_, { type } = {}) => ["highImpact"].includes(type),
       },
       relationTo: "products",
+    },
+    {
+      name: "slides",
+      type: "array",
+      admin: {
+        condition: (_, { type } = {}) => type === "heroSlider",
+      },
+      fields: [
+        {
+          name: "media",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+        },
+        {
+          name: "heading",
+          type: "text",
+        },
+        {
+          name: "subheading",
+          type: "text",
+        },
+        linkGroup({
+          overrides: {
+            maxRows: 1,
+          },
+        }),
+      ],
+      maxRows: 10,
+      minRows: 1,
+      label: "Slides",
     },
   ],
   label: false,

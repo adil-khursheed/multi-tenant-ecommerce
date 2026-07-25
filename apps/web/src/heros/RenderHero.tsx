@@ -1,12 +1,14 @@
 import React from "react";
 
 import { HighImpactHero } from "@/heros/HighImpact";
+import { HeroSlider } from "@/heros/HeroSlider";
 import { LowImpactHero } from "@/heros/LowImpact";
 import { MediumImpactHero } from "@/heros/MediumImpact";
 import type { Page } from "@/payload-types";
 
 const heroes = {
   highImpact: HighImpactHero,
+  heroSlider: HeroSlider,
   lowImpact: LowImpactHero,
   mediumImpact: MediumImpactHero,
 };
