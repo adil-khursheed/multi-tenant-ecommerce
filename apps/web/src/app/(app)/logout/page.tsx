@@ -1,23 +1,22 @@
-import type { Metadata } from 'next'
+import React from "react";
+import type { Metadata } from "next";
 
-import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import React from 'react'
-
-import { LogoutPage } from './LogoutPage'
+import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
+import { LogoutPage } from "./LogoutPage";
 
 export default async function Logout() {
   return (
     <div className="container max-w-lg my-16">
       <LogoutPage />
     </div>
-  )
+  );
 }
 
 export const metadata: Metadata = {
-  description: 'You have been logged out.',
+  description: "You have been logged out.",
   openGraph: mergeOpenGraph({
-    title: 'Logout',
-    url: '/logout',
+    title: "Logout",
+    url: "/logout",
   }),
-  title: 'Logout',
-}
+  title: "Logout",
+};

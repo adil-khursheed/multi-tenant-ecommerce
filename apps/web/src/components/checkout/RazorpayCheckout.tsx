@@ -25,7 +25,10 @@ declare global {
   interface Window {
     Razorpay: new (options: Record<string, unknown>) => {
       open: () => void;
-      on: (event: string, handler: (response: Record<string, unknown>) => void) => void;
+      on: (
+        event: string,
+        handler: (response: Record<string, unknown>) => void,
+      ) => void;
     };
   }
 }
@@ -85,7 +88,10 @@ export const RazorpayCheckout: React.FC<Props> = ({
             if (onSuccess) {
               onSuccess({
                 orderID: result.orderID as string,
-                accessToken: "accessToken" in result ? (result.accessToken as string) : undefined,
+                accessToken:
+                  "accessToken" in result
+                    ? (result.accessToken as string)
+                    : undefined,
               });
             }
           }
@@ -116,9 +122,7 @@ export const RazorpayCheckout: React.FC<Props> = ({
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", (response: Record<string, unknown>) => {
         const errorData = response.error as Record<string, unknown> | undefined;
-        setError(
-          (errorData?.description as string) || "Payment failed",
-        );
+        setError((errorData?.description as string) || "Payment failed");
         setIsLoading(false);
         setProcessingPayment(false);
       });

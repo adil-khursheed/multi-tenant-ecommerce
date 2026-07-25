@@ -1,7 +1,17 @@
-import { StyleSheet, Text, TextInput, TextInputProps, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  View,
+} from "react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type Props = TextInputProps & {
   label: string;

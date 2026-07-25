@@ -51,7 +51,10 @@ export const CODCheckout: React.FC<Props> = ({
         if (onSuccess) {
           onSuccess({
             orderID: result.orderID as string,
-            accessToken: "accessToken" in result ? (result.accessToken as string) : undefined,
+            accessToken:
+              "accessToken" in result
+                ? (result.accessToken as string)
+                : undefined,
           });
         }
       }

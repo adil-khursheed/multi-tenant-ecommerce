@@ -1,7 +1,7 @@
 import type { Access } from "payload";
 
-import { checkRole } from "@/access/utilities";
 import { getUserTenantIds } from "@/access/products";
+import { checkRole } from "@/access/utilities";
 
 /**
  * Reviews read access:

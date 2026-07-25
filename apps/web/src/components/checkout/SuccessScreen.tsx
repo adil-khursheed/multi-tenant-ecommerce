@@ -1,15 +1,16 @@
-'use client'
+"use client";
 
-import React from 'react'
-import Link from 'next/link'
-import { motion } from 'motion/react'
-import { CheckCircle2, Package, Truck, CreditCard } from 'lucide-react'
+import React from "react";
+import Link from "next/link";
 
-import { Button } from '@/components/ui/button'
+import { CheckCircle2, CreditCard, Package, Truck } from "lucide-react";
+import { motion } from "motion/react";
+
+import { Button } from "@/components/ui/button";
 
 type Props = {
-  orderID: string
-}
+  orderID: string;
+};
 
 export const SuccessScreen: React.FC<Props> = ({ orderID }) => {
   return (
@@ -22,11 +23,14 @@ export const SuccessScreen: React.FC<Props> = ({ orderID }) => {
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
         className="mb-8"
       >
         <div className="w-24 h-24 rounded-full bg-foreground flex items-center justify-center relative shadow-lg">
-          <CheckCircle2 className="w-12 h-12 text-background" strokeWidth={1.5} />
+          <CheckCircle2
+            className="w-12 h-12 text-background"
+            strokeWidth={1.5}
+          />
           <div className="absolute -inset-4 border border-foreground/10 rounded-full animate-[spin_10s_linear_infinite]" />
         </div>
       </motion.div>
@@ -46,7 +50,10 @@ export const SuccessScreen: React.FC<Props> = ({ orderID }) => {
         transition={{ delay: 0.5 }}
         className="font-sans text-[15px] text-muted-foreground mb-12"
       >
-        Order ID: <span className="font-mono text-foreground tracking-wider ml-1">{orderID}</span>
+        Order ID:{" "}
+        <span className="font-mono text-foreground tracking-wider ml-1">
+          {orderID}
+        </span>
       </motion.p>
 
       <motion.div
@@ -57,28 +64,49 @@ export const SuccessScreen: React.FC<Props> = ({ orderID }) => {
       >
         <div className="flex items-center gap-5 p-5 bg-card border border-border rounded-[4px] relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-1 h-full bg-foreground" />
-          <CreditCard className="w-6 h-6 text-foreground shrink-0" strokeWidth={1.5} />
+          <CreditCard
+            className="w-6 h-6 text-foreground shrink-0"
+            strokeWidth={1.5}
+          />
           <div>
-            <p className="font-serif text-[18px] text-foreground mb-1">Payment Confirmed</p>
-            <p className="text-[13px] font-sans text-muted-foreground">Your payment has been successfully processed</p>
+            <p className="font-serif text-[18px] text-foreground mb-1">
+              Payment Confirmed
+            </p>
+            <p className="text-[13px] font-sans text-muted-foreground">
+              Your payment has been successfully processed
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-5 p-5 bg-secondary/50 border border-border rounded-[4px] relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-border" />
-          <Package className="w-6 h-6 text-muted-foreground shrink-0" strokeWidth={1.5} />
+          <Package
+            className="w-6 h-6 text-muted-foreground shrink-0"
+            strokeWidth={1.5}
+          />
           <div>
-            <p className="font-serif text-[18px] text-muted-foreground mb-1">Order Processing</p>
-            <p className="text-[13px] font-sans text-muted-foreground">We are preparing your order</p>
+            <p className="font-serif text-[18px] text-muted-foreground mb-1">
+              Order Processing
+            </p>
+            <p className="text-[13px] font-sans text-muted-foreground">
+              We are preparing your order
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-5 p-5 bg-secondary/50 border border-border rounded-[4px] relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-border" />
-          <Truck className="w-6 h-6 text-muted-foreground shrink-0" strokeWidth={1.5} />
+          <Truck
+            className="w-6 h-6 text-muted-foreground shrink-0"
+            strokeWidth={1.5}
+          />
           <div>
-            <p className="font-serif text-[18px] text-muted-foreground mb-1">Delivery expected</p>
-            <p className="text-[13px] font-sans text-muted-foreground">Usually within 3-5 business days</p>
+            <p className="font-serif text-[18px] text-muted-foreground mb-1">
+              Delivery expected
+            </p>
+            <p className="text-[13px] font-sans text-muted-foreground">
+              Usually within 3-5 business days
+            </p>
           </div>
         </div>
       </motion.div>
@@ -90,16 +118,22 @@ export const SuccessScreen: React.FC<Props> = ({ orderID }) => {
         className="flex flex-col sm:flex-row gap-4 w-full max-w-[440px]"
       >
         <Link href={`/orders/${orderID}`} className="flex-1">
-          <Button variant="default" className="w-full h-12 uppercase tracking-[0.08em] font-medium rounded-[4px]">
+          <Button
+            variant="default"
+            className="w-full h-12 uppercase tracking-[0.08em] font-medium rounded-[4px]"
+          >
             View Order
           </Button>
         </Link>
         <Link href="/search" className="flex-1">
-          <Button variant="outline" className="w-full h-12 uppercase tracking-[0.08em] font-medium rounded-[4px]">
+          <Button
+            variant="outline"
+            className="w-full h-12 uppercase tracking-[0.08em] font-medium rounded-[4px]"
+          >
             Continue Shopping
           </Button>
         </Link>
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};

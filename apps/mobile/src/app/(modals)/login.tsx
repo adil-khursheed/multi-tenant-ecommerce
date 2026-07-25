@@ -10,11 +10,12 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useAuth } from "@/providers/Auth";
+import { useRouter } from "expo-router";
+
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
+import { useAuth } from "@/providers/Auth";
 
 export default function LoginScreen() {
   const router = useRouter();

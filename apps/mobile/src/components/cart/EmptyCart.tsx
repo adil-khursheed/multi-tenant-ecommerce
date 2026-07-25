@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
+
 import { ShoppingCart01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useRouter } from "expo-router";
 
+import { moderateScale, verticalScale } from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { verticalScale, moderateScale } from "@/constants/responsive";
 
 export function EmptyCart() {
   const router = useRouter();
@@ -23,8 +24,8 @@ export function EmptyCart() {
       <Text style={styles.title}>Your cart is empty</Text>
 
       <Text style={styles.subtitle}>
-      Looks like you haven&apos;t added anything yet. Browse our collection and find
-      something you love.
+        Looks like you haven&apos;t added anything yet. Browse our collection
+        and find something you love.
       </Text>
 
       <Text

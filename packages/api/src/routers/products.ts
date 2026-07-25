@@ -6,36 +6,40 @@ import { baseProcedure } from "../trpc";
 
 export const productsRouter = {
   getFilterOptions: baseProcedure.query(async ({ ctx }) => {
-    const [variantTypesResult, allOptionsResult, materialsResult, tenantsResult] =
-      await Promise.all([
-        ctx.payload.find({
-          collection: "variantTypes",
-          select: { label: true, name: true },
-          pagination: false,
-          depth: 0,
-        }),
-        ctx.payload.find({
-          collection: "variantOptions",
-          select: { variantType: true, label: true },
-          pagination: false,
-          depth: 0,
-        }),
-        ctx.payload.find({
-          collection: "materials",
-          where: { active: { equals: true } },
-          select: { name: true },
-          sort: "order",
-          pagination: false,
-          depth: 0,
-        }),
-        ctx.payload.find({
-          collection: "tenants",
-          where: { storeName: { exists: true } },
-          select: { storeName: true },
-          pagination: false,
-          depth: 0,
-        }),
-      ]);
+    const [
+      variantTypesResult,
+      allOptionsResult,
+      materialsResult,
+      tenantsResult,
+    ] = await Promise.all([
+      ctx.payload.find({
+        collection: "variantTypes",
+        select: { label: true, name: true },
+        pagination: false,
+        depth: 0,
+      }),
+      ctx.payload.find({
+        collection: "variantOptions",
+        select: { variantType: true, label: true },
+        pagination: false,
+        depth: 0,
+      }),
+      ctx.payload.find({
+        collection: "materials",
+        where: { active: { equals: true } },
+        select: { name: true },
+        sort: "order",
+        pagination: false,
+        depth: 0,
+      }),
+      ctx.payload.find({
+        collection: "tenants",
+        where: { storeName: { exists: true } },
+        select: { storeName: true },
+        pagination: false,
+        depth: 0,
+      }),
+    ]);
 
     const sizeTypeIds = new Set<string | number>();
     const colorTypeIds = new Set<string | number>();
@@ -169,81 +173,86 @@ export const productsRouter = {
       }
 
       // Run all filter pre-lookups in parallel
-      const [catResult, tenantResult, matResult, sizeProductIds, colorProductIds] =
-        await Promise.all([
-          category
-            ? ctx.payload.find({
-                collection: "categories",
-                where: { slug: { equals: category } },
-                limit: 1,
-                depth: 0,
-              })
-            : null,
-          brand
-            ? ctx.payload.find({
-                collection: "tenants",
-                where: { storeName: { equals: brand } },
-                limit: 1,
+      const [
+        catResult,
+        tenantResult,
+        matResult,
+        sizeProductIds,
+        colorProductIds,
+      ] = await Promise.all([
+        category
+          ? ctx.payload.find({
+              collection: "categories",
+              where: { slug: { equals: category } },
+              limit: 1,
+              depth: 0,
+            })
+          : null,
+        brand
+          ? ctx.payload.find({
+              collection: "tenants",
+              where: { storeName: { equals: brand } },
+              limit: 1,
+              pagination: false,
+              depth: 0,
+            })
+          : null,
+        material
+          ? ctx.payload.find({
+              collection: "materials",
+              where: { name: { equals: material } },
+              limit: 1,
+              pagination: false,
+              depth: 0,
+            })
+          : null,
+        size
+          ? (async () => {
+              const opts = await ctx.payload.find({
+                collection: "variantOptions",
+                where: { label: { equals: size } },
                 pagination: false,
                 depth: 0,
-              })
-            : null,
-          material
-            ? ctx.payload.find({
-                collection: "materials",
-                where: { name: { equals: material } },
-                limit: 1,
+              });
+              const optionIds = opts.docs.map((d) => d.id);
+              if (optionIds.length === 0) return [];
+              const variants = await ctx.payload.find({
+                collection: "variants",
+                where: { options: { in: optionIds } },
+                select: { product: true },
                 pagination: false,
                 depth: 0,
-              })
-            : null,
-          size
-            ? (async () => {
-                const opts = await ctx.payload.find({
-                  collection: "variantOptions",
-                  where: { label: { equals: size } },
-                  pagination: false,
-                  depth: 0,
-                });
-                const optionIds = opts.docs.map((d) => d.id);
-                if (optionIds.length === 0) return [];
-                const variants = await ctx.payload.find({
-                  collection: "variants",
-                  where: { options: { in: optionIds } },
-                  select: { product: true },
-                  pagination: false,
-                  depth: 0,
-                });
-                return variants.docs.map((v) => {
-                  const p = (v as any).product;
-                  return typeof p === "string" ? p : p?.id;
-                });
-              })()
-            : null,
-          color
-            ? (async () => {
-                const opts = await ctx.payload.find({
-                  collection: "variantOptions",
-                  where: { label: { equals: color } },
-                  pagination: false,
-                  depth: 0,
-                });
-                const optionIds = opts.docs.map((d) => d.id);
-                if (optionIds.length === 0) return [];
-                const variants = await ctx.payload.find({
-                  collection: "variants",
-                  where: { options: { in: optionIds } },
-                  select: { product: true },
-                  pagination: false,
-                  depth: 0,
-                });
-                return variants.docs.map((v) => {
-                  const p = (v as any).product;
-                  return typeof p === "string" ? p : p?.id;
-                });
-              })()
-            : null,
-        ]);
+              });
+              return variants.docs.map((v) => {
+                const p = (v as any).product;
+                return typeof p === "string" ? p : p?.id;
+              });
+            })()
+          : null,
+        color
+          ? (async () => {
+              const opts = await ctx.payload.find({
+                collection: "variantOptions",
+                where: { label: { equals: color } },
+                pagination: false,
+                depth: 0,
+              });
+              const optionIds = opts.docs.map((d) => d.id);
+              if (optionIds.length === 0) return [];
+              const variants = await ctx.payload.find({
+                collection: "variants",
+                where: { options: { in: optionIds } },
+                select: { product: true },
+                pagination: false,
+                depth: 0,
+              });
+              return variants.docs.map((v) => {
+                const p = (v as any).product;
+                return typeof p === "string" ? p : p?.id;
+              });
+            })()
+          : null,
+      ]);
 
       if (category) {
         if (catResult?.docs[0]) {
@@ -403,16 +412,23 @@ export const productsRouter = {
         resolvedSizeGuide = product.sizeGuide;
       } else if (product.categories?.length) {
         const firstCat = product.categories[0];
-        const categoryId = typeof firstCat === "object" ? firstCat.id : firstCat;
+        const categoryId =
+          typeof firstCat === "object" ? firstCat.id : firstCat;
         if (categoryId) {
-          const firstCategory = typeof firstCat === "object"
-            ? firstCat
-            : await ctx.payload.findByID({
-                collection: "categories",
-                id: categoryId,
-                depth: 1,
-              });
-          if (firstCategory && typeof firstCategory === "object" && firstCategory.sizeGuide && typeof firstCategory.sizeGuide === "object") {
+          const firstCategory =
+            typeof firstCat === "object"
+              ? firstCat
+              : await ctx.payload.findByID({
+                  collection: "categories",
+                  id: categoryId,
+                  depth: 1,
+                });
+          if (
+            firstCategory &&
+            typeof firstCategory === "object" &&
+            firstCategory.sizeGuide &&
+            typeof firstCategory.sizeGuide === "object"
+          ) {
             resolvedSizeGuide = firstCategory.sizeGuide;
           }
         }

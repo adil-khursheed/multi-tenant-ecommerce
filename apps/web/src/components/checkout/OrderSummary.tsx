@@ -12,9 +12,9 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+import { PriceBreakdown } from "@/components/checkout/PriceBreakdown";
 import { Media } from "@/components/Media";
 import { Price } from "@/components/Price";
-import { PriceBreakdown } from "@/components/checkout/PriceBreakdown";
 
 type Props = {
   selectedPaymentMethod?: "razorpay" | "cod";
@@ -87,11 +87,9 @@ export const OrderSummary: React.FC<Props> = ({
 
             const vendorName =
               typeof firstProduct === "object" && firstProduct
-                ? typeof firstProduct.tenant === "object" &&
-                  firstProduct.tenant
+                ? typeof firstProduct.tenant === "object" && firstProduct.tenant
                   ? ((firstProduct.tenant as Record<string, unknown>)
-                      .storeName as string) ||
-                    "Store"
+                      .storeName as string) || "Store"
                   : "Store"
                 : "Store";
 
@@ -212,7 +210,10 @@ export const OrderSummary: React.FC<Props> = ({
           <PriceBreakdown
             subtotal={subtotal}
             discount={discount}
-            couponCode={appliedCoupon?.code ?? (cart as Record<string, unknown>).couponCode as string | null}
+            couponCode={
+              appliedCoupon?.code ??
+              ((cart as Record<string, unknown>).couponCode as string | null)
+            }
             selectedPaymentMethod={selectedPaymentMethod}
             onApplyCoupon={onApplyCoupon}
             onRemoveCoupon={onRemoveCoupon}

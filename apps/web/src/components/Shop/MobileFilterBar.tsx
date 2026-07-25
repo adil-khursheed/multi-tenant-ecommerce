@@ -8,6 +8,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { sorting } from "@repo/types";
+import { StarRating } from "@/components/StarRating";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Drawer,
@@ -17,7 +18,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { StarRating } from "@/components/StarRating";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@/utilities/cn";
 import { createUrl } from "@/utilities/createUrl";
@@ -236,7 +236,9 @@ export const MobileFilterBar = () => {
                     return (
                       <div
                         key={stars}
-                        onClick={() => toggleLocalParam("rating", String(stars))}
+                        onClick={() =>
+                          toggleLocalParam("rating", String(stars))
+                        }
                         className={cn(
                           "flex items-center gap-2 p-2 cursor-pointer rounded-[2px]",
                           isActive
@@ -256,33 +258,38 @@ export const MobileFilterBar = () => {
 
               <SidebarGroup title="Occasion">
                 <div className="grid grid-cols-2 gap-2">
-                  {["Casual", "Festive", "Wedding", "Office", "Party", "Outdoor"].map(
-                    (item) => {
-                      const isActive = localParams.get("occasion") === item;
-                      return (
-                        <label
-                          key={item}
-                          className="flex items-center gap-2 cursor-pointer"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleLocalParam("occasion", item);
-                          }}
+                  {[
+                    "Casual",
+                    "Festive",
+                    "Wedding",
+                    "Office",
+                    "Party",
+                    "Outdoor",
+                  ].map((item) => {
+                    const isActive = localParams.get("occasion") === item;
+                    return (
+                      <label
+                        key={item}
+                        className="flex items-center gap-2 cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleLocalParam("occasion", item);
+                        }}
+                      >
+                        <Checkbox checked={isActive} />
+                        <span
+                          className={cn(
+                            "font-sans text-[12px]",
+                            isActive
+                              ? "text-foreground font-medium"
+                              : "text-secondary-foreground",
+                          )}
                         >
-                          <Checkbox checked={isActive} />
-                          <span
-                            className={cn(
-                              "font-sans text-[12px]",
-                              isActive
-                                ? "text-foreground font-medium"
-                                : "text-secondary-foreground",
-                            )}
-                          >
-                            {item}
-                          </span>
-                        </label>
-                      );
-                    },
-                  )}
+                          {item}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               </SidebarGroup>
 

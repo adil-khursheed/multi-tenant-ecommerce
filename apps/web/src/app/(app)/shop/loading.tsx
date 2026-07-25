@@ -1,5 +1,6 @@
-import { Grid } from '@/components/Grid'
-import React from 'react'
+import React from "react";
+
+import { Grid } from "@/components/Grid";
 
 export default function Loading() {
   return (
@@ -7,8 +8,13 @@ export default function Loading() {
       {Array(12)
         .fill(0)
         .map((_, index) => {
-          return <div className="animate-pulse bg-neutral-100 dark:bg-neutral-900" key={index} />
+          return (
+            <div
+              className="animate-pulse bg-neutral-100 dark:bg-neutral-900"
+              key={index}
+            />
+          );
         })}
     </Grid>
-  )
+  );
 }

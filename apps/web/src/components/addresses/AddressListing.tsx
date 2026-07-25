@@ -1,14 +1,16 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
-import { AddressItem } from '@/components/addresses/AddressItem'
+import React from "react";
+
+import { useAddresses } from "@payloadcms/plugin-ecommerce/client/react";
+
+import { AddressItem } from "@/components/addresses/AddressItem";
 
 export const AddressListing: React.FC = () => {
-  const { addresses } = useAddresses()
+  const { addresses } = useAddresses();
 
   if (!addresses || addresses.length === 0) {
-    return <p>No addresses found.</p>
+    return <p>No addresses found.</p>;
   }
 
   return (
@@ -21,5 +23,5 @@ export const AddressListing: React.FC = () => {
         ))}
       </ul>
     </div>
-  )
-}
+  );
+};

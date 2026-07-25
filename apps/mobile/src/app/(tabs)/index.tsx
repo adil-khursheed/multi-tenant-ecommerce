@@ -7,11 +7,11 @@ import {
 } from "react-native";
 
 import { useQuery } from "@tanstack/react-query";
+import { StatusBar } from "expo-status-bar";
 
 import { RenderHero } from "@/components/hero/RenderHero";
-import { useTRPC } from "@/utils/api";
-
 import { colors, typography } from "@/constants/theme";
+import { useTRPC } from "@/utils/api";
 
 export default function Home() {
   const trpc = useTRPC();
@@ -26,6 +26,7 @@ export default function Home() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
+      <StatusBar style="dark" />
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />

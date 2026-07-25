@@ -7,12 +7,17 @@ import {
   TextInput,
   View,
 } from "react-native";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/utils/api";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
 
 export function AccountSettingsForm() {
   const { user, setUser } = useAuth();
@@ -53,7 +58,10 @@ export function AccountSettingsForm() {
         Alert.alert("Success", "Password changed successfully.");
       },
       onError: (error) => {
-        Alert.alert("Error", error.message || "There was a problem changing your password.");
+        Alert.alert(
+          "Error",
+          error.message || "There was a problem changing your password.",
+        );
       },
     }),
   );
@@ -135,7 +143,9 @@ export function AccountSettingsForm() {
           disabled={changePasswordMutation.isPending}
         >
           <Text style={styles.buttonText}>
-            {changePasswordMutation.isPending ? "Processing..." : "Change Password"}
+            {changePasswordMutation.isPending
+              ? "Processing..."
+              : "Change Password"}
           </Text>
         </Pressable>
       </View>

@@ -7,18 +7,12 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-import {
-  FavouriteIcon,
-  HeartAddIcon,
-} from "@hugeicons/core-free-icons";
+import { FavouriteIcon, HeartAddIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
-import {
-  horizontalScale,
-  moderateScale,
-} from "@/constants/responsive";
+import { horizontalScale, moderateScale } from "@/constants/responsive";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/utils/api";
@@ -39,10 +33,7 @@ export function WishlistButton({ productId, size = 20, style }: Props) {
   const scale = useSharedValue(1);
 
   const { data } = useQuery(
-    trpc.wishlist.check.queryOptions(
-      { productId },
-      { enabled: !!user },
-    ),
+    trpc.wishlist.check.queryOptions({ productId }, { enabled: !!user }),
   );
 
   const isWishlisted = data?.isWishlisted ?? false;

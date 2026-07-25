@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 const COD_FEE = 50;
 
@@ -53,7 +57,10 @@ export function PriceBreakdown({
             autoCapitalize="characters"
           />
           <Pressable
-            style={[styles.couponButton, couponLoading && styles.couponButtonDisabled]}
+            style={[
+              styles.couponButton,
+              couponLoading && styles.couponButtonDisabled,
+            ]}
             onPress={handleApply}
             disabled={couponLoading || !couponInput.trim()}
           >
@@ -66,7 +73,9 @@ export function PriceBreakdown({
         <View style={styles.appliedCoupon}>
           <Text style={styles.couponLabel}>Coupon ({couponCode})</Text>
           <View style={styles.couponRight}>
-            <Text style={styles.discountAmount}>-₹{(discount / 100).toFixed(2)}</Text>
+            <Text style={styles.discountAmount}>
+              -₹{(discount / 100).toFixed(2)}
+            </Text>
             <Pressable onPress={onRemoveCoupon} disabled={couponLoading}>
               <Text style={styles.removeButton}>Remove</Text>
             </Pressable>
@@ -74,7 +83,9 @@ export function PriceBreakdown({
         </View>
       )}
 
-      {couponError ? <Text style={styles.couponError}>{couponError}</Text> : null}
+      {couponError ? (
+        <Text style={styles.couponError}>{couponError}</Text>
+      ) : null}
 
       <View style={styles.row}>
         <Text style={styles.label}>Subtotal</Text>
@@ -84,7 +95,9 @@ export function PriceBreakdown({
       {discount > 0 && (
         <View style={styles.row}>
           <Text style={styles.discountLabel}>Discount</Text>
-          <Text style={styles.discountAmount}>-₹{(discount / 100).toFixed(2)}</Text>
+          <Text style={styles.discountAmount}>
+            -₹{(discount / 100).toFixed(2)}
+          </Text>
         </View>
       )}
 

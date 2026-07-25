@@ -1,35 +1,46 @@
-import type { CheckboxField } from '@payloadcms/plugin-form-builder/types'
-import type { FieldErrorsImpl, FieldValues, UseFormRegister } from 'react-hook-form'
+import React from "react";
+import type {
+  FieldErrorsImpl,
+  FieldValues,
+  UseFormRegister,
+} from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-import { useFormContext } from 'react-hook-form'
+import type { CheckboxField } from "@payloadcms/plugin-form-builder/types";
 
-import { Checkbox as CheckboxUi } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import React from 'react'
-
-import { Error } from '../Error'
-import { Width } from '../Width'
-import { capitaliseFirstLetter } from '@/utilities/capitaliseFirstLetter'
-import { FormError } from '@/components/forms/FormError'
+import { FormError } from "@/components/forms/FormError";
+import { Checkbox as CheckboxUi } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { capitaliseFirstLetter } from "@/utilities/capitaliseFirstLetter";
+import { Error } from "../Error";
+import { Width } from "../Width";
 
 export const Checkbox: React.FC<
   CheckboxField & {
     errors: Partial<
       FieldErrorsImpl<{
-        [x: string]: any
+        [x: string]: any;
       }>
-    >
-    getValues: any
-    register: UseFormRegister<FieldValues>
-    setValue: any
+    >;
+    getValues: any;
+    register: UseFormRegister<FieldValues>;
+    setValue: any;
   }
-> = ({ name, defaultValue, errors, label, register, required: requiredFromProps, width }) => {
+> = ({
+  name,
+  defaultValue,
+  errors,
+  label,
+  register,
+  required: requiredFromProps,
+  width,
+}) => {
   const props = register(name, {
     required: requiredFromProps
       ? `${capitaliseFirstLetter(label || name)} is required.`
       : undefined,
-  })
-  const { setValue } = useFormContext()
+  });
+  const { setValue } = useFormContext();
 
   return (
     <Width width={width}>
@@ -39,14 +50,15 @@ export const Checkbox: React.FC<
           id={name}
           {...props}
           onCheckedChange={(checked) => {
-            setValue(props.name, checked)
+            setValue(props.name, checked);
           }}
         />
         <Label htmlFor={name}>{label}</Label>
       </div>
-      {errors?.[name]?.message && typeof errors?.[name]?.message === 'string' && (
-        <FormError message={errors?.[name]?.message} />
-      )}
+      {errors?.[name]?.message &&
+        typeof errors?.[name]?.message === "string" && (
+          <FormError message={errors?.[name]?.message} />
+        )}
     </Width>
-  )
-}
+  );
+};

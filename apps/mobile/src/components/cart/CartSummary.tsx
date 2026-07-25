@@ -1,11 +1,16 @@
 import { StyleSheet, Text, View } from "react-native";
+
 import { useRouter } from "expo-router";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
 import { useCart } from "@/providers/Cart";
 import { useCurrency } from "@/providers/Currency";
-import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
 
 export function CartSummary() {
   const { formatPrice } = useCurrency();

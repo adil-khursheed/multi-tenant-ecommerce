@@ -1,12 +1,21 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Image } from "expo-image";
-import { Delete02Icon, MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react-native";
 
-import { useCurrency } from "@/providers/Currency";
-import { type FlattenedCartItem, useCart } from "@/providers/Cart";
+import {
+  Delete02Icon,
+  MinusSignIcon,
+  PlusSignIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
+import { Image } from "expo-image";
+
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
+import { useCart, type FlattenedCartItem } from "@/providers/Cart";
+import { useCurrency } from "@/providers/Currency";
 
 type Props = {
   item: FlattenedCartItem;

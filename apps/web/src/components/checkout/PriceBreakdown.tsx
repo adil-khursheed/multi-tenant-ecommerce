@@ -1,18 +1,18 @@
 "use client";
 
 import React from "react";
+import { Controller, useForm } from "react-hook-form";
 
-import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 
 import { Price } from "@/components/Price";
-import { Spinner } from "@/components/ui/spinner";
+import { Field, FieldContent, FieldError } from "@/components/ui/field";
 import {
-  Field,
-  FieldContent,
-  FieldError,
-} from "@/components/ui/field";
-import { InputGroup, InputGroupInput, InputGroupButton } from "@/components/ui/input-group";
+  InputGroup,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Spinner } from "@/components/ui/spinner";
 
 const couponInputSchema = z.object({
   code: z.string().min(1, "Coupon code is required.").max(50),
@@ -90,19 +90,17 @@ export const PriceBreakdown: React.FC<Props> = ({
                       disabled={couponLoading}
                       className="h-full rounded-l-none"
                     >
-                      {couponLoading ? (
-                        <Spinner className="size-3" />
-                      ) : (
-                        "Apply"
-                      )}
+                      {couponLoading ? <Spinner className="size-3" /> : "Apply"}
                     </InputGroupButton>
                   </InputGroup>
                   {(fieldState.error || couponError) && (
                     <FieldError
-                      errors={[
-                        fieldState.error,
-                        couponError ? { message: couponError } : undefined,
-                      ].filter(Boolean) as Array<{ message?: string }>}
+                      errors={
+                        [
+                          fieldState.error,
+                          couponError ? { message: couponError } : undefined,
+                        ].filter(Boolean) as Array<{ message?: string }>
+                      }
                     />
                   )}
                 </FieldContent>

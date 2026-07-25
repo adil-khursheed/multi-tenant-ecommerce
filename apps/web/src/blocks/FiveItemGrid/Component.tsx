@@ -1,21 +1,26 @@
 import React from "react";
 
-import { serverCaller } from "@/trpc/server";
 import { RichText } from "@/components/RichText";
-import type { FiveItemGridBlock as FiveItemGridBlockProps, Product } from "@/payload-types";
+import type {
+  FiveItemGridBlock as FiveItemGridBlockProps,
+  Product,
+} from "@/payload-types";
+import { serverCaller } from "@/trpc/server";
 import { FiveItemGridClient } from "./Component.client";
 
-export const FiveItemGridBlock: React.FC<FiveItemGridBlockProps> = async (props) => {
-  const { heading, populateBy, productFilter, categories, selectedDocs } = props;
+export const FiveItemGridBlock: React.FC<FiveItemGridBlockProps> = async (
+  props,
+) => {
+  const { heading, populateBy, productFilter, categories, selectedDocs } =
+    props;
 
   let products: Product[] = [];
 
   if (populateBy === "collection") {
     // We map Payload's category relationships to just string IDs for tRPC input
-    const categoryIds =
-      categories
-        ?.map((c) => (typeof c === "object" && c !== null ? c.id : c))
-        .filter(Boolean) as string[] | undefined;
+    const categoryIds = categories
+      ?.map((c) => (typeof c === "object" && c !== null ? c.id : c))
+      .filter(Boolean) as string[] | undefined;
 
     // Use tRPC via serverCaller (bypasses HTTP)
     products = (await serverCaller().blocks.getFiveItemGrid({

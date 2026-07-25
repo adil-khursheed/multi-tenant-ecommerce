@@ -1,67 +1,67 @@
-import { RequiredDataFromCollectionSlug } from 'payload'
+import { RequiredDataFromCollectionSlug } from "payload";
 
-export const imageTshirtWhiteData: RequiredDataFromCollectionSlug<'media'> = {
-  alt: 'White tshirt with the Payload logo on the front',
+export const imageTshirtWhiteData: RequiredDataFromCollectionSlug<"media"> = {
+  alt: "White tshirt with the Payload logo on the front",
   caption: {
     root: {
-      type: 'root',
+      type: "root",
       children: [
         {
-          type: 'paragraph',
+          type: "paragraph",
           children: [
             {
-              type: 'text',
+              type: "text",
               detail: 0,
               format: 0,
-              mode: 'normal',
-              style: '',
-              text: 'Photo by ',
+              mode: "normal",
+              style: "",
+              text: "Photo by ",
               version: 1,
             },
             {
-              type: 'link',
+              type: "link",
               children: [
                 {
-                  type: 'text',
+                  type: "text",
                   detail: 0,
                   format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'Andrew Kliatskyi',
+                  mode: "normal",
+                  style: "",
+                  text: "Andrew Kliatskyi",
                   version: 1,
                 },
               ],
-              direction: 'ltr',
+              direction: "ltr",
               fields: {
-                linkType: 'custom',
+                linkType: "custom",
                 newTab: true,
-                url: 'https://unsplash.com/@kirp',
+                url: "https://unsplash.com/@kirp",
               },
-              format: '',
+              format: "",
               indent: 0,
               version: 2,
             },
             {
-              type: 'text',
+              type: "text",
               detail: 0,
               format: 0,
-              mode: 'normal',
-              style: '',
-              text: ' on Unsplash.',
+              mode: "normal",
+              style: "",
+              text: " on Unsplash.",
               version: 1,
             },
           ],
-          direction: 'ltr',
-          format: '',
+          direction: "ltr",
+          format: "",
           indent: 0,
           textFormat: 0,
           version: 1,
         },
       ],
-      direction: 'ltr',
-      format: '',
+      direction: "ltr",
+      format: "",
       indent: 0,
       version: 1,
     },
   },
-}
+};

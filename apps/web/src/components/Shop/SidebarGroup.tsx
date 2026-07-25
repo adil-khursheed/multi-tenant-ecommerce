@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { AnimatePresence, motion } from "motion/react";
 
 export const SidebarGroup = ({
   title,
@@ -25,8 +26,15 @@ export const SidebarGroup = ({
         <span className="font-sans font-medium text-[12px] uppercase tracking-[0.08em] text-foreground">
           {title}
         </span>
-        <motion.div animate={{ rotate: isOpen ? 0 : -90 }} transition={{ duration: 0.25 }}>
-          <HugeiconsIcon icon={ArrowDown01Icon} size={14} className="text-foreground" />
+        <motion.div
+          animate={{ rotate: isOpen ? 0 : -90 }}
+          transition={{ duration: 0.25 }}
+        >
+          <HugeiconsIcon
+            icon={ArrowDown01Icon}
+            size={14}
+            className="text-foreground"
+          />
         </motion.div>
       </button>
 

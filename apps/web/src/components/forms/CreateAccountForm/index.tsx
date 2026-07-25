@@ -15,6 +15,10 @@ import {
 import { HugeiconsIcon, IconSvgElement } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
 
+import {
+  createAccountSchema,
+  type CreateAccountFormData,
+} from "@repo/validators";
 import ArtisanIcon from "@/components/icons/artisan";
 import { Message } from "@/components/Message";
 import { Button } from "@/components/ui/button";
@@ -26,10 +30,6 @@ import { usePhoneVerification } from "@/hooks/usePhoneVerification";
 import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@/utilities/cn";
-import {
-  createAccountSchema,
-  type CreateAccountFormData,
-} from "@repo/validators";
 import PersonalInfoForm from "./personal-info-form";
 
 const accountTypes = [

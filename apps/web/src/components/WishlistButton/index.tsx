@@ -23,10 +23,7 @@ export const WishlistButton: React.FC<Props> = ({ productId, className }) => {
   const queryClient = useQueryClient();
 
   const { data } = useQuery(
-    trpc.wishlist.check.queryOptions(
-      { productId },
-      { enabled: !!user },
-    ),
+    trpc.wishlist.check.queryOptions({ productId }, { enabled: !!user }),
   );
 
   const isWishlisted = data?.isWishlisted ?? false;

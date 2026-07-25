@@ -14,8 +14,8 @@ import {
   useAddresses,
   useCart,
 } from "@payloadcms/plugin-ecommerce/client/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 

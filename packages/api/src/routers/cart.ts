@@ -9,10 +9,7 @@ async function findActiveCart(ctx: any, userId: string) {
   const result = await ctx.payload.find({
     collection: "carts",
     where: {
-      and: [
-        { customer: { equals: userId } },
-        { status: { equals: "active" } },
-      ],
+      and: [{ customer: { equals: userId } }, { status: { equals: "active" } }],
     },
     depth: CART_DEPTH,
     limit: 1,
@@ -69,8 +66,7 @@ export const cartRouter = {
         const targetVariantId = input.variantId ?? null;
 
         return (
-          itemProductId === input.productId &&
-          itemVariantId === targetVariantId
+          itemProductId === input.productId && itemVariantId === targetVariantId
         );
       });
 
@@ -143,9 +139,7 @@ export const cartRouter = {
       }
 
       const updatedItems = (cart.items ?? []).map((item: any) =>
-        item.id === input.itemId
-          ? { ...item, quantity: input.quantity }
-          : item,
+        item.id === input.itemId ? { ...item, quantity: input.quantity } : item,
       );
 
       const updated = await ctx.payload.update({
@@ -197,10 +191,7 @@ export const cartRouter = {
       const couponResult = await ctx.payload.find({
         collection: "coupons",
         where: {
-          and: [
-            { code: { equals: code } },
-            { isActive: { equals: true } },
-          ],
+          and: [{ code: { equals: code } }, { isActive: { equals: true } }],
         },
         limit: 1,
       });

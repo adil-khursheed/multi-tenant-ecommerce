@@ -1,11 +1,16 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+
 import { ArrowUp01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { useCart } from "@/providers/Cart";
 import { useCurrency } from "@/providers/Currency";
-import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type Props = {
   onPress: () => void;

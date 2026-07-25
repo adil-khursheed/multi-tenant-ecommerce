@@ -24,6 +24,9 @@ import { VariantOptionsCollection } from "@/collections/VariantOptions";
 import { VariantsCollection } from "@/collections/Variants";
 import { VariantTypesCollection } from "@/collections/VariantTypes";
 import { env } from "@/env";
+import { sendOrderConfirmationEmail } from "@/hooks/orders/sendOrderConfirmationEmail";
+import { sendOrderStatusEmail } from "@/hooks/orders/sendOrderStatusEmail";
+import { sendPaymentFailedEmail } from "@/hooks/transactions/sendPaymentFailedEmail";
 import type { Config } from "@/payload-types";
 import { Page, Product } from "@/payload-types";
 import { getServerSideURL } from "@/utilities/getURL";
@@ -168,6 +171,14 @@ export const plugins: Plugin[] = [
             },
           },
         ],
+        hooks: {
+          ...defaultCollection.hooks,
+          afterChange: [
+            ...(defaultCollection.hooks?.afterChange || []),
+            sendOrderConfirmationEmail,
+            sendOrderStatusEmail,
+          ],
+        },
       }),
     },
     carts: {
@@ -296,6 +307,13 @@ export const plugins: Plugin[] = [
             },
           },
         ],
+        hooks: {
+          ...defaultCollection.hooks,
+          afterChange: [
+            ...(defaultCollection.hooks?.afterChange || []),
+            sendPaymentFailedEmail,
+          ],
+        },
       }),
     },
     payments: {

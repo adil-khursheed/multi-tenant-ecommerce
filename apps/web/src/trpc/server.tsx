@@ -9,9 +9,9 @@ import {
   type TRPCQueryOptions,
 } from "@trpc/tanstack-react-query";
 
-import { makeQueryClient } from "./query-client";
 import { AppRouter, appRouter, createCallerFactory } from "@repo/api";
 import { createTRPCContext } from "./context";
+import { makeQueryClient } from "./query-client";
 
 const createContext = cache(async () => {
   const heads = new Headers(await headers());
@@ -57,4 +57,3 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
  */
 const createCaller = createCallerFactory(appRouter);
 export const serverCaller = cache(() => createCaller(createContext));
-

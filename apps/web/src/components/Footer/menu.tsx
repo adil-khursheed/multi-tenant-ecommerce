@@ -1,14 +1,14 @@
-import type { Footer } from '@/payload-types'
+import React from "react";
 
-import { CMSLink } from '@/components/Link'
-import React from 'react'
+import { CMSLink } from "@/components/Link";
+import type { Footer } from "@/payload-types";
 
 interface Props {
-  menu: Footer['navItems']
+  menu: Footer["navItems"];
 }
 
 export function FooterMenu({ menu }: Props) {
-  if (!menu?.length) return null
+  if (!menu?.length) return null;
 
   return (
     <nav>
@@ -18,9 +18,9 @@ export function FooterMenu({ menu }: Props) {
             <li key={item.id}>
               <CMSLink appearance="link" {...item.link} />
             </li>
-          )
+          );
         })}
       </ul>
     </nav>
-  )
+  );
 }

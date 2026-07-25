@@ -10,6 +10,7 @@ import { UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { City, Country, State } from "country-state-city";
 
+import { VendorOnboardingFormData } from "@repo/validators";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -26,7 +27,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { VendorOnboardingFormData } from "@repo/validators";
 
 const AddressForm = ({
   control,

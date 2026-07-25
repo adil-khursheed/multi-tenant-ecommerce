@@ -1,7 +1,7 @@
 import React from "react";
 
-import { HighImpactHero } from "@/heros/HighImpact";
 import { HeroSlider } from "@/heros/HeroSlider";
+import { HighImpactHero } from "@/heros/HighImpact";
 import { LowImpactHero } from "@/heros/LowImpact";
 import { MediumImpactHero } from "@/heros/MediumImpact";
 import type { Page } from "@/payload-types";

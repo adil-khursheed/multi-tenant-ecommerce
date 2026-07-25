@@ -1,8 +1,12 @@
 import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 type VariantOption = {
   id: string | number;
@@ -44,10 +48,14 @@ export function VariantSelector({
 }: VariantSelectorProps) {
   const validVariants = useMemo(() => {
     if (!variants) return [];
-    return variants.filter((v): v is Variant => typeof v === "object" && v !== null);
+    return variants.filter(
+      (v): v is Variant => typeof v === "object" && v !== null,
+    );
   }, [variants]);
 
-  const hasVariants = Boolean(enableVariants && validVariants.length > 0 && variantTypes?.length);
+  const hasVariants = Boolean(
+    enableVariants && validVariants.length > 0 && variantTypes?.length,
+  );
 
   if (!hasVariants || !variantTypes) return null;
 
@@ -63,7 +71,8 @@ export function VariantSelector({
         // Find selected option label for color type
         const selectedOptionLabel = isColorType
           ? type.options.docs.find(
-              (opt) => typeof opt === "object" && String(opt.id) === selectedOptionId,
+              (opt) =>
+                typeof opt === "object" && String(opt.id) === selectedOptionId,
             )
           : null;
 
@@ -71,9 +80,13 @@ export function VariantSelector({
           <View key={type.id} style={styles.typeGroup}>
             <View style={styles.typeHeader}>
               <Text style={styles.typeLabel}>{type.label || type.name}</Text>
-              {isColorType && selectedOptionLabel && typeof selectedOptionLabel === "object" && (
-                <Text style={styles.selectedLabel}>{selectedOptionLabel.label}</Text>
-              )}
+              {isColorType &&
+                selectedOptionLabel &&
+                typeof selectedOptionLabel === "object" && (
+                  <Text style={styles.selectedLabel}>
+                    {selectedOptionLabel.label}
+                  </Text>
+                )}
             </View>
 
             <View style={styles.optionsRow}>
@@ -101,11 +114,14 @@ export function VariantSelector({
                         !isAvailable && styles.colorSwatchUnavailable,
                       ]}
                       onPress={() => {
-                        if (isAvailable) onOptionSelect(type.name!, String(opt.id));
+                        if (isAvailable)
+                          onOptionSelect(type.name!, String(opt.id));
                       }}
                       disabled={!isAvailable}
                     >
-                      {!isAvailable && <View style={styles.strikethroughLine} />}
+                      {!isAvailable && (
+                        <View style={styles.strikethroughLine} />
+                      )}
                     </Pressable>
                   );
                 }
@@ -119,7 +135,8 @@ export function VariantSelector({
                       !isAvailable && styles.textOptionUnavailable,
                     ]}
                     onPress={() => {
-                      if (isAvailable) onOptionSelect(type.name!, String(opt.id));
+                      if (isAvailable)
+                        onOptionSelect(type.name!, String(opt.id));
                     }}
                     disabled={!isAvailable}
                   >

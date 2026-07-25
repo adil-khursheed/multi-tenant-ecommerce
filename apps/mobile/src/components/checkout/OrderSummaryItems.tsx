@@ -1,9 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
+
 import { Image } from "expo-image";
 
-import { useCurrency } from "@/providers/Currency";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
+import { useCurrency } from "@/providers/Currency";
 
 type CartItem = {
   id: string;

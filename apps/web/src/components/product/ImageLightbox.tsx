@@ -2,8 +2,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Media } from "@/components/Media";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { Product } from "@/payload-types";
 import { cn } from "@/utilities/cn";
 
@@ -225,10 +225,7 @@ export const ImageLightbox: React.FC<Props> = ({
         if (lastTouchDistanceRef.current > 0) {
           const ratio = distance / lastTouchDistanceRef.current;
           setScale((prev) => {
-            const next = Math.min(
-              MAX_SCALE,
-              Math.max(MIN_SCALE, prev * ratio),
-            );
+            const next = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev * ratio));
             if (next === 1) setPosition({ x: 0, y: 0 });
             return next;
           });
@@ -244,17 +241,14 @@ export const ImageLightbox: React.FC<Props> = ({
     [isDragging, dragStart],
   );
 
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      if (e.touches.length < 2) {
-        lastTouchDistanceRef.current = 0;
-      }
-      if (e.touches.length === 0) {
-        setIsDragging(false);
-      }
-    },
-    [],
-  );
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      lastTouchDistanceRef.current = 0;
+    }
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+    }
+  }, []);
 
   const toggleThumbnailStrip = useCallback(() => {
     setShowThumbnailStrip((prev) => !prev);

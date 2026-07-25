@@ -107,8 +107,7 @@ export function VariantSelector({ product }: { product: Product }) {
                         "variant",
                         String(matchingVariant.id),
                       );
-                      isAvailableForSale =
-                        (matchingVariant.inventory ?? 0) > 0;
+                      isAvailableForSale = (matchingVariant.inventory ?? 0) > 0;
                     } else {
                       isAvailableForSale = false;
                     }

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
+
 import {
   CheckmarkCircle02Icon,
   CreditCardIcon,
@@ -9,10 +9,15 @@ import {
   TruckIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import { useRouter } from "expo-router";
 
-import { useCheckout } from "@/providers/Checkout";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
+import { useCheckout } from "@/providers/Checkout";
 
 export default function CheckoutSuccess() {
   const router = useRouter();
@@ -20,7 +25,12 @@ export default function CheckoutSuccess() {
   const { completedOrderId } = useCheckout();
 
   return (
-    <View style={[styles.container, { paddingTop: top + verticalScale(spacing[8]) }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: top + verticalScale(spacing[8]) },
+      ]}
+    >
       <View style={styles.content}>
         <Animated.View
           entering={FadeIn.delay(100).duration(500)}
@@ -42,7 +52,8 @@ export default function CheckoutSuccess() {
 
         <Animated.View entering={FadeInDown.delay(400).duration(400)}>
           <Text style={styles.orderId}>
-            Order ID: <Text style={styles.orderIdValue}>{completedOrderId}</Text>
+            Order ID:{" "}
+            <Text style={styles.orderIdValue}>{completedOrderId}</Text>
           </Text>
         </Animated.View>
 
@@ -80,7 +91,9 @@ export default function CheckoutSuccess() {
             </View>
             <View style={styles.timelineContent}>
               <Text style={styles.timelineTitle}>Order Processing</Text>
-              <Text style={styles.timelineDesc}>We are preparing your order</Text>
+              <Text style={styles.timelineDesc}>
+                We are preparing your order
+              </Text>
             </View>
           </View>
 

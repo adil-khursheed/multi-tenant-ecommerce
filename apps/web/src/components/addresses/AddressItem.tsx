@@ -1,28 +1,29 @@
-'use client'
+"use client";
 
-import React from 'react'
-import type { Address } from '@/payload-types'
-import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
+import React from "react";
+
+import { CreateAddressModal } from "@/components/addresses/CreateAddressModal";
+import type { Address } from "@/payload-types";
 
 type Props = {
-  address: Partial<Omit<Address, 'country'>> & { country?: string } // Allow address to be partial and entirely optional as this is entirely for display purposes
+  address: Partial<Omit<Address, "country">> & { country?: string }; // Allow address to be partial and entirely optional as this is entirely for display purposes
   /**
    * Completely override the default actions
    */
-  actions?: React.ReactNode
+  actions?: React.ReactNode;
   /**
    * Insert elements before the actions
    */
-  beforeActions?: React.ReactNode
+  beforeActions?: React.ReactNode;
   /**
    * Insert elements after the actions
    */
-  afterActions?: React.ReactNode
+  afterActions?: React.ReactNode;
   /**
    * Hide all actions
    */
-  hideActions?: boolean
-}
+  hideActions?: boolean;
+};
 
 export const AddressItem: React.FC<Props> = ({
   address,
@@ -32,7 +33,7 @@ export const AddressItem: React.FC<Props> = ({
   afterActions,
 }) => {
   if (!address) {
-    return null
+    return null;
   }
 
   return (
@@ -65,8 +66,8 @@ export const AddressItem: React.FC<Props> = ({
                 <CreateAddressModal
                   addressID={address.id}
                   initialData={address}
-                  buttonText={'Edit'}
-                  modalTitle={'Edit address'}
+                  buttonText={"Edit"}
+                  modalTitle={"Edit address"}
                 />
               )}
               {afterActions}
@@ -75,5 +76,5 @@ export const AddressItem: React.FC<Props> = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};

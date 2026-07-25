@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 
-import { colors, fonts, fontSizes } from "@/constants/theme";
 import { moderateScale } from "@/constants/responsive";
+import { colors, fonts, fontSizes } from "@/constants/theme";
 
 export default function ShopLayout() {
   return (

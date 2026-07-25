@@ -17,6 +17,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
+import { type CreateAccountFormData } from "@repo/validators";
 import {
   Field,
   FieldDescription,
@@ -38,7 +39,6 @@ import { CountrySelect, PhoneInput } from "@/components/ui/phone-input";
 import { Spinner } from "@/components/ui/spinner";
 import { usePhoneVerification } from "@/hooks/usePhoneVerification";
 import { cn } from "@/utilities/cn";
-import { type CreateAccountFormData } from "@repo/validators";
 
 const PersonalInfoForm = ({
   control,

@@ -4,10 +4,14 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LogoutIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
-import { useAuth } from "@/providers/Auth";
 import { AccountSettingsForm } from "@/components/profile";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
+import { useAuth } from "@/providers/Auth";
 
 export default function ProfileTab() {
   const { logout } = useAuth();

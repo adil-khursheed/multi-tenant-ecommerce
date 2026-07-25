@@ -1,11 +1,19 @@
 import { forwardRef, useCallback, useMemo } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 
 import { sorting } from "@repo/types";
-
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
 
 type SortDrawerProps = {
   currentSort: string | null;

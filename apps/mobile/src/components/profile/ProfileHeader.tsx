@@ -1,7 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
 
 type Props = {
   name: string;

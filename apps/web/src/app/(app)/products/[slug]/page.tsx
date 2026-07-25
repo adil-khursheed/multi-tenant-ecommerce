@@ -71,10 +71,12 @@ export default async function ProductPage({ params }: Args) {
   const { slug } = await params;
   const { isEnabled: draft } = await draftMode();
   const caller = await serverCaller();
-  const { product, reviews, sizeGuide } = await caller.product.getProductBySlug({
-    slug,
-    draft: draft || undefined,
-  });
+  const { product, reviews, sizeGuide } = await caller.product.getProductBySlug(
+    {
+      slug,
+      draft: draft || undefined,
+    },
+  );
 
   if (!product) return notFound();
 

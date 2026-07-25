@@ -9,8 +9,8 @@ import React, {
 } from "react";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { RouterOutputs } from "@repo/api";
 
+import type { RouterOutputs } from "@repo/api";
 import { useTRPC } from "@/utils/api";
 import {
   clearGuestCart,
@@ -141,7 +141,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
 
   const persistGuestItems = useCallback(
-    (updater: GuestCartItem[] | ((prev: GuestCartItem[]) => GuestCartItem[])) => {
+    (
+      updater: GuestCartItem[] | ((prev: GuestCartItem[]) => GuestCartItem[]),
+    ) => {
       if (typeof updater === "function") {
         setGuestItems((prev) => {
           const next = updater(prev);
@@ -196,14 +198,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const flattenedItems: FlattenedCartItem[] = useMemo(() => {
     if (status === "loggedIn") {
-      return ((serverCart?.items ?? []) as ServerCartItem[]).reduce<FlattenedCartItem[]>(
-        (acc, item) => {
-          const flat = flattenServerItem(item);
-          if (flat) acc.push(flat);
-          return acc;
-        },
-        [],
-      );
+      return ((serverCart?.items ?? []) as ServerCartItem[]).reduce<
+        FlattenedCartItem[]
+      >((acc, item) => {
+        const flat = flattenServerItem(item);
+        if (flat) acc.push(flat);
+        return acc;
+      }, []);
     }
     return guestItems.map((item) => ({
       id: item.id,
@@ -352,7 +353,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
       });
     },
-    [status, serverCart, removeItemMutation, updateQuantityMutation, persistGuestItems],
+    [
+      status,
+      serverCart,
+      removeItemMutation,
+      updateQuantityMutation,
+      persistGuestItems,
+    ],
   );
 
   const clearCart = useCallback<CartContext["clearCart"]>(async () => {

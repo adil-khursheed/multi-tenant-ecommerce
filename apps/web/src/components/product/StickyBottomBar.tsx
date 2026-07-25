@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { useCurrency } from "@payloadcms/plugin-ecommerce/client/react";
 
@@ -10,7 +11,6 @@ import { AddToCart } from "@/components/Cart/AddToCart";
 import { Media } from "@/components/Media";
 import { Price } from "@/components/Price";
 import type { Product, Variant } from "@/payload-types";
-import { useSearchParams } from "next/navigation";
 
 export const StickyBottomBar: React.FC<{ product: Product }> = ({
   product,

@@ -1,7 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 import { useCurrency } from "@/providers/Currency";
 
 type ProductPriceProps = {
@@ -71,7 +75,8 @@ export function ProductPrice({
   // Single product or fallback
   const effective = effectivePrice ?? basePrice ?? 0;
   const original = basePrice ?? 0;
-  const hasDiscount = original > effective && discountPercent && discountPercent > 0;
+  const hasDiscount =
+    original > effective && discountPercent && discountPercent > 0;
 
   return (
     <View style={styles.container}>

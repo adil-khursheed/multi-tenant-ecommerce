@@ -17,6 +17,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
 
+import { type VendorOnboardingFormData } from "@repo/validators";
 import {
   Field,
   FieldDescription,
@@ -38,7 +39,6 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useTRPC } from "@/trpc/client";
-import { type VendorOnboardingFormData } from "@repo/validators";
 
 const BankAccountInfoForm = ({
   control,

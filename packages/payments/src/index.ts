@@ -4,7 +4,7 @@ export type {
   PaymentAdapterArgs,
   PaymentAdapterModule,
   WebhookHandlerArgs,
-} from './types'
+} from "./types";
 
-export { razorpayAdapter, razorpayAdapterClient } from './razorpay'
-export { codAdapter, codAdapterClient } from './cod'
+export { razorpayAdapter, razorpayAdapterClient } from "./razorpay";
+export { codAdapter, codAdapterClient } from "./cod";

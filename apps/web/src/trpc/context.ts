@@ -1,9 +1,14 @@
 import { cookies } from "next/headers";
+
 import { getPayload } from "payload";
+
 import config from "@payload-config";
+
 import type { TRPCContext } from "@repo/api";
 
-export const createTRPCContext = async (opts: { headers: Headers }): Promise<TRPCContext> => {
+export const createTRPCContext = async (opts: {
+  headers: Headers;
+}): Promise<TRPCContext> => {
   const payload = await getPayload({ config });
 
   const { user } = await payload.auth({ headers: opts.headers });

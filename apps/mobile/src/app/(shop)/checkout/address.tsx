@@ -8,20 +8,25 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 
+import { AddressCard } from "@/components/checkout/AddressCard";
+import { CheckoutInput } from "@/components/checkout/CheckoutInput";
+import { StepHeader } from "@/components/checkout/StepHeader";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
 import { useCheckout } from "@/providers/Checkout";
 import { useTRPC } from "@/utils/api";
-import { StepHeader } from "@/components/checkout/StepHeader";
-import { AddressCard } from "@/components/checkout/AddressCard";
-import { CheckoutInput } from "@/components/checkout/CheckoutInput";
-import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type AddressForm = {
   firstName: string;
@@ -57,7 +62,9 @@ export default function CheckoutAddress() {
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<AddressForm>(EMPTY_FORM);
-  const [errors, setErrors] = useState<Partial<Record<keyof AddressForm, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof AddressForm, string>>
+  >({});
 
   const { data: addressesData, isLoading: addressesLoading } = useQuery(
     trpc.addresses.list.queryOptions(undefined, {
@@ -68,7 +75,9 @@ export default function CheckoutAddress() {
   const createAddressMutation = useMutation(
     trpc.addresses.create.mutationOptions({
       onSuccess: (data) => {
-        queryClient.invalidateQueries({ queryKey: trpc.addresses.list.queryKey() });
+        queryClient.invalidateQueries({
+          queryKey: trpc.addresses.list.queryKey(),
+        });
         setBillingAddress(data.address as any);
         setShowForm(false);
       },
@@ -135,7 +144,12 @@ export default function CheckoutAddress() {
   const canContinue = billingAddress && !showForm;
 
   return (
-    <View style={[styles.container, { paddingTop: top + verticalScale(spacing[4]) }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: top + verticalScale(spacing[4]) },
+      ]}
+    >
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -166,7 +180,9 @@ export default function CheckoutAddress() {
                     country: addr.country,
                     id: addr.id,
                   }}
-                  isSelected={billingAddress?.addressLine1 === addr.addressLine1}
+                  isSelected={
+                    billingAddress?.addressLine1 === addr.addressLine1
+                  }
                   onSelect={() => handleSelectAddress(addr)}
                 />
               ))}
@@ -294,12 +310,17 @@ export default function CheckoutAddress() {
             </View>
 
             <Pressable
-              style={[styles.submitButton, createAddressMutation.isPending && styles.submitButtonDisabled]}
+              style={[
+                styles.submitButton,
+                createAddressMutation.isPending && styles.submitButtonDisabled,
+              ]}
               onPress={handleSubmit}
               disabled={createAddressMutation.isPending}
             >
               <Text style={styles.submitButtonText}>
-                {createAddressMutation.isPending ? "Saving..." : "Use this Address"}
+                {createAddressMutation.isPending
+                  ? "Saving..."
+                  : "Use this Address"}
               </Text>
             </Pressable>
           </View>

@@ -1,16 +1,16 @@
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
   cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from "react-native-reanimated";
 
+import { horizontalScale, moderateScale } from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { moderateScale, horizontalScale } from "@/constants/responsive";
 
 type Props = {
   inventory: number;

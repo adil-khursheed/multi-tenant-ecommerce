@@ -1,11 +1,11 @@
 import { FlatList, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useCart } from "@/providers/Cart";
 import { CartItem } from "@/components/cart/CartItem";
 import { CartSummary } from "@/components/cart/CartSummary";
 import { EmptyCart } from "@/components/cart/EmptyCart";
 import { colors } from "@/constants/theme";
+import { useCart } from "@/providers/Cart";
 
 export default function Cart() {
   const { items, isLoading } = useCart();

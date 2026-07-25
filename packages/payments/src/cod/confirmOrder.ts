@@ -1,31 +1,32 @@
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest } from "payload";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyPayload = any
+type AnyPayload = any;
 
-export const confirmOrder = () =>
+export const confirmOrder =
+  () =>
   async ({
-    cartsSlug = 'carts',
+    cartsSlug = "carts",
     data,
-    ordersSlug = 'orders',
+    ordersSlug = "orders",
     req,
-    transactionsSlug = 'transactions',
+    transactionsSlug = "transactions",
   }: {
-    cartsSlug?: string
+    cartsSlug?: string;
     data: {
-      transactionID?: string
-      customerEmail?: string
-      [key: string]: unknown
-    }
-    ordersSlug?: string
-    req: PayloadRequest
-    transactionsSlug?: string
+      transactionID?: string;
+      customerEmail?: string;
+      [key: string]: unknown;
+    };
+    ordersSlug?: string;
+    req: PayloadRequest;
+    transactionsSlug?: string;
   }) => {
-    const payload = req.payload as AnyPayload
-    const { transactionID, customerEmail } = data
+    const payload = req.payload as AnyPayload;
+    const { transactionID, customerEmail } = data;
 
     if (!transactionID) {
-      throw new Error('Transaction ID is required for COD confirmation.')
+      throw new Error("Transaction ID is required for COD confirmation.");
     }
 
     try {
@@ -34,10 +35,10 @@ export const confirmOrder = () =>
         collection: transactionsSlug,
         req,
         depth: 0,
-      })
+      });
 
       if (!transaction) {
-        throw new Error('Transaction not found.')
+        throw new Error("Transaction not found.");
       }
 
       const existingOrders = await payload.find({
@@ -49,19 +50,22 @@ export const confirmOrder = () =>
           },
         },
         limit: 1,
-      })
+      });
 
       if (existingOrders.totalDocs > 0) {
-        const existing = existingOrders.docs[0]
+        const existing = existingOrders.docs[0];
         if (existing) {
           return {
-            message: 'Order already confirmed',
+            message: "Order already confirmed",
             orderID: existing.id,
             transactionID: transaction.id,
-            ...('accessToken' in existing
-              ? { accessToken: (existing as { accessToken?: string }).accessToken }
+            ...("accessToken" in existing
+              ? {
+                  accessToken: (existing as { accessToken?: string })
+                    .accessToken,
+                }
               : {}),
-          }
+          };
         }
       }
 
@@ -77,14 +81,16 @@ export const confirmOrder = () =>
               : {}),
           items: transaction.items,
           shippingAddress: transaction.billingAddress,
-          status: 'processing',
+          status: "processing",
           transactions: [transaction.id],
-          couponCode: (transaction as Record<string, unknown>).couponCode || undefined,
+          couponCode:
+            (transaction as Record<string, unknown>).couponCode || undefined,
           discount: (transaction as Record<string, unknown>).discount || 0,
-          shippingCharge: (transaction as Record<string, unknown>).shippingCharge || 0,
+          shippingCharge:
+            (transaction as Record<string, unknown>).shippingCharge || 0,
         },
         req,
-      })
+      });
 
       await payload.update({
         id: transaction.cart,
@@ -93,38 +99,38 @@ export const confirmOrder = () =>
           purchasedAt: new Date().toISOString(),
         },
         req,
-      })
+      });
 
       await payload.update({
         id: transaction.id,
         collection: transactionsSlug,
         data: {
           order: order.id,
-          status: 'succeeded',
+          status: "succeeded",
           cod: {
             codConfirmed: true,
           },
         },
         req,
-      })
+      });
 
       return {
-        message: 'COD order confirmed successfully',
+        message: "COD order confirmed successfully",
         orderID: order.id,
         transactionID: transaction.id,
-        ...('accessToken' in order
+        ...("accessToken" in order
           ? { accessToken: (order as { accessToken?: string }).accessToken }
           : {}),
-      }
+      };
     } catch (error) {
       payload.logger.error({
         err: error,
-        msg: 'Error confirming COD order',
-      })
+        msg: "Error confirming COD order",
+      });
       throw new Error(
         error instanceof Error
           ? error.message
-          : 'Unknown error confirming COD order',
-      )
+          : "Unknown error confirming COD order",
+      );
     }
-  }
+  };

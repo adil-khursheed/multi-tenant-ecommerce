@@ -14,6 +14,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
 
+import { loginSchema, type LoginFormData } from "@repo/validators";
 import { Message } from "@/components/Message";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +40,6 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/trpc/client";
-import { loginSchema, type LoginFormData } from "@repo/validators";
 
 type Props = {
   open: boolean;

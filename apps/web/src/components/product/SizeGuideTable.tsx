@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 
-import type { SizeGuide } from "@/payload-types";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import type { SizeGuide } from "@/payload-types";
 
 type Props = {
   sizeGuide: SizeGuide;

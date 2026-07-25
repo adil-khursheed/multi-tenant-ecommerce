@@ -1,26 +1,27 @@
-'use client'
+"use client";
 
-import { useAuth } from '@/providers/Auth'
-import Link from 'next/link'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from "react";
+import Link from "next/link";
+
+import { useAuth } from "@/providers/Auth";
 
 export const LogoutPage: React.FC = (props) => {
-  const { logout } = useAuth()
-  const [success, setSuccess] = useState('')
-  const [error, setError] = useState('')
+  const { logout } = useAuth();
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const performLogout = async () => {
       try {
-        await logout()
-        setSuccess('Logged out successfully.')
+        await logout();
+        setSuccess("Logged out successfully.");
       } catch (_) {
-        setError('You are already logged out.')
+        setError("You are already logged out.");
       }
-    }
+    };
 
-    void performLogout()
-  }, [logout])
+    void performLogout();
+  }, [logout]);
 
   return (
     <Fragment>
@@ -30,7 +31,7 @@ export const LogoutPage: React.FC = (props) => {
           <p>
             What would you like to do next?
             <Fragment>
-              {' '}
+              {" "}
               <Link href="/search">Click here</Link>
               {` to shop.`}
             </Fragment>
@@ -40,5 +41,5 @@ export const LogoutPage: React.FC = (props) => {
         </div>
       )}
     </Fragment>
-  )
-}
+  );
+};

@@ -50,11 +50,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname, "../../"),
   },
-  transpilePackages: [
-    "@repo/api",
-    "@repo/validators",
-    "@repo/types"
-  ],
+  transpilePackages: ["@repo/api", "@repo/validators", "@repo/types"],
 };
 
 export default withPayload(nextConfig);

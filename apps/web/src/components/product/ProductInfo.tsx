@@ -16,7 +16,6 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { AddToCart } from "@/components/Cart/AddToCart";
-import { WishlistButton } from "@/components/WishlistButton";
 import { Price } from "@/components/Price";
 import { StarRating } from "@/components/StarRating";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,10 +29,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { WishlistButton } from "@/components/WishlistButton";
 import type { Product, SizeGuide, Variant } from "@/payload-types";
+import { SizeGuideTable } from "./SizeGuideTable";
 import { StockIndicator } from "./StockIndicator";
 import { VariantSelector } from "./VariantSelector";
-import { SizeGuideTable } from "./SizeGuideTable";
 
 export const ProductInfo: React.FC<{
   product: Product;
@@ -132,9 +132,7 @@ export const ProductInfo: React.FC<{
             <SheetContent className="sm:max-w-[425px]">
               <SheetHeader>
                 <SheetTitle>Size Guide</SheetTitle>
-                <SheetDescription>
-                  Find your perfect fit.
-                </SheetDescription>
+                <SheetDescription>Find your perfect fit.</SheetDescription>
               </SheetHeader>
               <SizeGuideTable sizeGuide={sizeGuide} />
             </SheetContent>

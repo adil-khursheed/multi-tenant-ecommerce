@@ -17,9 +17,9 @@ export const createMediaDoc = async ({
   if (match) {
     const mimeType = match[1];
     const base64Data = match[2];
-    
+
     if (!mimeType || !base64Data) return uploadedMediaId;
-    
+
     const extension = mimeType.split("/")[1] || "png";
     const buffer = Buffer.from(base64Data, "base64");
 

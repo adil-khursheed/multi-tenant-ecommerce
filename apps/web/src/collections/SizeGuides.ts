@@ -75,7 +75,8 @@ export const SizeGuides: CollectionConfig = {
           type: "text",
           required: true,
           admin: {
-            description: 'The size label shown to customers, e.g. "S", "M", "L", "28", "30".',
+            description:
+              'The size label shown to customers, e.g. "S", "M", "L", "28", "30".',
           },
         },
         {

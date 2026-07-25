@@ -1,25 +1,37 @@
-import type { EmailField } from '@payloadcms/plugin-form-builder/types'
-import type { FieldErrorsImpl, FieldValues, UseFormRegister } from 'react-hook-form'
+import React from "react";
+import type {
+  FieldErrorsImpl,
+  FieldValues,
+  UseFormRegister,
+} from "react-hook-form";
 
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import React from 'react'
+import type { EmailField } from "@payloadcms/plugin-form-builder/types";
 
-import { Width } from '../Width'
-import { FormItem } from '@/components/forms/FormItem'
-import { FormError } from '@/components/forms/FormError'
-import { capitaliseFirstLetter } from '@/utilities/capitaliseFirstLetter'
+import { FormError } from "@/components/forms/FormError";
+import { FormItem } from "@/components/forms/FormItem";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { capitaliseFirstLetter } from "@/utilities/capitaliseFirstLetter";
+import { Width } from "../Width";
 
 export const Email: React.FC<
   EmailField & {
     errors: Partial<
       FieldErrorsImpl<{
-        [x: string]: any
+        [x: string]: any;
       }>
-    >
-    register: UseFormRegister<FieldValues>
+    >;
+    register: UseFormRegister<FieldValues>;
   }
-> = ({ name, defaultValue, errors, label, register, required: requiredFromProps, width }) => {
+> = ({
+  name,
+  defaultValue,
+  errors,
+  label,
+  register,
+  required: requiredFromProps,
+  width,
+}) => {
   return (
     <Width width={width}>
       <FormItem>
@@ -36,10 +48,11 @@ export const Email: React.FC<
           })}
         />
 
-        {errors?.[name]?.message && typeof errors?.[name]?.message === 'string' && (
-          <FormError message={errors?.[name]?.message} />
-        )}
+        {errors?.[name]?.message &&
+          typeof errors?.[name]?.message === "string" && (
+            <FormError message={errors?.[name]?.message} />
+          )}
       </FormItem>
     </Width>
-  )
-}
+  );
+};

@@ -4,8 +4,13 @@ import React from "react";
 
 import { Check, X } from "lucide-react";
 
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Field, FieldLabel, FieldContent, FieldError } from "@/components/ui/field";
 import { cn } from "@/utilities/cn";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -32,7 +37,10 @@ export const CheckoutInput = React.forwardRef<HTMLInputElement, InputProps>(
   ) => {
     return (
       <Field className={containerClassName}>
-        <FieldLabel required={required} className="font-sans font-medium text-[11px] tracking-[0.08em] uppercase text-foreground">
+        <FieldLabel
+          required={required}
+          className="font-sans font-medium text-[11px] tracking-[0.08em] uppercase text-foreground"
+        >
           {label}
         </FieldLabel>
         <FieldContent className="relative">
@@ -54,7 +62,12 @@ export const CheckoutInput = React.forwardRef<HTMLInputElement, InputProps>(
             <X className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-destructive pointer-events-none" />
           )}
         </FieldContent>
-        {error && <FieldError errors={[{ message: error }]} className="font-sans text-[12px]" />}
+        {error && (
+          <FieldError
+            errors={[{ message: error }]}
+            className="font-sans text-[12px]"
+          />
+        )}
       </Field>
     );
   },

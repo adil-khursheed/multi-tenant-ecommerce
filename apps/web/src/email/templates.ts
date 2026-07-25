@@ -41,7 +41,7 @@ const brand = {
 
 // ─── Layout Wrapper ────────────────────────────────────────────────────────────
 
-function emailLayout(content: string): string {
+export function emailLayout(content: string): string {
   return `
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -378,3 +378,10 @@ export function adminVendorOnboardedEmail(
 
   return emailLayout(content);
 }
+
+// ─── Re-exports: Order Notification Templates ───────────────────────────────
+
+export { orderConfirmationHTML } from "./templates/orderConfirmation";
+export { orderFailedHTML } from "./templates/orderFailed";
+export { orderStatusUpdateHTML } from "./templates/orderStatusUpdate";
+export { tenantNewOrderHTML } from "./templates/tenantNewOrder";

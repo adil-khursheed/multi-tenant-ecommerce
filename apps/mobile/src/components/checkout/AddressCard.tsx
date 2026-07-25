@@ -1,7 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type AddressData = {
   firstName: string;
@@ -23,7 +27,13 @@ type Props = {
   onDelete?: () => void;
 };
 
-export function AddressCard({ address, isSelected, onSelect, onEdit, onDelete }: Props) {
+export function AddressCard({
+  address,
+  isSelected,
+  onSelect,
+  onEdit,
+  onDelete,
+}: Props) {
   return (
     <Pressable
       style={[styles.card, isSelected && styles.cardSelected]}

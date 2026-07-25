@@ -1,16 +1,16 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
 
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 
 import { RichText } from "@/components/rich-text/RichText";
 import {
   horizontalScale,
   moderateScale,
-  verticalScale,
   width as SCREEN_WIDTH,
+  verticalScale,
 } from "@/constants/responsive";
-import { colors, fontSizes, fonts, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 
 type Link = {
   href: string;

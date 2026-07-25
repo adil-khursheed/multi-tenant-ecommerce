@@ -1,16 +1,19 @@
 import { getPayload } from "payload";
 
 import configPromise from "@payload-config";
-import { env } from "@/env";
+
 import {
-  verifyWebhookSignature,
-  parseWebhookEvent,
-  dispatchWebhookEvent,
   createDefaultWebhookHandlers,
+  dispatchWebhookEvent,
+  parseWebhookEvent,
+  verifyWebhookSignature,
   type WebhookHandlers,
 } from "@repo/payments/razorpay";
+import { env } from "@/env";
+import { queuePaymentFailedEmail } from "./queuePaymentFailedEmail";
+import { queueRazorpayOrderEmails } from "./queueRazorpayOrderEmails";
 
-const webhookHandlers: WebhookHandlers = createDefaultWebhookHandlers()
+const webhookHandlers: WebhookHandlers = createDefaultWebhookHandlers();
 
 export async function POST(req: Request) {
   const payload = await getPayload({ config: configPromise });
@@ -27,7 +30,9 @@ export async function POST(req: Request) {
 
   const signature = req.headers.get("x-razorpay-signature") ?? "";
 
-  if (!verifyWebhookSignature(rawBody, signature, env.RAZORPAY_WEBHOOK_SECRET)) {
+  if (
+    !verifyWebhookSignature(rawBody, signature, env.RAZORPAY_WEBHOOK_SECRET)
+  ) {
     payload.logger.warn({ msg: "Invalid Razorpay webhook signature" });
     return Response.json(
       { error: "Invalid webhook signature" },
@@ -55,6 +60,26 @@ export async function POST(req: Request) {
       error: err?.message,
     });
     return Response.json({ error: "Handler failed" }, { status: 500 });
+  }
+
+  if (event.event === "payment.captured") {
+    const payment = event.payload.payment?.entity;
+    if (payment?.order_id) {
+      await queueRazorpayOrderEmails({
+        payload,
+        razorpayOrderId: payment.order_id,
+      });
+    }
+  }
+
+  if (event.event === "payment.failed") {
+    const payment = event.payload.payment?.entity;
+    if (payment?.order_id) {
+      await queuePaymentFailedEmail({
+        payload,
+        razorpayOrderId: payment.order_id,
+      });
+    }
   }
 
   return Response.json({ received: true });

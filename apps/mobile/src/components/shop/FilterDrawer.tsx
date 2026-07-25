@@ -1,12 +1,20 @@
-import { forwardRef, useCallback, useMemo, useState, useEffect } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
 
 import type { RouterOutputs } from "@repo/api";
-
-import { AccordionGroup } from "./AccordionGroup";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { verticalScale, horizontalScale, moderateScale } from "@/constants/responsive";
+import { AccordionGroup } from "./AccordionGroup";
 
 type FilterOptions = RouterOutputs["product"]["getFilterOptions"];
 type CategoriesData = RouterOutputs["category"]["getAllCategories"];
@@ -27,7 +35,14 @@ const PRICE_RANGES = [
   "₹10,000+",
 ];
 
-const OCCASIONS = ["Casual", "Festive", "Wedding", "Office", "Party", "Outdoor"];
+const OCCASIONS = [
+  "Casual",
+  "Festive",
+  "Wedding",
+  "Office",
+  "Party",
+  "Outdoor",
+];
 
 type FilterDrawerProps = {
   filterOptions: FilterOptions;
@@ -75,10 +90,7 @@ function CheckboxItem({
         {isActive && <Text style={styles.checkmark}>✓</Text>}
       </View>
       <Text
-        style={[
-          styles.checkboxLabel,
-          isActive && styles.checkboxLabelActive,
-        ]}
+        style={[styles.checkboxLabel, isActive && styles.checkboxLabelActive]}
       >
         {label}
       </Text>
@@ -312,7 +324,10 @@ export const FilterDrawer = forwardRef<BottomSheetModal, FilterDrawerProps>(
 
         <View style={styles.footer}>
           <Pressable
-            style={[styles.applyButton, activeCount === 0 && styles.applyButtonDisabled]}
+            style={[
+              styles.applyButton,
+              activeCount === 0 && styles.applyButtonDisabled,
+            ]}
             onPress={handleApply}
           >
             <Text style={styles.applyButtonText}>

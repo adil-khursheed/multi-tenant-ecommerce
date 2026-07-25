@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { vendorOnboardingSchema, IFSCVerificationResponse } from "@repo/validators";
+
 import type { BusinessType } from "@repo/types";
+import {
+  IFSCVerificationResponse,
+  vendorOnboardingSchema,
+} from "@repo/validators";
 import { protectedProcedure } from "../trpc";
 import { createMediaDoc } from "../utils/createMediaDoc";
 

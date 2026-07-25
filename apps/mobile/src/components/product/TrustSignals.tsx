@@ -1,14 +1,18 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import {
-  ShippingTruck01Icon,
   PackageReceiveIcon,
   Shield01Icon,
+  ShippingTruck01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, spacing } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 const signals = [
   { icon: ShippingTruck01Icon, label: "Free Shipping" },

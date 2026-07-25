@@ -1,32 +1,31 @@
 import { useCallback, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useRouter } from "expo-router";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import RazorpayCheckout from "react-native-razorpay";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMutation } from "@tanstack/react-query";
+
 import {
-  MapPinIcon,
-  CreditCardIcon,
   Cash01Icon,
+  CreditCardIcon,
+  MapPinIcon,
   Shield01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import RazorpayCheckout from "react-native-razorpay";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 
+import { OrderSummaryItems } from "@/components/checkout/OrderSummaryItems";
+import { StepHeader } from "@/components/checkout/StepHeader";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
 import { useCart } from "@/providers/Cart";
-import { useCurrency } from "@/providers/Currency";
 import { useCheckout } from "@/providers/Checkout";
+import { useCurrency } from "@/providers/Currency";
 import { useTRPC } from "@/utils/api";
-import { StepHeader } from "@/components/checkout/StepHeader";
-import { OrderSummaryItems } from "@/components/checkout/OrderSummaryItems";
-import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 export default function CheckoutReview() {
   const router = useRouter();
@@ -121,24 +120,30 @@ export default function CheckoutReview() {
 
   if (!billingAddress) {
     return (
-      <View style={[styles.container, { paddingTop: top + verticalScale(spacing[4]) }]}>
+      <View
+        style={[
+          styles.container,
+          { paddingTop: top + verticalScale(spacing[4]) },
+        ]}
+      >
         <Text style={styles.errorText}>Please select an address first.</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: top + verticalScale(spacing[4]) }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: top + verticalScale(spacing[4]) },
+      ]}
+    >
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <StepHeader
-          number="04"
-          title="Review Order"
-          isCurrent
-        />
+        <StepHeader number="04" title="Review Order" isCurrent />
 
         {error && (
           <View style={styles.errorBanner}>
@@ -169,10 +174,13 @@ export default function CheckoutReview() {
               {billingAddress.addressLine1}
             </Text>
             {billingAddress.addressLine2 ? (
-              <Text style={styles.addressLine}>{billingAddress.addressLine2}</Text>
+              <Text style={styles.addressLine}>
+                {billingAddress.addressLine2}
+              </Text>
             ) : null}
             <Text style={styles.addressLine}>
-              {billingAddress.city}, {billingAddress.state ? `${billingAddress.state} ` : ""}
+              {billingAddress.city},{" "}
+              {billingAddress.state ? `${billingAddress.state} ` : ""}
               {billingAddress.postalCode}
             </Text>
             <Text style={styles.addressLine}>{billingAddress.country}</Text>
@@ -186,7 +194,9 @@ export default function CheckoutReview() {
           <View style={styles.sectionHeader}>
             <View style={styles.sectionHeaderLeft}>
               <HugeiconsIcon
-                icon={selectedPaymentMethod === "cod" ? Cash01Icon : CreditCardIcon}
+                icon={
+                  selectedPaymentMethod === "cod" ? Cash01Icon : CreditCardIcon
+                }
                 size={16}
                 color={colors.mutedForeground}
                 strokeWidth={1.5}
@@ -233,7 +243,11 @@ export default function CheckoutReview() {
       <View style={styles.bottomBar}>
         <Pressable
           style={[styles.payButton, isProcessing && styles.payButtonDisabled]}
-          onPress={selectedPaymentMethod === "razorpay" ? handleRazorpayPayment : handleCODConfirm}
+          onPress={
+            selectedPaymentMethod === "razorpay"
+              ? handleRazorpayPayment
+              : handleCODConfirm
+          }
           disabled={isProcessing}
         >
           <Text style={styles.payButtonText}>

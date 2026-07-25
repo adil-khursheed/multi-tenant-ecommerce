@@ -7,8 +7,8 @@ import React, {
 } from "react";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { RouterOutputs } from "@repo/api";
 
+import type { RouterOutputs } from "@repo/api";
 import { useTRPC } from "@/utils/api";
 import { deleteAuthToken, getAuthToken, setAuthToken } from "@/utils/token";
 

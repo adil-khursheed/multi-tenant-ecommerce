@@ -1,9 +1,9 @@
 import React from "react";
 
 import { EcommerceProvider } from "@payloadcms/plugin-ecommerce/client/react";
-import { razorpayAdapterClient } from "@repo/payments/razorpay";
-import { codAdapterClient } from "@repo/payments/cod";
 
+import { codAdapterClient } from "@repo/payments/cod";
+import { razorpayAdapterClient } from "@repo/payments/razorpay";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { env } from "@/env";
 import { AuthProvider } from "@/providers/Auth";
@@ -57,10 +57,7 @@ export const Providers: React.FC<{
                       },
                     },
                   }}
-                  paymentMethods={[
-                    razorpayAdapterClient(),
-                    codAdapterClient(),
-                  ]}
+                  paymentMethods={[razorpayAdapterClient(), codAdapterClient()]}
                 >
                   {children}
                 </EcommerceProvider>

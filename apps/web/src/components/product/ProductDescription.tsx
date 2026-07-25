@@ -1,55 +1,72 @@
-'use client'
-import type { Product, Variant } from '@/payload-types'
+"use client";
 
-import { RichText } from '@/components/RichText'
-import { AddToCart } from '@/components/Cart/AddToCart'
-import { Price } from '@/components/Price'
-import React, { Suspense } from 'react'
+import React, { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-import { VariantSelector } from './VariantSelector'
-import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
-import { StockIndicator } from '@/components/product/StockIndicator'
-import { useSearchParams } from 'next/navigation'
+import { useCurrency } from "@payloadcms/plugin-ecommerce/client/react";
 
-function ProductPrice({ product, currencyCode }: { product: Product; currencyCode: string }) {
-  const searchParams = useSearchParams()
-  const variantId = searchParams.get('variant')
-  const priceField = `priceIn${currencyCode}` as keyof Product
+import { AddToCart } from "@/components/Cart/AddToCart";
+import { Price } from "@/components/Price";
+import { StockIndicator } from "@/components/product/StockIndicator";
+import { RichText } from "@/components/RichText";
+import type { Product, Variant } from "@/payload-types";
+import { VariantSelector } from "./VariantSelector";
 
-  const hasVariants = product.enableVariants && Boolean(product.variants?.docs?.length)
-  let selectedVariant: Variant | undefined
+function ProductPrice({
+  product,
+  currencyCode,
+}: {
+  product: Product;
+  currencyCode: string;
+}) {
+  const searchParams = useSearchParams();
+  const variantId = searchParams.get("variant");
+  const priceField = `priceIn${currencyCode}` as keyof Product;
+
+  const hasVariants =
+    product.enableVariants && Boolean(product.variants?.docs?.length);
+  let selectedVariant: Variant | undefined;
 
   if (hasVariants && variantId && product.variants?.docs) {
     selectedVariant = product.variants.docs.find(
-      (v) => typeof v === 'object' && String(v.id) === variantId
-    ) as Variant | undefined
+      (v) => typeof v === "object" && String(v.id) === variantId,
+    ) as Variant | undefined;
   }
 
   if (selectedVariant) {
-    const variantPriceField = `priceIn${currencyCode}` as keyof Variant
-    const vPrice = selectedVariant[variantPriceField]
-    const originalAmount = typeof vPrice === 'number' ? vPrice : (product[priceField] as number | undefined)
-    const effectiveAmount = selectedVariant.effectivePrice ?? originalAmount
-    return <Price amount={effectiveAmount as number} originalAmount={originalAmount} />
+    const variantPriceField = `priceIn${currencyCode}` as keyof Variant;
+    const vPrice = selectedVariant[variantPriceField];
+    const originalAmount =
+      typeof vPrice === "number"
+        ? vPrice
+        : (product[priceField] as number | undefined);
+    const effectiveAmount = selectedVariant.effectivePrice ?? originalAmount;
+    return (
+      <Price
+        amount={effectiveAmount as number}
+        originalAmount={originalAmount}
+      />
+    );
   }
 
   if (hasVariants) {
-    const minPrice = product.minEffectivePrice
-    const maxPrice = product.maxEffectivePrice
-    if (typeof minPrice === 'number' && typeof maxPrice === 'number') {
-      return <Price lowestAmount={minPrice} highestAmount={maxPrice} />
+    const minPrice = product.minEffectivePrice;
+    const maxPrice = product.maxEffectivePrice;
+    if (typeof minPrice === "number" && typeof maxPrice === "number") {
+      return <Price lowestAmount={minPrice} highestAmount={maxPrice} />;
     }
   }
 
-  const basePrice = product[priceField] as number
-  const effectivePrice = product.effectivePrice ?? basePrice
+  const basePrice = product[priceField] as number;
+  const effectivePrice = product.effectivePrice ?? basePrice;
 
-  return <Price amount={effectivePrice} originalAmount={basePrice} />
+  return <Price amount={effectivePrice} originalAmount={basePrice} />;
 }
 
 export function ProductDescription({ product }: { product: Product }) {
-  const { currency } = useCurrency()
-  const hasVariants = product.enableVariants && Boolean(product.variants?.docs?.length)
+  const { currency } = useCurrency();
+  const hasVariants =
+    product.enableVariants && Boolean(product.variants?.docs?.length);
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,7 +79,11 @@ export function ProductDescription({ product }: { product: Product }) {
         </div>
       </div>
       {product.description ? (
-        <RichText className="" data={product.description} enableGutter={false} />
+        <RichText
+          className=""
+          data={product.description}
+          enableGutter={false}
+        />
       ) : null}
       <hr />
       {hasVariants && (
@@ -86,5 +107,5 @@ export function ProductDescription({ product }: { product: Product }) {
         </Suspense>
       </div>
     </div>
-  )
+  );
 }

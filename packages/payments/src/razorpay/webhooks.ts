@@ -1,18 +1,20 @@
-import { validateWebhookSignature } from 'razorpay/dist/utils/razorpay-utils'
-import type { PayloadRequest } from 'payload'
-import type { RazorpayWebhookEvent } from './types'
+import type { PayloadRequest } from "payload";
+
+import { validateWebhookSignature } from "razorpay/dist/utils/razorpay-utils";
+
+import type { RazorpayWebhookEvent } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyPayload = any
+type AnyPayload = any;
 
 export type RazorpayWebhookHandler = (args: {
-  event: RazorpayWebhookEvent
-  req: PayloadRequest
-}) => Promise<void> | void
+  event: RazorpayWebhookEvent;
+  req: PayloadRequest;
+}) => Promise<void> | void;
 
 export type WebhookHandlers = {
-  [eventType: string]: RazorpayWebhookHandler
-}
+  [eventType: string]: RazorpayWebhookHandler;
+};
 
 export function verifyWebhookSignature(
   rawBody: string,
@@ -20,15 +22,15 @@ export function verifyWebhookSignature(
   secret: string,
 ): boolean {
   try {
-    validateWebhookSignature(rawBody, signature, secret)
-    return true
+    validateWebhookSignature(rawBody, signature, secret);
+    return true;
   } catch {
-    return false
+    return false;
   }
 }
 
 export function parseWebhookEvent(rawBody: string): RazorpayWebhookEvent {
-  return JSON.parse(rawBody) as RazorpayWebhookEvent
+  return JSON.parse(rawBody) as RazorpayWebhookEvent;
 }
 
 export async function dispatchWebhookEvent(
@@ -36,55 +38,56 @@ export async function dispatchWebhookEvent(
   handlers: WebhookHandlers,
   req: PayloadRequest,
 ): Promise<void> {
-  const handler = handlers[event.event]
-  if (typeof handler === 'function') {
-    await handler({ event, req })
+  const handler = handlers[event.event];
+  if (typeof handler === "function") {
+    await handler({ event, req });
   }
 }
 
 export function createPaymentCaptureHandler(): RazorpayWebhookHandler {
   return async ({ event, req }) => {
-    const payment = event.payload.payment?.entity
-    if (!payment?.order_id || !payment?.id) return
+    const payment = event.payload.payment?.entity;
+    if (!payment?.order_id || !payment?.id) return;
 
-    const payload = req.payload as AnyPayload
+    const payload = req.payload as AnyPayload;
 
     const transactions = await payload.find({
-      collection: 'transactions',
+      collection: "transactions",
       req,
       where: {
-        'razorpay.orderID': {
+        "razorpay.orderID": {
           equals: payment.order_id,
         },
       },
       limit: 1,
-    })
+    });
 
-    if (transactions.totalDocs === 0) return
+    if (transactions.totalDocs === 0) return;
 
-    const transaction = transactions.docs[0]
-    if (!transaction) return
+    const transaction = transactions.docs[0];
+    if (!transaction) return;
 
-    if (transaction.status === 'succeeded') return
+    if (transaction.status === "succeeded") return;
 
     await payload.update({
       id: transaction.id,
-      collection: 'transactions',
+      collection: "transactions",
       data: {
-        status: 'succeeded',
+        status: "succeeded",
         razorpay: {
-          ...(typeof transaction.razorpay === 'object' && transaction.razorpay !== null
+          ...(typeof transaction.razorpay === "object" &&
+          transaction.razorpay !== null
             ? transaction.razorpay
             : {}),
           paymentID: payment.id,
         },
       },
       req,
-    })
+    });
 
     if (!transaction.order) {
       const order = await payload.create({
-        collection: 'orders',
+        collection: "orders",
         data: {
           amount: transaction.amount,
           currency: transaction.currency,
@@ -92,57 +95,57 @@ export function createPaymentCaptureHandler(): RazorpayWebhookHandler {
           customerEmail: transaction.customerEmail,
           items: transaction.items,
           shippingAddress: transaction.billingAddress,
-          status: 'processing',
+          status: "processing",
           transactions: [transaction.id],
         },
         req,
-      })
+      });
 
       await payload.update({
         id: transaction.id,
-        collection: 'transactions',
+        collection: "transactions",
         data: { order: order.id },
         req,
-      })
+      });
     }
-  }
+  };
 }
 
 export function createPaymentFailedHandler(): RazorpayWebhookHandler {
   return async ({ event, req }) => {
-    const payment = event.payload.payment?.entity
-    if (!payment?.order_id) return
+    const payment = event.payload.payment?.entity;
+    if (!payment?.order_id) return;
 
-    const payload = req.payload as AnyPayload
+    const payload = req.payload as AnyPayload;
 
     const transactions = await payload.find({
-      collection: 'transactions',
+      collection: "transactions",
       req,
       where: {
-        'razorpay.orderID': {
+        "razorpay.orderID": {
           equals: payment.order_id,
         },
       },
       limit: 1,
-    })
+    });
 
-    if (transactions.totalDocs === 0) return
+    if (transactions.totalDocs === 0) return;
 
-    const transaction = transactions.docs[0]
-    if (!transaction) return
+    const transaction = transactions.docs[0];
+    if (!transaction) return;
 
     await payload.update({
       id: transaction.id,
-      collection: 'transactions',
-      data: { status: 'failed' },
+      collection: "transactions",
+      data: { status: "failed" },
       req,
-    })
-  }
+    });
+  };
 }
 
 export function createDefaultWebhookHandlers(): WebhookHandlers {
   return {
-    'payment.captured': createPaymentCaptureHandler(),
-    'payment.failed': createPaymentFailedHandler(),
-  }
+    "payment.captured": createPaymentCaptureHandler(),
+    "payment.failed": createPaymentFailedHandler(),
+  };
 }

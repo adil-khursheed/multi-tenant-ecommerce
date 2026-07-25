@@ -10,11 +10,12 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useAuth } from "@/providers/Auth";
+import { useRouter } from "expo-router";
+
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
+import { useAuth } from "@/providers/Auth";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -28,7 +29,13 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!firstName.trim() || !email.trim() || !phone.trim() || !password.trim() || !passwordConfirm.trim()) {
+    if (
+      !firstName.trim() ||
+      !email.trim() ||
+      !phone.trim() ||
+      !password.trim() ||
+      !passwordConfirm.trim()
+    ) {
       Alert.alert("Error", "Please fill in all required fields.");
       return;
     }
@@ -168,10 +175,7 @@ export default function RegisterScreen() {
               </Text>
             </Pressable>
 
-            <Pressable
-              style={styles.linkButton}
-              onPress={() => router.back()}
-            >
+            <Pressable style={styles.linkButton} onPress={() => router.back()}>
               <Text style={styles.linkText}>
                 Already have an account?{" "}
                 <Text style={styles.linkTextBold}>Sign In</Text>

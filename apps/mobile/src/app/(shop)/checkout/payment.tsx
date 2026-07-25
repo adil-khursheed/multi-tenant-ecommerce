@@ -1,23 +1,22 @@
 import { useCallback, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useRouter } from "expo-router";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 
+import { PaymentMethodCard } from "@/components/checkout/PaymentMethodCard";
+import { StepHeader } from "@/components/checkout/StepHeader";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 import { useCheckout } from "@/providers/Checkout";
 import { useTRPC } from "@/utils/api";
-import { StepHeader } from "@/components/checkout/StepHeader";
-import { PaymentMethodCard } from "@/components/checkout/PaymentMethodCard";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 export default function CheckoutPayment() {
   const router = useRouter();
@@ -61,7 +60,12 @@ export default function CheckoutPayment() {
   }, [selectedPaymentMethod, initiateMutation]);
 
   return (
-    <View style={[styles.container, { paddingTop: top + verticalScale(spacing[4]) }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: top + verticalScale(spacing[4]) },
+      ]}
+    >
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -155,7 +159,10 @@ export default function CheckoutPayment() {
 
       <View style={styles.bottomBar}>
         <Pressable
-          style={[styles.proceedButton, isInitiating && styles.proceedButtonDisabled]}
+          style={[
+            styles.proceedButton,
+            isInitiating && styles.proceedButtonDisabled,
+          ]}
           onPress={handleProceed}
           disabled={isInitiating}
         >

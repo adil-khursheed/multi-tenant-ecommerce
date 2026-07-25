@@ -23,9 +23,11 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Tabs, useRouter } from "expo-router";
 
-import { useAuth } from "@/providers/Auth";
-import { useCart } from "@/providers/Cart";
-import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import {
   colors,
   fonts,
@@ -34,6 +36,8 @@ import {
   shadows,
   spacing,
 } from "@/constants/theme";
+import { useAuth } from "@/providers/Auth";
+import { useCart } from "@/providers/Cart";
 
 const ICON_MAP: Record<string, typeof Home01Icon> = {
   index: Home01Icon,
@@ -104,9 +108,10 @@ function CustomTabBar({ state, navigation, descriptors }: TabBarProps) {
           (route: { key: string; name: string }, index: number) => {
             const isFocused = state.index === index;
             const isProfileTab = route.name === "profile";
-            const label = isProfileTab && !isLoggedIn
-              ? "Login"
-              : descriptors[route.key]?.options?.title ?? route.name;
+            const label =
+              isProfileTab && !isLoggedIn
+                ? "Login"
+                : (descriptors[route.key]?.options?.title ?? route.name);
             const Icon = ICON_MAP[route.name] ?? Home01Icon;
 
             const onPress = () => {

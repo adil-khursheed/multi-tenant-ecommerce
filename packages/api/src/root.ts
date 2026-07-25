@@ -2,6 +2,7 @@ import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 import { addressesRouter } from "./routers/addresses";
 import { authRouter } from "./routers/auth";
+import { blocksRouter } from "./routers/blocks";
 import { cartRouter } from "./routers/cart";
 import { categoriesRouter } from "./routers/categories";
 import { ordersRouter } from "./routers/orders";
@@ -9,7 +10,6 @@ import { pagesRouter } from "./routers/pages";
 import { paymentsRouter } from "./routers/payments";
 import { productsRouter } from "./routers/products";
 import { vendorRouter } from "./routers/vendor";
-import { blocksRouter } from "./routers/blocks";
 import { wishlistRouter } from "./routers/wishlist";
 import { createTRPCRouter } from "./trpc";
 

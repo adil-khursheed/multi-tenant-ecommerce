@@ -1,4 +1,4 @@
-export { razorpayAdapter, razorpayAdapterClient } from './adapter'
+export { razorpayAdapter, razorpayAdapterClient } from "./adapter";
 export type {
   RazorpayAdapterArgs,
   RazorpayWebhookEvent,
@@ -7,7 +7,7 @@ export type {
   RazorpayOrder,
   InitiatePaymentReturnType,
   ConfirmOrderReturnType,
-} from './types'
+} from "./types";
 export {
   verifyWebhookSignature,
   parseWebhookEvent,
@@ -15,5 +15,5 @@ export {
   createPaymentCaptureHandler,
   createPaymentFailedHandler,
   createDefaultWebhookHandlers,
-} from './webhooks'
-export type { WebhookHandlers } from './webhooks'
+} from "./webhooks";
+export type { WebhookHandlers } from "./webhooks";

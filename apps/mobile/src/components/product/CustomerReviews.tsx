@@ -1,7 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 type Review = {
   id: string | number;
@@ -9,10 +13,7 @@ type Review = {
   title?: string | null;
   description?: string | null;
   createdAt?: string | null;
-  user?:
-    | { name?: string | null; [k: string]: unknown }
-    | string
-    | null;
+  user?: { name?: string | null; [k: string]: unknown } | string | null;
 };
 
 type CustomerReviewsProps = {
@@ -52,7 +53,15 @@ function StarRatingDisplay({
   return <View style={styles.starsRow}>{stars}</View>;
 }
 
-function DistributionBar({ count, total, stars }: { count: number; total: number; stars: number }) {
+function DistributionBar({
+  count,
+  total,
+  stars,
+}: {
+  count: number;
+  total: number;
+  stars: number;
+}) {
   const percentage = total > 0 ? (count / total) * 100 : 0;
 
   return (
@@ -85,9 +94,7 @@ export function CustomerReviews({
       <View style={styles.header}>
         <View>
           <Text style={styles.heading}>Customer Reviews</Text>
-          <Text style={styles.subtitle}>
-            Based on {reviewCount} reviews
-          </Text>
+          <Text style={styles.subtitle}>Based on {reviewCount} reviews</Text>
         </View>
       </View>
 
@@ -140,18 +147,25 @@ export function CustomerReviews({
                       <Text style={styles.userName}>{userName}</Text>
                       <Text style={styles.reviewDate}>
                         {review.createdAt
-                          ? new Date(review.createdAt).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })
+                          ? new Date(review.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              },
+                            )
                           : ""}
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.reviewBody}>
-                    <StarRatingDisplay rating={review.rating} maxStars={5} size={12} />
+                    <StarRatingDisplay
+                      rating={review.rating}
+                      maxStars={5}
+                      size={12}
+                    />
                     {review.title ? (
                       <Text style={styles.reviewTitle}>{review.title}</Text>
                     ) : null}

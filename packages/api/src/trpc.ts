@@ -1,4 +1,5 @@
 import type { Payload } from "payload";
+
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { z, ZodError } from "zod";
@@ -7,7 +8,11 @@ import { z, ZodError } from "zod";
 export type TRPCContext = {
   payload: Payload;
   session: { user: any | null };
-  setCookie?: (name: string, value: string, options?: any) => Promise<void> | void;
+  setCookie?: (
+    name: string,
+    value: string,
+    options?: any,
+  ) => Promise<void> | void;
 };
 
 const t = initTRPC.context<TRPCContext>().create({
@@ -16,10 +21,7 @@ const t = initTRPC.context<TRPCContext>().create({
     ...shape,
     data: {
       ...shape.data,
-      zodError:
-        error.cause instanceof ZodError
-          ? error.cause.flatten()
-          : null,
+      zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
     },
   }),
 });

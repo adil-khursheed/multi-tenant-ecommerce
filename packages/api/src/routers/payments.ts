@@ -1,5 +1,5 @@
-import Razorpay from "razorpay";
 import { TRPCError } from "@trpc/server";
+import Razorpay from "razorpay";
 import { z } from "zod";
 
 import { protectedProcedure } from "../trpc";
@@ -125,12 +125,12 @@ export const paymentsRouter = {
 
         const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
 
-        const razorpayOrder = await razorpay.orders.create({
+        const razorpayOrder = (await razorpay.orders.create({
           amount: total,
           currency,
           receipt: String(cart.id),
           notes: { cartID: String(cart.id) },
-        }) as { id: string };
+        })) as { id: string };
 
         const transaction = await ctx.payload.create({
           collection: "transactions",
@@ -264,7 +264,9 @@ export const paymentsRouter = {
           };
         }
 
-        const payment = await razorpay.payments.fetch(razorpayPaymentID) as { status: string };
+        const payment = (await razorpay.payments.fetch(razorpayPaymentID)) as {
+          status: string;
+        };
         if (payment.status !== "captured") {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -281,7 +283,9 @@ export const paymentsRouter = {
             items: transaction.items,
             status: "processing",
             transactions: [transaction.id],
-            ...(transaction.couponCode ? { couponCode: transaction.couponCode } : {}),
+            ...(transaction.couponCode
+              ? { couponCode: transaction.couponCode }
+              : {}),
             discount: transaction.discount ?? 0,
             shippingCharge: transaction.shippingCharge ?? 0,
           },
@@ -304,7 +308,8 @@ export const paymentsRouter = {
             order: order.id,
             status: "succeeded",
             razorpay: {
-              ...(typeof transaction.razorpay === "object" && transaction.razorpay !== null
+              ...(typeof transaction.razorpay === "object" &&
+              transaction.razorpay !== null
                 ? transaction.razorpay
                 : {}),
               paymentID: razorpayPaymentID,
@@ -369,7 +374,9 @@ export const paymentsRouter = {
           items: transaction.items,
           status: "processing",
           transactions: [transaction.id],
-          ...(transaction.couponCode ? { couponCode: transaction.couponCode } : {}),
+          ...(transaction.couponCode
+            ? { couponCode: transaction.couponCode }
+            : {}),
           discount: transaction.discount ?? 0,
           shippingCharge: transaction.shippingCharge ?? 0,
         },

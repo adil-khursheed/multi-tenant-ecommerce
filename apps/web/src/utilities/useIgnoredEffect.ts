@@ -1,5 +1,6 @@
-'use client'
-import { useEffect, useRef } from 'react'
+"use client";
+
+import { useEffect, useRef } from "react";
 
 /**
  * useIgnoredEffect
@@ -12,12 +13,12 @@ export function useIgnoredEffect(
   triggerDeps: any[],
   ignoredDeps: any[],
 ) {
-  const ignoredDepsRef = useRef(ignoredDeps)
+  const ignoredDepsRef = useRef(ignoredDeps);
 
   // Update ref when ignoredDeps change, but do not trigger the effect
   useEffect(() => {
-    ignoredDepsRef.current = ignoredDeps
-  }, ignoredDeps)
+    ignoredDepsRef.current = ignoredDeps;
+  }, ignoredDeps);
 
-  useEffect(effect, triggerDeps)
+  useEffect(effect, triggerDeps);
 }

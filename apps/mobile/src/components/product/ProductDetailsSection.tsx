@@ -3,16 +3,20 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   AlignLeftIcon,
-  Shirt01Icon,
-  RulerIcon,
   DeliveryTruck01Icon,
+  RulerIcon,
+  Shirt01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
-import { AccordionGroup } from "@/components/shop/AccordionGroup";
 import { RichText } from "@/components/rich-text/RichText";
+import { AccordionGroup } from "@/components/shop/AccordionGroup";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 const CM_TO_INCHES = 0.3937;
 
@@ -153,7 +157,8 @@ export function ProductDetailsSection({
               <RichText data={tenant.shippingPolicy} />
             ) : (
               <Text style={styles.descriptionText}>
-                Shipping and delivery information will be provided by the seller.
+                Shipping and delivery information will be provided by the
+                seller.
               </Text>
             )}
           </View>
@@ -164,7 +169,8 @@ export function ProductDetailsSection({
               <RichText data={tenant.returnAndExchangePolicy} />
             ) : (
               <Text style={styles.descriptionText}>
-                Returns are accepted within 30 days of purchase. Items must be in their original condition with tags attached.
+                Returns are accepted within 30 days of purchase. Items must be
+                in their original condition with tags attached.
               </Text>
             )}
           </View>
@@ -243,8 +249,7 @@ function SizeGuideTable({
     <View>
       <View style={styles.unitToggle}>
         <Text style={styles.unitText}>
-          Measurements in{" "}
-          <Text style={styles.unitBold}>{unitLabel}</Text>
+          Measurements in <Text style={styles.unitBold}>{unitLabel}</Text>
         </Text>
         <Pressable
           style={styles.unitButton}
@@ -266,15 +271,24 @@ function SizeGuideTable({
               Size
             </Text>
             {measurementKeys.map((mk) => (
-              <Text key={mk.key} style={[styles.tableHeaderText, styles.tableCellValue]}>
+              <Text
+                key={mk.key}
+                style={[styles.tableHeaderText, styles.tableCellValue]}
+              >
                 {mk.label}
               </Text>
             ))}
             {hasEquivalents && (
               <>
-                <Text style={[styles.tableHeaderText, styles.tableCellEquiv]}>US</Text>
-                <Text style={[styles.tableHeaderText, styles.tableCellEquiv]}>UK</Text>
-                <Text style={[styles.tableHeaderText, styles.tableCellEquiv]}>EU</Text>
+                <Text style={[styles.tableHeaderText, styles.tableCellEquiv]}>
+                  US
+                </Text>
+                <Text style={[styles.tableHeaderText, styles.tableCellEquiv]}>
+                  UK
+                </Text>
+                <Text style={[styles.tableHeaderText, styles.tableCellEquiv]}>
+                  EU
+                </Text>
               </>
             )}
           </View>
@@ -285,7 +299,13 @@ function SizeGuideTable({
               key={row.id ?? i}
               style={[styles.tableRow, i % 2 === 0 && styles.tableRowEven]}
             >
-              <Text style={[styles.tableCellText, styles.tableCellSize, styles.tableCellBold]}>
+              <Text
+                style={[
+                  styles.tableCellText,
+                  styles.tableCellSize,
+                  styles.tableCellBold,
+                ]}
+              >
                 {row.sizeLabel}
               </Text>
               {measurementKeys.map((mk) => {
@@ -299,7 +319,10 @@ function SizeGuideTable({
                   displayUnit,
                 );
                 return (
-                  <Text key={mk.key} style={[styles.tableCellText, styles.tableCellValue]}>
+                  <Text
+                    key={mk.key}
+                    style={[styles.tableCellText, styles.tableCellValue]}
+                  >
                     {displayValue} {unitLabel}
                   </Text>
                 );

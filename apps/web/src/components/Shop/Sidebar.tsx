@@ -248,8 +248,7 @@ export const Sidebar = () => {
             <div className="grid grid-cols-6 gap-y-4 gap-x-2">
               {filterOptions.colors.map((colorName) => {
                 const isActive = activeColor === colorName;
-                const hex =
-                  COLOR_HEX_MAP[colorName] || "#D1D5DB";
+                const hex = COLOR_HEX_MAP[colorName] || "#D1D5DB";
                 return (
                   <Tooltip key={colorName}>
                     <TooltipTrigger

@@ -1,11 +1,16 @@
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useAuth } from "@/providers/Auth";
+import { useRouter } from "expo-router";
+
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
+import { useAuth } from "@/providers/Auth";
 
 export default function CheckoutContact() {
   const { user } = useAuth();
@@ -20,14 +25,24 @@ export default function CheckoutContact() {
 
   if (!user) {
     return (
-      <View style={[styles.container, { paddingTop: top + verticalScale(spacing[4]) }]}>
+      <View
+        style={[
+          styles.container,
+          { paddingTop: top + verticalScale(spacing[4]) },
+        ]}
+      >
         <Text style={styles.message}>Please log in to continue checkout.</Text>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: top + verticalScale(spacing[4]) }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: top + verticalScale(spacing[4]) },
+      ]}
+    >
       <Text style={styles.message}>Redirecting...</Text>
     </View>
   );

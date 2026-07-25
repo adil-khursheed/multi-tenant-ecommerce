@@ -1,9 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
+
 import { useQuery } from "@tanstack/react-query";
 
-import { useTRPC } from "@/utils/api";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
+import { useTRPC } from "@/utils/api";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   pending: { bg: colors.warning, text: colors.foreground },
@@ -59,14 +64,20 @@ export function OrdersSection() {
   return (
     <View style={styles.container}>
       {orders.map((order: any) => {
-        const statusStyle = STATUS_COLORS[order.status] ?? STATUS_COLORS.pending;
+        const statusStyle =
+          STATUS_COLORS[order.status] ?? STATUS_COLORS.pending;
         const itemCount = order.items?.length ?? 0;
 
         return (
           <View key={order.id} style={styles.orderCard}>
             <View style={styles.orderHeader}>
               <Text style={styles.orderId}>#{order.id}</Text>
-              <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: statusStyle.bg },
+                ]}
+              >
                 <Text style={[styles.statusText, { color: statusStyle.text }]}>
                   {order.status ?? "pending"}
                 </Text>
@@ -79,7 +90,9 @@ export function OrdersSection() {
               <Text style={styles.orderItems}>
                 {itemCount} {itemCount === 1 ? "item" : "items"}
               </Text>
-              <Text style={styles.orderAmount}>{formatAmount(order.amount)}</Text>
+              <Text style={styles.orderAmount}>
+                {formatAmount(order.amount)}
+              </Text>
             </View>
           </View>
         );

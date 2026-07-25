@@ -1,9 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
+
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type Props = {
   number: string;
@@ -39,10 +44,7 @@ export function StepHeader({
             />
           ) : (
             <Text
-              style={[
-                styles.numberText,
-                isCurrent && styles.numberTextCurrent,
-              ]}
+              style={[styles.numberText, isCurrent && styles.numberTextCurrent]}
             >
               {number}
             </Text>

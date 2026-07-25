@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/carousel";
 import type { Product } from "@/payload-types";
 import { cn } from "@/utilities/cn";
-
 import { ImageLightbox } from "./ImageLightbox";
 
 type Props = {
@@ -226,7 +225,11 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
       <ImageLightbox
         open={lightboxOpen}
         onOpenChange={setLightboxOpen}
-        gallery={gallery as { image: NonNullable<Product["gallery"]>[number]["image"] }[]}
+        gallery={
+          gallery as {
+            image: NonNullable<Product["gallery"]>[number]["image"];
+          }[]
+        }
         initialIndex={current}
         onIndexChange={(index) => {
           setCurrent(index);

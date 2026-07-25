@@ -1,8 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { ProductCard, type ShopProduct } from "@/components/shop/ProductCard";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
 
 type RelatedProductsProps = {
   products: ShopProduct[];

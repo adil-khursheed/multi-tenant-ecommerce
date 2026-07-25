@@ -16,6 +16,13 @@ import {
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
 
+import {
+  addressSchema,
+  bankAccountBaseSchema,
+  businessInfoBaseSchema,
+  VendorOnboardingFormData,
+  vendorOnboardingSchema,
+} from "@repo/validators";
 import { Message } from "@/components/Message";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
@@ -26,13 +33,6 @@ import AddressForm from "./address-form";
 import BankAccountInfoForm from "./bank-account-info-form";
 import BusinessInfoForm from "./business-info-form";
 import ReviewStep from "./review-step";
-import {
-  addressSchema,
-  bankAccountBaseSchema,
-  businessInfoBaseSchema,
-  VendorOnboardingFormData,
-  vendorOnboardingSchema,
-} from "@repo/validators";
 
 /* ---------- Step configuration ---------- */
 
@@ -150,8 +150,8 @@ const VendorMultiStepForm = () => {
   const handleNext = async () => {
     if (activeStep >= steps.length - 1) return;
 
-    const currentFields = currentStep
-      .fields as (keyof VendorOnboardingFormData)[];
+    const currentFields =
+      currentStep.fields as (keyof VendorOnboardingFormData)[];
 
     if (currentFields.length > 0) {
       const valid = await trigger(currentFields);
@@ -289,7 +289,9 @@ const VendorMultiStepForm = () => {
         {/* Step Header */}
         <div className="mb-8 lg:mb-12">
           <h2 className="relative inline-block font-serif text-2xl sm:text-3xl lg:text-4xl">
-            {currentStep?.id === "business" && <div className="absolute bottom-[-8px] left-0 h-px w-1/3 bg-secondary" />}
+            {currentStep?.id === "business" && (
+              <div className="absolute bottom-[-8px] left-0 h-px w-1/3 bg-secondary" />
+            )}
             {currentStep.heading}
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base lg:mt-6 lg:text-lg">

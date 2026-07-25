@@ -1,12 +1,14 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import {
-  Shield01Icon,
-  Cash01Icon,
-} from "@hugeicons/core-free-icons";
+
+import { Cash01Icon, Shield01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
 
 type PaymentMethod = "razorpay" | "cod";
 
@@ -53,7 +55,9 @@ export function PaymentMethodCard({ method, isSelected, onSelect }: Props) {
           strokeWidth={1.5}
         />
         <View style={styles.textGroup as any}>
-          <Text style={[styles.label as any, isSelected && styles.labelSelected]}>
+          <Text
+            style={[styles.label as any, isSelected && styles.labelSelected]}
+          >
             {label}
           </Text>
           <Text style={styles.description as any}>{description}</Text>

@@ -1,19 +1,18 @@
 import { useCallback, useState } from "react";
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useTRPC } from "@/utils/api";
 import { CheckoutInput } from "@/components/checkout/CheckoutInput";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, verticalScale, moderateScale } from "@/constants/responsive";
+import { useTRPC } from "@/utils/api";
 
 type AddressForm = {
   firstName: string;
@@ -44,7 +43,9 @@ export function AddressesSection() {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<AddressForm>(EMPTY_FORM);
-  const [errors, setErrors] = useState<Partial<Record<keyof AddressForm, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof AddressForm, string>>
+  >({});
 
   const { data: addressesData, isLoading } = useQuery(
     trpc.addresses.list.queryOptions(),
@@ -53,7 +54,9 @@ export function AddressesSection() {
   const createAddressMutation = useMutation(
     trpc.addresses.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.addresses.list.queryKey() });
+        queryClient.invalidateQueries({
+          queryKey: trpc.addresses.list.queryKey(),
+        });
         setForm(EMPTY_FORM);
         setShowForm(false);
       },
@@ -66,7 +69,9 @@ export function AddressesSection() {
   const deleteAddressMutation = useMutation(
     trpc.addresses.delete.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.addresses.list.queryKey() });
+        queryClient.invalidateQueries({
+          queryKey: trpc.addresses.list.queryKey(),
+        });
       },
       onError: () => {
         Alert.alert("Error", "Failed to delete address.");
@@ -115,14 +120,18 @@ export function AddressesSection() {
 
   const handleDelete = useCallback(
     (id: string) => {
-      Alert.alert("Remove Address", "Are you sure you want to remove this address?", [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => deleteAddressMutation.mutate({ id }),
-        },
-      ]);
+      Alert.alert(
+        "Remove Address",
+        "Are you sure you want to remove this address?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Remove",
+            style: "destructive",
+            onPress: () => deleteAddressMutation.mutate({ id }),
+          },
+        ],
+      );
     },
     [deleteAddressMutation],
   );
@@ -158,7 +167,9 @@ export function AddressesSection() {
                 {"\n"}
                 {addr.country}
               </Text>
-              {addr.phone ? <Text style={styles.phone}>{addr.phone}</Text> : null}
+              {addr.phone ? (
+                <Text style={styles.phone}>{addr.phone}</Text>
+              ) : null}
             </View>
           ))}
         </View>

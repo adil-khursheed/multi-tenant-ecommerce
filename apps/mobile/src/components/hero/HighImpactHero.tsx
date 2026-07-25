@@ -1,24 +1,24 @@
 import { useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
 import Animated, {
-  useSharedValue,
+  Easing,
   useAnimatedStyle,
+  useSharedValue,
   withRepeat,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
 
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 
 import { RichText } from "@/components/rich-text/RichText";
 import {
   horizontalScale,
   moderateScale,
-  verticalScale,
   width as SCREEN_WIDTH,
+  verticalScale,
 } from "@/constants/responsive";
-import { colors, fontSizes, fonts, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
 
 type Link = {
   href: string;
@@ -92,9 +92,7 @@ export function HighImpactHero({
           <View style={styles.productOverlay}>
             <View style={styles.productInfo}>
               {featuredProduct.title && (
-                <Text style={styles.productTitle}>
-                  {featuredProduct.title}
-                </Text>
+                <Text style={styles.productTitle}>{featuredProduct.title}</Text>
               )}
               {featuredProduct.effectivePrice != null && (
                 <View style={styles.priceRow}>
@@ -120,9 +118,7 @@ export function HighImpactHero({
             {featuredProduct.slug && (
               <Pressable
                 style={styles.productButton}
-                onPress={() =>
-                  router.push(`/(shop)/${featuredProduct.slug}`)
-                }
+                onPress={() => router.push(`/(shop)/${featuredProduct.slug}`)}
               >
                 <Text style={styles.productButtonText}>View</Text>
               </Pressable>
@@ -142,7 +138,9 @@ export function HighImpactHero({
                 key={i}
                 style={[
                   styles.linkButton,
-                  i === 0 ? styles.linkButtonPrimary : styles.linkButtonSecondary,
+                  i === 0
+                    ? styles.linkButtonPrimary
+                    : styles.linkButtonSecondary,
                 ]}
                 onPress={() => {
                   if (link.href.startsWith("http")) {
@@ -155,9 +153,7 @@ export function HighImpactHero({
                 <Text
                   style={[
                     styles.linkText,
-                    i === 0
-                      ? styles.linkTextPrimary
-                      : styles.linkTextSecondary,
+                    i === 0 ? styles.linkTextPrimary : styles.linkTextSecondary,
                   ]}
                 >
                   {link.label}

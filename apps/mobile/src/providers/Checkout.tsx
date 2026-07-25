@@ -38,10 +38,15 @@ type CheckoutContext = {
 const CheckoutContext = createContext<CheckoutContext>({} as CheckoutContext);
 
 export function CheckoutProvider({ children }: { children: React.ReactNode }) {
-  const [billingAddress, setBillingAddress] = useState<AddressData | null>(null);
+  const [billingAddress, setBillingAddress] = useState<AddressData | null>(
+    null,
+  );
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<PaymentMethod>("razorpay");
-  const [paymentData, setPaymentData] = useState<Record<string, unknown> | null>(null);
+  const [paymentData, setPaymentData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [completedOrderId, setCompletedOrderId] = useState<string | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<CouponData>(null);
   const [error, setError] = useState<string | null>(null);

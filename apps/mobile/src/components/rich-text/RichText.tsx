@@ -1,9 +1,8 @@
 import React from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
-import { Linking } from "react-native";
+import { Linking, Platform, StyleSheet, Text, View } from "react-native";
 
-import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { moderateScale, verticalScale } from "@/constants/responsive";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 
 // ─── Lexical Node Types ──────────────────────────────────────────────────────
 
@@ -104,7 +103,11 @@ export function RichText({ data, style }: RichTextProps) {
 
 // ─── Node Renderer ───────────────────────────────────────────────────────────
 
-function NodeRenderer({ node, index, listIndex }: {
+function NodeRenderer({
+  node,
+  index,
+  listIndex,
+}: {
   node: LexicalNode;
   index: number;
   listIndex?: number;
@@ -119,7 +122,13 @@ function NodeRenderer({ node, index, listIndex }: {
     case "list":
       return <ListRenderer node={node as ListNode} index={index} />;
     case "listitem":
-      return <ListItemRenderer node={node as ListItemNode} index={index} listIndex={listIndex} />;
+      return (
+        <ListItemRenderer
+          node={node as ListItemNode}
+          index={index}
+          listIndex={listIndex}
+        />
+      );
     case "link":
       return <LinkRenderer node={node as LinkNode} index={index} />;
     case "quote":
@@ -131,7 +140,13 @@ function NodeRenderer({ node, index, listIndex }: {
 
 // ─── Paragraph ───────────────────────────────────────────────────────────────
 
-function ParagraphRenderer({ node, index }: { node: ParagraphNode; index: number }) {
+function ParagraphRenderer({
+  node,
+  index,
+}: {
+  node: ParagraphNode;
+  index: number;
+}) {
   if (!node.children || node.children.length === 0) {
     return <Text style={styles.paragraph}>{""}</Text>;
   }
@@ -147,7 +162,13 @@ function ParagraphRenderer({ node, index }: { node: ParagraphNode; index: number
 
 // ─── Heading ─────────────────────────────────────────────────────────────────
 
-function HeadingRenderer({ node, index }: { node: HeadingNode; index: number }) {
+function HeadingRenderer({
+  node,
+  index,
+}: {
+  node: HeadingNode;
+  index: number;
+}) {
   const headingStyle = headingStyles[node.tag] || headingStyles.h4;
 
   return (
@@ -197,7 +218,11 @@ function ListRenderer({ node, index }: { node: ListNode; index: number }) {
 
 // ─── List Item ───────────────────────────────────────────────────────────────
 
-function ListItemRenderer({ node, index, listIndex }: {
+function ListItemRenderer({
+  node,
+  index,
+  listIndex,
+}: {
   node: ListItemNode;
   index: number;
   listIndex?: number;
@@ -253,7 +278,13 @@ function QuoteRenderer({ node, index }: { node: QuoteNode; index: number }) {
 
 // ─── Fallback ────────────────────────────────────────────────────────────────
 
-function FallbackRenderer({ node, index }: { node: LexicalNode; index: number }) {
+function FallbackRenderer({
+  node,
+  index,
+}: {
+  node: LexicalNode;
+  index: number;
+}) {
   const elementNode = node as ElementNode;
   if (Array.isArray(elementNode.children)) {
     return (

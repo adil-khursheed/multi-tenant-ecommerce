@@ -7,10 +7,10 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
+import type { VendorOnboardingFormData } from "@repo/validators";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/utilities/cn";
-import type { VendorOnboardingFormData } from "@repo/validators";
 
 interface ReviewStepProps {
   getValues: UseFormGetValues<VendorOnboardingFormData>;

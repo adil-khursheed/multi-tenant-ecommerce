@@ -1,14 +1,18 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
 
 import { User02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-
-import { useAuth } from "@/providers/Auth";
-import { ProfileHeader } from "@/components/profile";
+import { useRouter } from "expo-router";
 import { TopTabs } from "expo-router/js-top-tabs";
+
+import { ProfileHeader } from "@/components/profile";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
+import { useAuth } from "@/providers/Auth";
 
 export default function ProfileLayout() {
   const { user } = useAuth();
@@ -24,7 +28,9 @@ export default function ProfileLayout() {
             color={colors.muted}
             strokeWidth={1.5}
           />
-          <Text style={styles.loggedOutTitle}>Sign in to manage your account</Text>
+          <Text style={styles.loggedOutTitle}>
+            Sign in to manage your account
+          </Text>
           <Text style={styles.loggedOutSubtext}>
             View your orders, addresses, and account settings
           </Text>
@@ -65,7 +71,10 @@ export default function ProfileLayout() {
         }}
       >
         <TopTabs.Screen name="index" options={{ tabBarLabel: "Profile" }} />
-        <TopTabs.Screen name="addresses" options={{ tabBarLabel: "Addresses" }} />
+        <TopTabs.Screen
+          name="addresses"
+          options={{ tabBarLabel: "Addresses" }}
+        />
         <TopTabs.Screen name="orders" options={{ tabBarLabel: "Orders" }} />
       </TopTabs>
     </View>

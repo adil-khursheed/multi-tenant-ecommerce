@@ -1,28 +1,31 @@
-import type { Order } from '@/payload-types'
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
+import { headers as getHeaders } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
+import { getPayload } from "payload";
 
-import { OrderItem } from '@/components/OrderItem'
-import { headers as getHeaders } from 'next/headers'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { redirect } from 'next/navigation'
+import configPromise from "@payload-config";
+
+import { OrderItem } from "@/components/OrderItem";
+import type { Order } from "@/payload-types";
+import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
 
 export default async function Orders() {
-  const headers = await getHeaders()
-  const payload = await getPayload({ config: configPromise })
-  const { user } = await payload.auth({ headers })
+  const headers = await getHeaders();
+  const payload = await getPayload({ config: configPromise });
+  const { user } = await payload.auth({ headers });
 
-  let orders: Order[] | null = null
+  let orders: Order[] | null = null;
 
   if (!user) {
-    redirect(`/login?warning=${encodeURIComponent('Please login to access your orders.')}`)
+    redirect(
+      `/login?warning=${encodeURIComponent("Please login to access your orders.")}`,
+    );
   }
 
   try {
     const ordersResult = await payload.find({
-      collection: 'orders',
+      collection: "orders",
       limit: 0,
       pagination: false,
       user,
@@ -32,9 +35,9 @@ export default async function Orders() {
           equals: user?.id,
         },
       },
-    })
+    });
 
-    orders = ordersResult?.docs || []
+    orders = ordersResult?.docs || [];
   } catch (error) {}
 
   return (
@@ -56,14 +59,14 @@ export default async function Orders() {
         )}
       </div>
     </>
-  )
+  );
 }
 
 export const metadata: Metadata = {
-  description: 'Your orders.',
+  description: "Your orders.",
   openGraph: mergeOpenGraph({
-    title: 'Orders',
-    url: '/orders',
+    title: "Orders",
+    url: "/orders",
   }),
-  title: 'Orders',
-}
+  title: "Orders",
+};

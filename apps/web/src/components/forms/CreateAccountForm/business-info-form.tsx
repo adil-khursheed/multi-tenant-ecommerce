@@ -21,6 +21,8 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
 
+import { businessTypes } from "@repo/types";
+import { VendorOnboardingFormData } from "@repo/validators";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -45,10 +47,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { env } from "@/env";
-import { businessTypes } from "@repo/types";
 import { useTRPC } from "@/trpc/client";
 import { formatSlug } from "@/utilities/formatSlug";
-import { VendorOnboardingFormData } from "@repo/validators";
 
 const BusinessInfoForm = ({
   control,
