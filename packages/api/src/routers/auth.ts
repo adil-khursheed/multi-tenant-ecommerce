@@ -169,6 +169,52 @@ export const authRouter = {
       };
     }),
 
+  updateProfile: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1, "Name is required"),
+        email: z.string().email("Invalid email address"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.payload.update({
+        collection: "users",
+        id: ctx.session.user.id,
+        data: {
+          name: input.name,
+          email: input.email,
+        },
+      });
+
+      return { user };
+    }),
+
+  changePassword: protectedProcedure
+    .input(
+      z.object({
+        password: z.string().min(6, "Password must be at least 6 characters"),
+        passwordConfirm: z.string().min(1, "Please confirm your password"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.password !== input.passwordConfirm) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Passwords do not match",
+        });
+      }
+
+      const user = await ctx.payload.update({
+        collection: "users",
+        id: ctx.session.user.id,
+        data: {
+          password: input.password,
+        },
+      });
+
+      return { user };
+    }),
+
   verifyEmail: baseProcedure
     .input(z.object({ token: z.string() }))
     .mutation(async ({ ctx, input }) => {

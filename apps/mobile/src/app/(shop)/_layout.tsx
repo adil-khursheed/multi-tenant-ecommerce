@@ -25,8 +25,7 @@ export default function ShopLayout() {
       <Stack.Screen
         name="[slug]"
         options={{
-          title: "Product",
-          headerBackTitle: "Shop",
+          headerShown: false,
         }}
       />
       <Stack.Screen

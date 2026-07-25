@@ -1,15 +1,19 @@
 import { useCallback, useMemo, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
+import {
+  ArrowLeft02Icon,
+  MinusSignIcon,
+  PlusSignIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -32,14 +36,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import {
-  colors,
-  fonts,
-  fontSizes,
-  radii,
-  shadows,
-  spacing,
-} from "@/constants/theme";
+import { colors, fonts, fontSizes, shadows, spacing } from "@/constants/theme";
 import { useCart } from "@/providers/Cart";
 import { useCurrency } from "@/providers/Currency";
 import { useTRPC } from "@/utils/api";
@@ -50,7 +47,29 @@ export default function ProductDetailScreen() {
   const trpc = useTRPC();
   const { formatPrice } = useCurrency();
   const { addItem } = useCart();
+  const { top } = useSafeAreaInsets();
   const { bottom } = useSafeAreaInsets();
+
+  const scrollY = useSharedValue(0);
+  const detailsLayoutY = useSharedValue(0);
+  const titleLayoutY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    const threshold = detailsLayoutY.value + titleLayoutY.value;
+    const opacity = interpolate(
+      scrollY.value,
+      [0, threshold],
+      [0, 1],
+      Extrapolation.CLAMP,
+    );
+    return { opacity };
+  });
 
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -110,6 +129,8 @@ export default function ProductDetailScreen() {
   }, [product, selectedVariant]);
 
   const isAtMax = maxQuantity > 0 && quantity >= maxQuantity;
+
+  const needsVariantSelection = !!(product?.enableVariants && !selectedVariant);
 
   const handleOptionSelect = useCallback(
     (typeName: string, optionId: string) => {
@@ -246,11 +267,39 @@ export default function ProductDetailScreen() {
 
   return (
     <View style={styles.wrapper}>
-      <ScrollView
+      {/* Animated Header */}
+      <Animated.View
+        style={[
+          styles.animatedHeader,
+          {
+            paddingTop: top,
+          },
+          headerAnimatedStyle,
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.headerBack}
+          onPress={() => router.back()}
+        >
+          <HugeiconsIcon
+            icon={ArrowLeft02Icon}
+            size={moderateScale(22)}
+            color={colors.foreground}
+            strokeWidth={2}
+          />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          {product.title}
+        </Text>
+      </Animated.View>
+
+      <Animated.ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         scrollIndicatorInsets={{ bottom: 70 }}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       >
         {/* Image Gallery */}
         <ImageGallery
@@ -260,12 +309,23 @@ export default function ProductDetailScreen() {
         />
 
         {/* Product Info */}
-        <View style={styles.details}>
+        <View
+          style={styles.details}
+          onLayout={(e) => {
+            detailsLayoutY.value = e.nativeEvent.layout.y;
+          }}
+        >
           {categoriesText && (
             <Text style={styles.category}>{categoriesText}</Text>
           )}
 
-          <Text style={styles.title}>{product.title}</Text>
+          <View
+            onLayout={(e) => {
+              titleLayoutY.value = e.nativeEvent.layout.y;
+            }}
+          >
+            <Text style={styles.title}>{product.title}</Text>
+          </View>
 
           {product.shortDescription && (
             <Text style={styles.shortDescription}>
@@ -355,17 +415,17 @@ export default function ProductDetailScreen() {
               style={[
                 styles.addToCartButton,
                 adding && styles.addToCartDisabled,
-                stockQuantity === 0 && styles.addToCartDisabled,
+                stockQuantity === 0 &&
+                  !needsVariantSelection &&
+                  styles.addToCartDisabled,
               ]}
               onPress={handleAddToCart}
-              disabled={adding || stockQuantity === 0}
+              disabled={
+                adding || (stockQuantity === 0 && !needsVariantSelection)
+              }
             >
               <Text style={styles.addToCartText}>
-                {adding
-                  ? "Adding..."
-                  : stockQuantity === 0
-                    ? "Out of Stock"
-                    : "Add to Bag"}
+                {adding ? "Adding..." : "Add to Bag"}
               </Text>
             </TouchableOpacity>
             {product && (
@@ -415,7 +475,7 @@ export default function ProductDetailScreen() {
           />
           <View style={styles.bottomSpacer} />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Sticky Bottom Bar */}
       <View style={[styles.stickyBottom, { paddingBottom: bottom }]}>
@@ -427,17 +487,14 @@ export default function ProductDetailScreen() {
           <TouchableOpacity
             style={[
               styles.stickyCartButton,
-              (adding || stockQuantity === 0) && styles.addToCartDisabled,
+              (adding || (stockQuantity === 0 && !needsVariantSelection)) &&
+                styles.addToCartDisabled,
             ]}
             onPress={handleAddToCart}
-            disabled={adding || stockQuantity === 0}
+            disabled={adding || (stockQuantity === 0 && !needsVariantSelection)}
           >
             <Text style={styles.stickyCartText}>
-              {adding
-                ? "Adding..."
-                : stockQuantity === 0
-                  ? "Out of Stock"
-                  : "Add to Bag"}
+              {adding ? "Adding..." : "Add to Bag"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -450,6 +507,33 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  animatedHeader: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[3]),
+    paddingHorizontal: horizontalScale(spacing[4]),
+    paddingBottom: verticalScale(spacing[3]),
+    backgroundColor: colors.background,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  headerBack: {
+    width: moderateScale(40),
+    height: moderateScale(40),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    flex: 1,
+    fontFamily: fonts.sans.medium,
+    fontSize: moderateScale(fontSizes.base),
+    color: colors.foreground,
   },
   scrollArea: {
     flex: 1,

@@ -21,8 +21,9 @@ import {
   User02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 
+import { useAuth } from "@/providers/Auth";
 import { useCart } from "@/providers/Cart";
 import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
 import {
@@ -53,6 +54,10 @@ function CustomTabBar({ state, navigation, descriptors }: TabBarProps) {
   const { bottom } = useSafeAreaInsets();
   const [tabLayouts, setTabLayouts] = useState<TabLayout[]>([]);
   const { itemCount } = useCart();
+  const { status } = useAuth();
+  const router = useRouter();
+
+  const isLoggedIn = status === "loggedIn";
 
   const indicatorX = useSharedValue(0);
   const indicatorWidth = useSharedValue(0);
@@ -98,10 +103,18 @@ function CustomTabBar({ state, navigation, descriptors }: TabBarProps) {
         {state.routes.map(
           (route: { key: string; name: string }, index: number) => {
             const isFocused = state.index === index;
-            const label = descriptors[route.key]?.options?.title ?? route.name;
+            const isProfileTab = route.name === "profile";
+            const label = isProfileTab && !isLoggedIn
+              ? "Login"
+              : descriptors[route.key]?.options?.title ?? route.name;
             const Icon = ICON_MAP[route.name] ?? Home01Icon;
 
             const onPress = () => {
+              if (isProfileTab && !isLoggedIn) {
+                router.push("/(modals)/login");
+                return;
+              }
+
               const event = navigation.emit({
                 type: "tabPress",
                 target: route.key,

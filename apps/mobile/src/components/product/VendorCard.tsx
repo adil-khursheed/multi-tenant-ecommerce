@@ -1,23 +1,31 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
-  CheckmarkBadge01Icon,
   ArrowRight01Icon,
+  CheckmarkBadge01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Image } from "expo-image";
 
-import { colors, fonts, fontSizes, spacing, radii, shadows } from "@/constants/theme";
-import { moderateScale, horizontalScale, verticalScale } from "@/constants/responsive";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import {
+  colors,
+  fonts,
+  fontSizes,
+  radii,
+  shadows,
+  spacing,
+} from "@/constants/theme";
 
 type Tenant = {
   id?: string | number;
   storeName?: string | null;
   storeDescription?: string | null;
-  storeLogo?:
-    | string
-    | { url?: string | null; [k: string]: unknown }
-    | null;
+  storeLogo?: string | { url?: string | null; [k: string]: unknown } | null;
   verificationStatus?: string | null;
 };
 
@@ -32,10 +40,12 @@ export function VendorCard({ tenant, onVisitStore }: VendorCardProps) {
   const isVerified = tenant.verificationStatus === "approved";
 
   const logoUrl =
-    tenant.storeLogo && typeof tenant.storeLogo === "object" && "url" in tenant.storeLogo
-      ? tenant.storeLogo.url
+    tenant.storeLogo &&
+    typeof tenant.storeLogo === "object" &&
+    "url" in tenant.storeLogo
+      ? `${process.env.EXPO_PUBLIC_API_URL}${tenant.storeLogo.url}`
       : typeof tenant.storeLogo === "string"
-        ? tenant.storeLogo
+        ? `${process.env.EXPO_PUBLIC_API_URL}${tenant.storeLogo}`
         : null;
 
   return (
@@ -117,11 +127,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 2,
     borderColor: colors.background,
+    borderRadius: radii.full,
     ...shadows.sm,
   },
   logo: {
     width: "100%",
     height: "100%",
+    resizeMode: "contain",
   },
   logoPlaceholder: {
     backgroundColor: colors.primary,
