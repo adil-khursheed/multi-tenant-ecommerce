@@ -5,6 +5,13 @@ import { protectedProcedure } from "../trpc";
 
 const ADDRESSES_DEPTH = 0;
 
+const COUNTRY_VALUES = [
+  "US", "GB", "CA", "AU", "AT", "BE", "BR", "BG", "CY", "CZ", "DK", "EE",
+  "FI", "FR", "DE", "GR", "HK", "HU", "IN", "IE", "IT", "JP", "LV", "LT",
+  "LU", "MY", "MT", "MX", "NL", "NZ", "NO", "PL", "PT", "RO", "SG", "SK",
+  "SI", "ES", "SE", "CH",
+] as const;
+
 const addressInputSchema = z.object({
   title: z.string().nullable().optional(),
   firstName: z.string().min(1, "First name is required"),
@@ -15,7 +22,7 @@ const addressInputSchema = z.object({
   city: z.string().min(1, "City is required"),
   state: z.string().nullable().optional(),
   postalCode: z.string().min(1, "Postal code is required"),
-  country: z.string().min(1, "Country is required"),
+  country: z.enum(COUNTRY_VALUES, { message: "Country is required" }),
   phone: z.string().nullable().optional(),
 });
 

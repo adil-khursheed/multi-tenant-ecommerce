@@ -111,7 +111,7 @@ export default function CheckoutAddress() {
       city: form.city.trim(),
       state: form.state.trim() || undefined,
       postalCode: form.postalCode.trim(),
-      country: form.country.trim(),
+      country: form.country.trim() as "IN",
     });
   }, [form, validate, createAddressMutation]);
 

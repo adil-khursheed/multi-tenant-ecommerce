@@ -7,7 +7,7 @@ import { protectedProcedure } from "../trpc";
 const COD_FEE = 50;
 
 type CartItem = {
-  product: unknown;
+  product?: unknown;
   variant?: unknown;
   quantity: number;
   [key: string]: unknown;
@@ -96,10 +96,10 @@ export const paymentsRouter = {
       }
 
       const currency = "INR";
-      const flattenedItems = flattenCartItems(cart.items);
-      const subtotal = (cart as Record<string, unknown>).subtotal as number || 0;
-      const discount = (cart as Record<string, unknown>).discount as number || 0;
-      const couponCode = (cart as Record<string, unknown>).couponCode as string | null;
+      const flattenedItems = flattenCartItems(cart.items ?? []);
+      const subtotal = cart.subtotal ?? 0;
+      const discount = cart.discount ?? 0;
+      const couponCode = cart.couponCode ?? null;
 
       const req = {
         payload: ctx.payload,
@@ -115,7 +115,7 @@ export const paymentsRouter = {
           });
         }
 
-        const total = (cart as Record<string, unknown>).total as number || subtotal - discount;
+        const total = cart.total ?? subtotal - discount;
         if (total <= 0) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -127,7 +127,7 @@ export const paymentsRouter = {
 
         const razorpayOrder = await razorpay.orders.create({
           amount: total,
-          currency: currency.toUpperCase(),
+          currency,
           receipt: String(cart.id),
           notes: { cartID: String(cart.id) },
         }) as { id: string };
@@ -138,7 +138,7 @@ export const paymentsRouter = {
             customer: userId,
             amount: total,
             cart: cart.id,
-            currency: currency.toUpperCase(),
+            currency,
             items: flattenedItems,
             paymentMethod: "razorpay",
             status: "pending",
@@ -155,14 +155,14 @@ export const paymentsRouter = {
         return {
           razorpayOrderID: razorpayOrder.id,
           amount: total,
-          currency: currency.toUpperCase(),
+          currency,
           keyId,
           transactionID: transaction.id,
         };
       }
 
       // COD
-      const total = (cart as Record<string, unknown>).total as number || subtotal - discount;
+      const total = cart.total ?? subtotal - discount;
       const amount = total + COD_FEE;
 
       const transaction = await ctx.payload.create({
@@ -171,7 +171,7 @@ export const paymentsRouter = {
           customer: userId,
           amount,
           cart: cart.id,
-          currency: currency.toUpperCase(),
+          currency,
           items: flattenedItems,
           paymentMethod: "cod",
           status: "pending",
@@ -188,7 +188,7 @@ export const paymentsRouter = {
       return {
         transactionID: transaction.id,
         amount,
-        currency: currency.toUpperCase(),
+        currency,
       };
     }),
 
@@ -260,7 +260,7 @@ export const paymentsRouter = {
           return {
             orderID: existing.id,
             transactionID: transaction.id,
-            accessToken: (existing as Record<string, unknown>).accessToken as string | undefined,
+            accessToken: existing.accessToken,
           };
         }
 
@@ -282,8 +282,8 @@ export const paymentsRouter = {
             status: "processing",
             transactions: [transaction.id],
             ...(transaction.couponCode ? { couponCode: transaction.couponCode } : {}),
-            discount: (transaction as Record<string, unknown>).discount || 0,
-            shippingCharge: (transaction as Record<string, unknown>).shippingCharge || 0,
+            discount: transaction.discount ?? 0,
+            shippingCharge: transaction.shippingCharge ?? 0,
           },
           req,
         });
@@ -316,7 +316,7 @@ export const paymentsRouter = {
         return {
           orderID: order.id,
           transactionID: transaction.id,
-          accessToken: (order as Record<string, unknown>).accessToken as string | undefined,
+          accessToken: order.accessToken,
         };
       }
 
@@ -356,7 +356,7 @@ export const paymentsRouter = {
         return {
           orderID: existing.id,
           transactionID: transaction.id,
-          accessToken: (existing as Record<string, unknown>).accessToken as string | undefined,
+          accessToken: existing.accessToken,
         };
       }
 
@@ -370,8 +370,8 @@ export const paymentsRouter = {
           status: "processing",
           transactions: [transaction.id],
           ...(transaction.couponCode ? { couponCode: transaction.couponCode } : {}),
-          discount: (transaction as Record<string, unknown>).discount || 0,
-          shippingCharge: (transaction as Record<string, unknown>).shippingCharge || 0,
+          discount: transaction.discount ?? 0,
+          shippingCharge: transaction.shippingCharge ?? 0,
         },
         req,
       });
@@ -401,7 +401,7 @@ export const paymentsRouter = {
       return {
         orderID: order.id,
         transactionID: transaction.id,
-        accessToken: (order as Record<string, unknown>).accessToken as string | undefined,
+        accessToken: order.accessToken,
       };
     }),
 };
