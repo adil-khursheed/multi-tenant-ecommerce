@@ -141,7 +141,7 @@ export default async function ProductPage({ params }: Args) {
           <div className="w-full lg:w-[55%]">
             <Suspense
               fallback={
-                <div className="relative aspect-9/16 max-h-[650px] w-full overflow-hidden bg-muted rounded-lg animate-pulse" />
+                <div className="relative aspect-9/16 max-h-162.5 w-full overflow-hidden bg-muted rounded-lg animate-pulse" />
               }
             >
               {Boolean(gallery?.length) && (

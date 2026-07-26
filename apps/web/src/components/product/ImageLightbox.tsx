@@ -91,17 +91,6 @@ export const ImageLightbox: React.FC<Props> = ({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, currentIndex, gallery.length]);
 
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   const navigatePrev = useCallback(() => {
     if (currentIndex > 0) {
       resetTransform();

@@ -111,7 +111,7 @@ export const Gallery: React.FC<Props> = ({ gallery, isBestseller }) => {
     <div className="w-full">
       <div
         ref={containerRef}
-        className="relative aspect-9/16 max-h-[650px] w-full bg-muted border border-border rounded-lg overflow-hidden cursor-zoom-in group mb-4"
+        className="relative aspect-9/16 max-h-162.5 w-full bg-muted border border-border rounded-lg overflow-hidden cursor-zoom-in group mb-4"
         tabIndex={0}
         role="button"
         aria-label="View product images in fullscreen"
