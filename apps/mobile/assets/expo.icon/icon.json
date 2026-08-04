@@ -6,16 +6,12 @@
     {
       "layers": [
         {
-          "image-name": "dtlea.png",
+          "image-name": "dtlea.svg",
           "name": "dtlea",
           "position": {
             "scale": 1,
             "translation-in-points": [1.1008400065293245e-5, -16.046875]
           }
-        },
-        {
-          "image-name": "grid.png",
-          "name": "grid"
         }
       ],
       "shadow": {

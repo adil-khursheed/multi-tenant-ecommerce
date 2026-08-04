@@ -26,6 +26,7 @@ import { useAuth } from "@/providers/Auth";
 import { useLoginModal } from "@/providers/LoginModal";
 import { cn } from "@/utilities/cn";
 import { Logout } from "../Logout";
+import { Media } from "../Media";
 import { Button, buttonVariants } from "../ui/button";
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ type Props = {
 };
 
 export function HeaderClient({ header, user: serverUser }: Props) {
+  const logo = header.logo || null;
   const menu = header.navItems || [];
   const pathname = usePathname();
   const { user: clientUser } = useAuth();
@@ -54,7 +56,7 @@ export function HeaderClient({ header, user: serverUser }: Props) {
 
   return (
     <div className="relative z-20 border-b border-border bg-background">
-      <nav className="flex items-center md:items-end justify-between container pt-2">
+      <nav className="flex items-center md:items-end justify-between container">
         <div className="block flex-none md:hidden">
           <Suspense fallback={null}>
             <MobileMenu menu={menu} />
@@ -63,10 +65,18 @@ export function HeaderClient({ header, user: serverUser }: Props) {
         <div className="flex w-full items-center justify-between">
           <div className="flex w-full items-center gap-10 md:w-1/3">
             <Link
-              className="flex w-full items-center justify-center py-4 md:w-auto"
+              className="flex w-full items-center justify-center py-2 md:w-auto"
               href="/"
             >
-              <LogoIcon className="w-6 h-auto" />
+              {logo && typeof logo === "object" && "url" in logo ? (
+                <Media
+                  imgClassName="size-14"
+                  className="w-full h-full"
+                  resource={logo}
+                />
+              ) : (
+                <LogoIcon className="w-6 h-auto" />
+              )}
             </Link>
 
             {menu.length ? (

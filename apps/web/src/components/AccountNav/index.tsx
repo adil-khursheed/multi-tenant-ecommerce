@@ -48,6 +48,21 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
 
         <li>
           <Link
+            href="/wishlist"
+            className={cn(
+              buttonVariants({ variant: "link" }),
+              "text-primary/50 hover:text-primary hover:no-underline",
+              {
+                "text-primary": pathname === "/wishlist",
+              },
+            )}
+          >
+            Wishlist
+          </Link>
+        </li>
+
+        <li>
+          <Link
             href="/orders"
             className={cn(
               buttonVariants({ variant: "link" }),

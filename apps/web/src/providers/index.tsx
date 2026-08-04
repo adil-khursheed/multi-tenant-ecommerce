@@ -5,7 +5,6 @@ import { EcommerceProvider } from "@payloadcms/plugin-ecommerce/client/react";
 import { codAdapterClient } from "@repo/payments/cod";
 import { razorpayAdapterClient } from "@repo/payments/razorpay";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { env } from "@/env";
 import { AuthProvider } from "@/providers/Auth";
 import { LoginModalProvider } from "@/providers/LoginModal";
 import { SonnerProvider } from "@/providers/Sonner";
@@ -48,11 +47,21 @@ export const Providers: React.FC<{
                           inventory: true,
                           tenant: true,
                           priceInINR: true,
+                          effectivePrice: true,
                           meta: true,
+                          discountPercent: true,
                         },
                         variants: {
                           title: true,
                           inventory: true,
+                          priceInINR: true,
+                          effectivePrice: true,
+                          options: true,
+                        },
+                        tenants: {
+                          storeLogo: true,
+                          storeName: true,
+                          storeSlug: true,
                         },
                       },
                     },

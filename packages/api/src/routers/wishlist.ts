@@ -32,12 +32,12 @@ export const wishlistRouter = {
     }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.payload.findByID({
-      collection: "users",
-      id: ctx.session.user.id,
-      depth: 1,
-      select: { wishlist: true },
-    });
+      const user = await ctx.payload.findByID({
+        collection: "users",
+        id: ctx.session.user.id,
+        depth: 2,
+        select: { wishlist: true },
+      });
 
     return { wishlist: user.wishlist ?? [] };
   }),

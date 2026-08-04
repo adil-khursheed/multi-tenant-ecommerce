@@ -1,4 +1,6 @@
-import { Plugin } from "payload";
+import crypto from "crypto";
+
+import { CollectionBeforeChangeHook, Plugin } from "payload";
 import { ecommercePlugin } from "@payloadcms/plugin-ecommerce";
 import { formBuilderPlugin } from "@payloadcms/plugin-form-builder";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
@@ -33,14 +35,89 @@ import { getServerSideURL } from "@/utilities/getURL";
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title
-    ? `${doc.title} | Payload Ecommerce Template`
-    : "Payload Ecommerce Template";
+    ? `${doc.title} | DTlea | Dreams of Diva`
+    : "DTlea | Dreams of Diva";
 };
 
 const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
   const url = getServerSideURL();
 
   return doc?.slug ? `${url}/${doc.slug}` : url;
+};
+
+const cartSubtotalBeforeChange: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+  req,
+}) => {
+  if (!data) return data;
+
+  if (operation === "create" && !data.customer && !data.secret) {
+    data.secret = crypto.randomBytes(20).toString("hex");
+    if (!req.context) {
+      req.context = {};
+    }
+    req.context.newCartSecret = data.secret;
+  }
+
+  if (data.items && Array.isArray(data.items)) {
+    let subtotal = 0;
+    for (const item of data.items) {
+      const quantity = item.quantity || 1;
+
+      if (item.variant) {
+        const id =
+          typeof item.variant === "object" ? item.variant.id : item.variant;
+        const variant = await req.payload.findByID({
+          collection: "variants",
+          id,
+          depth: 0,
+          select: { effectivePrice: true, priceInINR: true },
+        });
+        subtotal +=
+          (variant?.effectivePrice ?? variant?.priceInINR ?? 0) * quantity;
+      } else {
+        const id =
+          typeof item.product === "object" ? item.product.id : item.product;
+        const product = await req.payload.findByID({
+          collection: "products",
+          id,
+          depth: 0,
+          select: { effectivePrice: true, priceInINR: true },
+        });
+        subtotal +=
+          (product?.effectivePrice ?? product?.priceInINR ?? 0) * quantity;
+      }
+    }
+    data.subtotal = subtotal;
+  } else {
+    data.subtotal = 0;
+  }
+
+  return data;
+};
+
+const cartCouponBeforeChange: CollectionBeforeChangeHook = ({ data }) => {
+  if (!data) return data;
+
+  const subtotal = data.subtotal || 0;
+  const discountType = data.couponDiscountType;
+  const discountValue = data.couponDiscountValue || 0;
+
+  let discount = 0;
+
+  if (discountType && discountValue > 0) {
+    if (discountType === "percentage") {
+      discount = Math.round((subtotal * Math.min(discountValue, 100)) / 100);
+    } else {
+      discount = Math.min(discountValue, subtotal);
+    }
+  }
+
+  data.discount = discount;
+  data.total = subtotal - discount;
+
+  return data;
 };
 
 export const plugins: Plugin[] = [
@@ -243,33 +320,7 @@ export const plugins: Plugin[] = [
         ],
         hooks: {
           ...defaultCollection.hooks,
-          beforeChange: [
-            ...(defaultCollection.hooks?.beforeChange || []),
-            ({ data }: { data: any }) => {
-              if (!data) return data;
-
-              const subtotal = data.subtotal || 0;
-              const discountType = data.couponDiscountType;
-              const discountValue = data.couponDiscountValue || 0;
-
-              let discount = 0;
-
-              if (discountType && discountValue > 0) {
-                if (discountType === "percentage") {
-                  discount = Math.round(
-                    (subtotal * Math.min(discountValue, 100)) / 100,
-                  );
-                } else {
-                  discount = Math.min(discountValue, subtotal);
-                }
-              }
-
-              data.discount = discount;
-              data.total = subtotal - discount;
-
-              return data;
-            },
-          ],
+          beforeChange: [cartSubtotalBeforeChange, cartCouponBeforeChange],
         },
       }),
     },

@@ -30,9 +30,9 @@ export const generateMeta = async (args: {
             },
           ]
         : undefined,
-      title: doc?.meta?.title || doc?.title || "Payload Ecommerce Template",
+      title: doc?.meta?.title || doc?.title || "DTlea | Dreams of Diva",
       url: Array.isArray(doc?.slug) ? doc?.slug.join("/") : "/",
     }),
-    title: doc?.meta?.title || doc?.title || "Payload Ecommerce Template",
+    title: doc?.meta?.title || doc?.title || "DTlea | Dreams of Diva",
   };
 };

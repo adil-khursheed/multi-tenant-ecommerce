@@ -118,14 +118,21 @@ export const OrderSummary: React.FC<Props> = ({
                     return null;
 
                   const { product, quantity, variant } = item;
-                  let price = product.priceInINR;
+                  let price = product.effectivePrice ?? product.priceInINR;
+                  let originalPrice = product.priceInINR;
+                  const discountPct = product.discountPercent;
                   let image =
                     product.gallery?.[0]?.image || product.meta?.image;
 
                   const isVariant =
                     Boolean(variant) && typeof variant === "object";
                   if (isVariant) {
-                    price = variant?.priceInINR;
+                    price =
+                      variant?.effectivePrice ??
+                      variant?.priceInINR ??
+                      product.effectivePrice ??
+                      product.priceInINR;
+                    originalPrice = variant?.priceInINR ?? product.priceInINR;
                     const imageVariant = product.gallery?.find((g: any) => {
                       if (!g.variantOption) return false;
                       const variantOptionID =
@@ -193,6 +200,12 @@ export const OrderSummary: React.FC<Props> = ({
                         {typeof price === "number" && (
                           <Price
                             amount={price * (quantity || 1)}
+                            originalAmount={
+                              typeof originalPrice === "number"
+                                ? originalPrice * (quantity || 1)
+                                : undefined
+                            }
+                            discountPercent={discountPct}
                             className="font-mono font-medium text-[14px] text-foreground"
                           />
                         )}

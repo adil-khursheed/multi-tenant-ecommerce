@@ -3,29 +3,29 @@ import { ErrorBoundary } from "react-error-boundary";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import OrdersList, {
-  OrdersListSkeleton,
-} from "@/components/Orders/OrdersList";
+import WishlistProducts, {
+  WishlistProductsSkeleton,
+} from "@/components/Wishlist";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { getUser } from "@/utilities/getUser";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
 
-export default async function OrdersPage() {
+export default async function WishlistPage() {
   const user = await getUser();
 
   if (!user) {
     redirect(
-      `/login?warning=${encodeURIComponent("Please login to access your orders.")}`,
+      `/login?warning=${encodeURIComponent("Please login to view your wishlist.")}`,
     );
   }
 
-  void prefetch(trpc.orders.list.queryOptions());
+  void prefetch(trpc.wishlist.getAll.queryOptions());
 
   return (
     <HydrateClient>
       <ErrorBoundary fallback={<div>Something went wrong!</div>}>
-        <Suspense fallback={<OrdersListSkeleton />}>
-          <OrdersList />
+        <Suspense fallback={<WishlistProductsSkeleton />}>
+          <WishlistProducts />
         </Suspense>
       </ErrorBoundary>
     </HydrateClient>
@@ -33,10 +33,10 @@ export default async function OrdersPage() {
 }
 
 export const metadata: Metadata = {
-  description: "Your orders.",
+  description: "Your wishlisted products.",
   openGraph: mergeOpenGraph({
-    title: "Orders",
-    url: "/orders",
+    title: "Wishlist",
+    url: "/wishlist",
   }),
-  title: "Orders",
+  title: "Wishlist",
 };

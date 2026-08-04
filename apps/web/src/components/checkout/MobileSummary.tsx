@@ -136,7 +136,9 @@ export const MobileSummary: React.FC<Props> = ({
                             return null;
 
                           const { product, quantity } = item;
-                          let price = product.priceInINR;
+                          let price = product.effectivePrice ?? product.priceInINR;
+                          let originalPrice = product.priceInINR;
+                          const discountPct = product.discountPercent;
                           let image =
                             product.gallery?.[0]?.image || product.meta?.image;
 
@@ -144,7 +146,12 @@ export const MobileSummary: React.FC<Props> = ({
                             Boolean(item.variant) &&
                             typeof item.variant === "object";
                           if (isVariant) {
-                            price = item.variant?.priceInINR;
+                            price =
+                              item.variant?.effectivePrice ??
+                              item.variant?.priceInINR ??
+                              product.effectivePrice ??
+                              product.priceInINR;
+                            originalPrice = item.variant?.priceInINR ?? product.priceInINR;
                             const imageVariant = product.gallery?.find(
                               (g: any) => {
                                 if (!g.variantOption) return false;
@@ -202,6 +209,12 @@ export const MobileSummary: React.FC<Props> = ({
                                 {typeof price === "number" && (
                                   <Price
                                     amount={price * (quantity || 1)}
+                                    originalAmount={
+                                      typeof originalPrice === "number"
+                                        ? originalPrice * (quantity || 1)
+                                        : undefined
+                                    }
+                                    discountPercent={discountPct}
                                     className="font-sans text-[13px] text-foreground"
                                   />
                                 )}
