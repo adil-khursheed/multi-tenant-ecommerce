@@ -20,7 +20,7 @@ import { useTRPC } from "@/utils/api";
 
 export default function CheckoutPayment() {
   const router = useRouter();
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const {
@@ -157,7 +157,7 @@ export default function CheckoutPayment() {
         </View>
       </ScrollView>
 
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { bottom }]}>
         <Pressable
           style={[
             styles.proceedButton,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     position: "absolute",
-    bottom: 0,
+    // bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: colors.background,
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   proceedButton: {
-    backgroundColor: colors.foreground,
+    backgroundColor: colors.primary,
     paddingVertical: verticalScale(spacing[4]),
     alignItems: "center",
   },

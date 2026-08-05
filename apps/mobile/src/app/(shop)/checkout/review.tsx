@@ -29,7 +29,7 @@ import { useTRPC } from "@/utils/api";
 
 export default function CheckoutReview() {
   const router = useRouter();
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const { user } = useAuth();
   const { items, clearCart } = useCart();
   const { formatPrice } = useCurrency();
@@ -240,7 +240,7 @@ export default function CheckoutReview() {
         </View>
       </ScrollView>
 
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { bottom }]}>
         <Pressable
           style={[styles.payButton, isProcessing && styles.payButtonDisabled]}
           onPress={
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     position: "absolute",
-    bottom: 0,
+    // bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: colors.background,
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
     gap: verticalScale(spacing[2]),
   },
   payButton: {
-    backgroundColor: colors.foreground,
+    backgroundColor: colors.primary,
     paddingVertical: verticalScale(spacing[4]),
     alignItems: "center",
   },

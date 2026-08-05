@@ -1,13 +1,5 @@
 import { useCallback, useState } from "react";
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
@@ -56,7 +48,7 @@ export default function CheckoutAddress() {
   const { user } = useAuth();
   const { billingAddress, setBillingAddress } = useCheckout();
   const router = useRouter();
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -147,7 +139,10 @@ export default function CheckoutAddress() {
     <View
       style={[
         styles.container,
-        { paddingTop: top + verticalScale(spacing[4]) },
+        {
+          paddingTop: top + verticalScale(spacing[4]),
+          paddingBottom: bottom + verticalScale(spacing[4]),
+        },
       ]}
     >
       <ScrollView
@@ -328,7 +323,7 @@ export default function CheckoutAddress() {
       </ScrollView>
 
       {canContinue && (
-        <View style={styles.bottomBar}>
+        <View style={[styles.bottomBar, { bottom }]}>
           <Pressable
             style={styles.continueButton}
             onPress={() => router.push("/(shop)/checkout/payment")}
@@ -432,7 +427,7 @@ const styles = StyleSheet.create({
   },
   bottomBar: {
     position: "absolute",
-    bottom: 0,
+    // bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: colors.background,
@@ -442,7 +437,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   continueButton: {
-    backgroundColor: colors.foreground,
+    backgroundColor: colors.primary,
     paddingVertical: verticalScale(spacing[4]),
     alignItems: "center",
   },
