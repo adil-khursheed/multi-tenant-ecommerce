@@ -11,7 +11,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { useTRPC } from "@/utils/api";
 
 type AddressForm = {
@@ -363,7 +363,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderStyle: "dashed",
-    borderRadius: radii.md,
     paddingVertical: verticalScale(spacing[3]),
   },
   addButtonText: {
@@ -414,7 +413,6 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: colors.foreground,
-    borderRadius: radii.sm,
     paddingVertical: verticalScale(spacing[3]),
     alignItems: "center",
     marginTop: verticalScale(spacing[2]),

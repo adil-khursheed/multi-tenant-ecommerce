@@ -10,7 +10,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
 
 export default function ProfileTab() {
@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
     gap: horizontalScale(spacing[2]),
     borderWidth: 1,
     borderColor: colors.destructive,
-    borderRadius: radii.md,
     paddingVertical: verticalScale(spacing[3]),
   },
   logoutText: {

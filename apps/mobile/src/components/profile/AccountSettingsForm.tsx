@@ -10,12 +10,8 @@ import {
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import {
-  horizontalScale,
-  moderateScale,
-  verticalScale,
-} from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { moderateScale, verticalScale } from "@/constants/responsive";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { useAuth } from "@/providers/Auth";
 import { useTRPC } from "@/utils/api";
 
@@ -246,13 +242,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.md,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
   },
   button: {
     backgroundColor: colors.primary,
-    borderRadius: radii.md,
     paddingVertical: verticalScale(spacing[3.5]),
     alignItems: "center",
     marginTop: verticalScale(spacing[2]),

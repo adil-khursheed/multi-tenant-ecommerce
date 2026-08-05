@@ -7,7 +7,7 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import { colors, fonts, fontSizes, spacing } from "@/constants/theme";
 import { useTRPC } from "@/utils/api";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: horizontalScale(spacing[2]),
     paddingVertical: verticalScale(spacing[0.5]),
-    borderRadius: radii.sm,
   },
   statusText: {
     fontFamily: fonts.sans.medium,
