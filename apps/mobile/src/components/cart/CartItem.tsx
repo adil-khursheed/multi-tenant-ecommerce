@@ -7,6 +7,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 
 import {
   horizontalScale,
@@ -24,8 +25,29 @@ type Props = {
 export function CartItem({ item }: Props) {
   const { formatPrice } = useCurrency();
   const { incrementItem, decrementItem, removeItem, isLoading } = useCart();
+  const router = useRouter();
 
   const isMutating = isLoading;
+
+  const hasDiscount =
+    item.effectivePrice > 0 && item.priceInINR > item.effectivePrice;
+  const discountPct = hasDiscount
+    ? (item.discountPercent ??
+      Math.round(
+        ((item.priceInINR - item.effectivePrice) / item.priceInINR) * 100,
+      ))
+    : null;
+
+  const atMax =
+    item.inventory != null &&
+    item.inventory > 0 &&
+    item.quantity >= item.inventory;
+
+  const variantLabel = item.variantOptionsLabel ?? item.variantTitle;
+
+  const handleProductPress = () => {
+    if (item.productSlug) router.push(`/(shop)/${item.productSlug}`);
+  };
 
   return (
     <View style={styles.container}>
@@ -43,31 +65,47 @@ export function CartItem({ item }: Props) {
         />
       </Pressable>
 
-      <View style={styles.imageContainer}>
-        {item.productImageUrl ? (
-          <Image
-            source={{ uri: item.productImageUrl }}
-            style={styles.image}
-            contentFit="cover"
-            transition={200}
-          />
-        ) : (
-          <View style={[styles.image, styles.imagePlaceholder]} />
-        )}
-      </View>
+      <Pressable onPress={handleProductPress}>
+        <View style={styles.imageContainer}>
+          {item.productImageUrl ? (
+            <Image
+              source={{ uri: item.productImageUrl }}
+              style={styles.image}
+              contentFit="cover"
+              transition={200}
+            />
+          ) : (
+            <View style={[styles.image, styles.imagePlaceholder]} />
+          )}
+        </View>
+      </Pressable>
 
       <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={2}>
-          {item.productTitle}
-        </Text>
+        <Pressable onPress={handleProductPress}>
+          <Text style={styles.title} numberOfLines={2}>
+            {item.productTitle}
+          </Text>
+        </Pressable>
 
-        {item.variantTitle ? (
-          <Text style={styles.variant} numberOfLines={1}>
-            {item.variantTitle}
+        {variantLabel ? (
+          <Text style={styles.variantChip} numberOfLines={1}>
+            {variantLabel}
           </Text>
         ) : null}
 
-        <Text style={styles.price}>{formatPrice(item.priceInINR)}</Text>
+        <View style={styles.priceRow}>
+          <Text style={styles.price}>{formatPrice(item.effectivePrice)}</Text>
+          {hasDiscount && (
+            <>
+              <Text style={styles.originalPrice}>
+                {formatPrice(item.priceInINR)}
+              </Text>
+              <View style={styles.discountBadge}>
+                <Text style={styles.discountText}>{discountPct}% off</Text>
+              </View>
+            </>
+          )}
+        </View>
       </View>
 
       <View style={styles.quantityControl}>
@@ -88,15 +126,18 @@ export function CartItem({ item }: Props) {
         <Text style={styles.quantityValue}>{item.quantity}</Text>
 
         <Pressable
-          style={styles.quantityButton}
+          style={[
+            styles.quantityButton,
+            atMax && styles.quantityButtonDisabled,
+          ]}
           onPress={() => incrementItem(item.id)}
-          disabled={isMutating}
+          disabled={isMutating || atMax}
           hitSlop={4}
         >
           <HugeiconsIcon
             icon={PlusSignIcon}
             size={14}
-            color={colors.foreground}
+            color={atMax ? colors.mutedForeground : colors.foreground}
             strokeWidth={2}
           />
         </Pressable>
@@ -143,15 +184,42 @@ const styles = StyleSheet.create({
     color: colors.foreground,
     lineHeight: moderateScale(fontSizes.sm * 1.3),
   },
-  variant: {
+  variantChip: {
+    alignSelf: "flex-start",
     fontFamily: fonts.sans.regular,
     fontSize: moderateScale(fontSizes.xs),
     color: colors.mutedForeground,
+    backgroundColor: colors.muted,
+    paddingHorizontal: horizontalScale(spacing[1.5]),
+    paddingVertical: verticalScale(2),
+    overflow: "hidden",
     textTransform: "capitalize",
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[1.5]),
+    marginTop: verticalScale(spacing[0.5]),
   },
   price: {
     fontFamily: fonts.sans.semiBold,
     fontSize: moderateScale(fontSizes.sm),
+    color: colors.primary,
+  },
+  originalPrice: {
+    fontFamily: fonts.sans.regular,
+    fontSize: moderateScale(fontSizes.xs),
+    color: colors.mutedForeground,
+    textDecorationLine: "line-through",
+  },
+  discountBadge: {
+    backgroundColor: `${colors.primary}15`,
+    paddingHorizontal: horizontalScale(spacing[1]),
+    paddingVertical: verticalScale(1),
+  },
+  discountText: {
+    fontFamily: fonts.sans.medium,
+    fontSize: moderateScale(10),
     color: colors.primary,
   },
   quantityControl: {
@@ -169,6 +237,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.muted,
+  },
+  quantityButtonDisabled: {
+    opacity: 0.4,
   },
   quantityValue: {
     fontFamily: fonts.sans.medium,

@@ -5,17 +5,49 @@ import { protectedProcedure } from "../trpc";
 
 const CART_DEPTH = 2;
 
+const CART_POPULATE = {
+  products: {
+    slug: true,
+    title: true,
+    gallery: true,
+    inventory: true,
+    tenant: true,
+    priceInINR: true,
+    effectivePrice: true,
+    meta: true,
+    discountPercent: true,
+  },
+  variants: {
+    title: true,
+    inventory: true,
+    priceInINR: true,
+    effectivePrice: true,
+    options: true,
+  },
+  tenants: {
+    storeLogo: true,
+    storeName: true,
+    storeSlug: true,
+  },
+} as const;
+
+const CART_CONTEXT = { isStorefront: true };
+
 async function findActiveCart(ctx: any, userId: string) {
   const result = await ctx.payload.find({
     collection: "carts",
-    where: {
-      and: [{ customer: { equals: userId } }, { status: { equals: "active" } }],
-    },
+    where: { customer: { equals: userId } },
+    sort: "-updatedAt",
     depth: CART_DEPTH,
     limit: 1,
+    populate: CART_POPULATE,
+    context: CART_CONTEXT,
+    overrideAccess: false,
+    user: ctx.session.user,
   });
 
-  return result.docs[0] ?? null;
+  const cart = result.docs[0] ?? null;
+  return cart?.status === "active" ? cart : null;
 }
 
 async function createOrGetCart(ctx: any, userId: string) {
@@ -26,11 +58,14 @@ async function createOrGetCart(ctx: any, userId: string) {
     collection: "carts",
     data: {
       customer: userId,
-      status: "active",
       currency: "INR",
       items: [],
     },
     depth: CART_DEPTH,
+    populate: CART_POPULATE,
+    context: CART_CONTEXT,
+    overrideAccess: false,
+    user: ctx.session.user,
   });
 
   return cart;
@@ -93,6 +128,10 @@ export const cartRouter = {
         id: cart.id,
         data: { items: updatedItems },
         depth: CART_DEPTH,
+        populate: CART_POPULATE,
+        context: CART_CONTEXT,
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { cart: updated };
@@ -120,6 +159,10 @@ export const cartRouter = {
         id: cart.id,
         data: { items: updatedItems },
         depth: CART_DEPTH,
+        populate: CART_POPULATE,
+        context: CART_CONTEXT,
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { cart: updated };
@@ -147,6 +190,10 @@ export const cartRouter = {
         id: cart.id,
         data: { items: updatedItems },
         depth: CART_DEPTH,
+        populate: CART_POPULATE,
+        context: CART_CONTEXT,
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { cart: updated };
@@ -168,6 +215,8 @@ export const cartRouter = {
       id: cart.id,
       data: { items: [] },
       depth: CART_DEPTH,
+      populate: CART_POPULATE,
+      context: CART_CONTEXT,
     });
 
     return { cart: updated };
@@ -194,6 +243,8 @@ export const cartRouter = {
           and: [{ code: { equals: code } }, { isActive: { equals: true } }],
         },
         limit: 1,
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       const coupon = couponResult.docs[0];
@@ -255,6 +306,10 @@ export const cartRouter = {
           total: subtotal - discount,
         },
         depth: CART_DEPTH,
+        populate: CART_POPULATE,
+        context: CART_CONTEXT,
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { cart: updated };
@@ -284,6 +339,8 @@ export const cartRouter = {
         total: subtotal,
       },
       depth: CART_DEPTH,
+      populate: CART_POPULATE,
+      context: CART_CONTEXT,
     });
 
     return { cart: updated };

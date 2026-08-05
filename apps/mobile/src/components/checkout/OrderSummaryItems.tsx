@@ -16,6 +16,7 @@ type CartItem = {
   productImageUrl: string | null;
   variantTitle: string | null;
   priceInINR: number;
+  effectivePrice?: number;
   quantity: number;
 };
 
@@ -56,7 +57,9 @@ export function OrderSummaryItems({ items }: Props) {
               </Text>
             ) : null}
             <Text style={styles.price}>
-              {formatPrice(item.priceInINR * item.quantity)}
+              {formatPrice(
+                (item.effectivePrice ?? item.priceInINR) * item.quantity,
+              )}
             </Text>
           </View>
         </View>

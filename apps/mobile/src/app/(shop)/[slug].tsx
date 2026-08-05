@@ -152,16 +152,41 @@ export default function ProductDetailScreen() {
     setAdding(true);
     try {
       const imageUrl = getImageUrl(product.gallery?.[0]?.image);
+      const tenant =
+        typeof product.tenant === "object" && product.tenant
+          ? product.tenant
+          : null;
+      const tenantLogoUrl = getImageUrl((tenant?.storeLogo ?? null) as any);
+      const basePrice = selectedVariant
+        ? ((selectedVariant as any).priceInINR ??
+          product.priceInINR ??
+          priceData.basePrice)
+        : (product.priceInINR ?? priceData.basePrice);
+      const effectivePrice = selectedVariant
+        ? ((selectedVariant as any).effectivePrice ??
+          (selectedVariant as any).priceInINR ??
+          priceData.effectivePrice)
+        : priceData.effectivePrice;
+      const inventory = selectedVariant
+        ? ((selectedVariant as any).inventory ?? product.inventory)
+        : product.inventory;
+
       await addItem({
         productId: String(product.id),
         productTitle: product.title ?? "Product",
         productSlug: product.slug ?? "",
         productImageUrl: imageUrl ?? null,
-        priceInINR: selectedVariant
-          ? ((selectedVariant as any).effectivePrice ??
-            (selectedVariant as any).priceInINR ??
-            priceData.effectivePrice)
-          : priceData.effectivePrice,
+        variantId: selectedVariant ? String(selectedVariant.id) : undefined,
+        variantTitle: selectedVariant
+          ? ((selectedVariant as any).title ?? null)
+          : null,
+        priceInINR: basePrice,
+        effectivePrice,
+        discountPercent: product.discountPercent ?? null,
+        inventory: inventory ?? null,
+        tenantId: tenant?.id ?? null,
+        tenantStoreName: tenant?.storeName ?? null,
+        tenantLogoUrl: tenantLogoUrl ?? null,
       });
       setQuantity(1);
       Alert.alert(

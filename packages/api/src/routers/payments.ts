@@ -63,18 +63,14 @@ export const paymentsRouter = {
 
       const result = await ctx.payload.find({
         collection: "carts",
-        where: {
-          and: [
-            { customer: { equals: userId } },
-            { status: { equals: "active" } },
-          ],
-        },
+        where: { customer: { equals: userId } },
+        sort: "-updatedAt",
         depth: 2,
         limit: 1,
       });
 
       const cart = result.docs[0];
-      if (!cart || !cart.items?.length) {
+      if (!cart || cart.status !== "active" || !cart.items?.length) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Cart is empty or not found",
@@ -101,6 +97,8 @@ export const paymentsRouter = {
       const discount = cart.discount ?? 0;
       const couponCode = cart.couponCode ?? null;
 
+      // NOTE: orders/transactions are admin-only in the plugin — keep overrideAccess defaulted
+      // (bypassed) here, but attach user for hooks (accessToken generation, masking).
       const req = {
         payload: ctx.payload,
         user: ctx.session.user,

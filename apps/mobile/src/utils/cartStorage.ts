@@ -9,6 +9,12 @@ export type GuestCartItem = {
   variantId?: string | null;
   variantTitle?: string | null;
   priceInINR: number;
+  effectivePrice?: number;
+  discountPercent?: number | null;
+  inventory?: number | null;
+  tenantId?: string | null;
+  tenantStoreName?: string | null;
+  tenantLogoUrl?: string | null;
   quantity: number;
 };
 

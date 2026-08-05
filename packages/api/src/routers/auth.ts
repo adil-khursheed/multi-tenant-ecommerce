@@ -125,6 +125,8 @@ export const authRouter = {
     const user = await ctx.payload.findByID({
       collection: "users",
       id: ctx.session.user.id,
+      overrideAccess: false,
+      user: ctx.session.user,
     });
 
     return { user };
@@ -184,6 +186,8 @@ export const authRouter = {
           name: input.name,
           email: input.email,
         },
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { user };
@@ -210,6 +214,8 @@ export const authRouter = {
         data: {
           password: input.password,
         },
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { user };

@@ -13,6 +13,8 @@ export const ordersRouter = {
       sort: "-createdAt",
       limit: 0,
       pagination: false,
+      overrideAccess: false,
+      user: ctx.session.user,
     });
 
     return { orders: result.docs };

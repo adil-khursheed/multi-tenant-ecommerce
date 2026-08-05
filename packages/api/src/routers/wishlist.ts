@@ -13,6 +13,8 @@ export const wishlistRouter = {
         id: userId,
         depth: 0,
         select: { wishlist: true },
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       const currentWishlist = (user.wishlist as string[]) ?? [];
@@ -26,6 +28,8 @@ export const wishlistRouter = {
         collection: "users",
         id: userId,
         data: { wishlist: updatedWishlist },
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { isWishlisted: !isWishlisted };
@@ -37,6 +41,8 @@ export const wishlistRouter = {
         id: ctx.session.user.id,
         depth: 2,
         select: { wishlist: true },
+        overrideAccess: false,
+        user: ctx.session.user,
       });
 
     return { wishlist: user.wishlist ?? [] };

@@ -24,25 +24,35 @@ type Cart = RouterOutputs["cart"]["get"]["cart"];
 
 type ServerCartItem = NonNullable<Cart["items"]>[number];
 
+type AddCartItem = {
+  productId: string;
+  variantId?: string;
+  productTitle?: string;
+  productSlug?: string;
+  productImageUrl?: string | null;
+  variantTitle?: string | null;
+  priceInINR?: number;
+  effectivePrice?: number;
+  discountPercent?: number | null;
+  inventory?: number | null;
+  tenantId?: string | null;
+  tenantStoreName?: string | null;
+  tenantLogoUrl?: string | null;
+};
+
 type CartContext = {
   cart: Cart | null;
   isLoading: boolean;
-  addItem: (item: {
-    productId: string;
-    variantId?: string;
-    productTitle?: string;
-    productSlug?: string;
-    productImageUrl?: string | null;
-    variantTitle?: string | null;
-    priceInINR?: number;
-  }) => Promise<void>;
+  addItem: (item: AddCartItem) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   incrementItem: (itemId: string) => Promise<void>;
   decrementItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
   itemCount: number;
   subtotal: number;
+  totalSavings: number;
   items: FlattenedCartItem[];
+  vendorGroups: VendorGroup[];
 };
 
 export type FlattenedCartItem = {
@@ -53,11 +63,35 @@ export type FlattenedCartItem = {
   productImageUrl: string | null;
   variantId: string | null;
   variantTitle: string | null;
+  variantOptionsLabel: string | null;
   priceInINR: number;
+  effectivePrice: number;
+  discountPercent: number | null;
+  inventory: number | null;
+  tenantId: string | null;
+  tenantStoreName: string | null;
+  tenantLogoUrl: string | null;
   quantity: number;
 };
 
+export type VendorGroup = {
+  tenantId: string;
+  tenantStoreName: string;
+  tenantLogoUrl: string | null;
+  items: FlattenedCartItem[];
+  itemCount: number;
+};
+
 const CartContext = createContext<CartContext>({} as CartContext);
+
+function resolveMediaUrl(media: unknown): string | null {
+  if (!media) return null;
+  const url =
+    typeof media === "string" ? media : (media as { url?: string }).url;
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${process.env.EXPO_PUBLIC_API_URL ?? ""}${url}`;
+}
 
 function flattenServerItem(item: ServerCartItem): FlattenedCartItem | null {
   const product = item.product;
@@ -65,21 +99,73 @@ function flattenServerItem(item: ServerCartItem): FlattenedCartItem | null {
 
   const variant =
     item.variant && typeof item.variant === "object" ? item.variant : null;
-  const gallery = product.gallery as { image: unknown }[] | undefined;
-  const firstGalleryImage =
-    gallery?.[0]?.image && typeof gallery[0].image === "object"
-      ? (gallery[0].image as { url?: string })
+
+  const gallery = (product.gallery ?? []) as {
+    image: unknown;
+    variantOption?: unknown;
+  }[];
+
+  const variantOptionIds = new Set(
+    (variant?.options ?? []).map((option: unknown) =>
+      typeof option === "object" && option
+        ? (option as { id?: string }).id
+        : option,
+    ),
+  );
+
+  let imageMedia: unknown;
+  if (variant && variantOptionIds.size > 0) {
+    const match = gallery.find((g) => {
+      if (!g.variantOption) return false;
+      const optionId =
+        typeof g.variantOption === "object" && g.variantOption
+          ? (g.variantOption as { id?: string }).id
+          : g.variantOption;
+      return variantOptionIds.has(optionId);
+    });
+    if (match) imageMedia = match.image;
+  }
+  if (!imageMedia) imageMedia = gallery[0]?.image;
+
+  const tenant =
+    typeof product.tenant === "object" && product.tenant
+      ? product.tenant
       : null;
+  const storeLogo = tenant?.storeLogo;
+
+  const basePrice = variant?.priceInINR ?? product.priceInINR ?? 0;
+  const effectivePrice =
+    variant?.effectivePrice ??
+    product.effectivePrice ??
+    variant?.priceInINR ??
+    product.priceInINR ??
+    0;
+
+  const variantOptionsLabel = (variant?.options ?? [])
+    .map((option: unknown) =>
+      typeof option === "object" && option
+        ? (option as { label?: string }).label
+        : "",
+    )
+    .filter(Boolean)
+    .join(", ");
 
   return {
     id: item.id ?? "",
     productId: product.id ?? "",
     productTitle: product.title ?? "",
     productSlug: (product as { slug?: string }).slug ?? "",
-    productImageUrl: firstGalleryImage?.url ?? null,
+    productImageUrl: resolveMediaUrl(imageMedia),
     variantId: variant?.id ?? null,
     variantTitle: variant?.title ?? null,
-    priceInINR: variant?.priceInINR ?? product.priceInINR ?? 0,
+    variantOptionsLabel: variantOptionsLabel || null,
+    priceInINR: basePrice,
+    effectivePrice,
+    discountPercent: product.discountPercent ?? null,
+    inventory: variant?.inventory ?? product.inventory ?? null,
+    tenantId: tenant?.id ?? null,
+    tenantStoreName: tenant?.storeName ?? null,
+    tenantLogoUrl: resolveMediaUrl(storeLogo),
     quantity: item.quantity ?? 0,
   };
 }
@@ -214,7 +300,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       productImageUrl: item.productImageUrl ?? null,
       variantId: item.variantId ?? null,
       variantTitle: item.variantTitle ?? null,
+      variantOptionsLabel: null,
       priceInINR: item.priceInINR,
+      effectivePrice: item.effectivePrice ?? item.priceInINR,
+      discountPercent: item.discountPercent ?? null,
+      inventory: item.inventory ?? null,
+      tenantId: item.tenantId ?? null,
+      tenantStoreName: item.tenantStoreName ?? null,
+      tenantLogoUrl: item.tenantLogoUrl ?? null,
       quantity: item.quantity,
     }));
   }, [status, serverCart, guestItems]);
@@ -227,11 +320,44 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const subtotal = useMemo(
     () =>
       flattenedItems.reduce(
-        (sum, item) => sum + item.priceInINR * item.quantity,
+        (sum, item) => sum + item.effectivePrice * item.quantity,
         0,
       ),
     [flattenedItems],
   );
+
+  const totalSavings = useMemo(
+    () =>
+      flattenedItems.reduce((sum, item) => {
+        const savings = item.priceInINR - item.effectivePrice;
+        if (savings > 0) return sum + savings * item.quantity;
+        return sum;
+      }, 0),
+    [flattenedItems],
+  );
+
+  const vendorGroups = useMemo<VendorGroup[]>(() => {
+    const groups: VendorGroup[] = [];
+    const index = new Map<string, VendorGroup>();
+    for (const item of flattenedItems) {
+      const tenantId = item.tenantId ?? "unknown";
+      let group = index.get(tenantId);
+      if (!group) {
+        group = {
+          tenantId,
+          tenantStoreName: item.tenantStoreName || "Store",
+          tenantLogoUrl: item.tenantLogoUrl,
+          items: [],
+          itemCount: 0,
+        };
+        index.set(tenantId, group);
+        groups.push(group);
+      }
+      group.items.push(item);
+      group.itemCount += item.quantity;
+    }
+    return groups;
+  }, [flattenedItems]);
 
   const isServerLoading =
     addItemMutation.isPending ||
@@ -276,6 +402,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             variantId: item.variantId ?? null,
             variantTitle: item.variantTitle ?? null,
             priceInINR: item.priceInINR ?? 0,
+            effectivePrice: item.effectivePrice ?? item.priceInINR ?? 0,
+            discountPercent: item.discountPercent ?? null,
+            inventory: item.inventory ?? null,
+            tenantId: item.tenantId ?? null,
+            tenantStoreName: item.tenantStoreName ?? null,
+            tenantLogoUrl: item.tenantLogoUrl ?? null,
             quantity: 1,
           },
         ];
@@ -384,7 +516,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         itemCount,
         subtotal,
+        totalSavings,
         items: flattenedItems,
+        vendorGroups,
       }}
     >
       {children}

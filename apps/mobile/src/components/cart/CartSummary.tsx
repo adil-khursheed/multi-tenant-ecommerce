@@ -14,7 +14,7 @@ import { useCurrency } from "@/providers/Currency";
 
 export function CartSummary() {
   const { formatPrice } = useCurrency();
-  const { itemCount, subtotal } = useCart();
+  const { itemCount, subtotal, totalSavings } = useCart();
   const { status } = useAuth();
   const router = useRouter();
 
@@ -40,6 +40,13 @@ export function CartSummary() {
         </Text>
         <Text style={styles.value}>{formatPrice(subtotal)}</Text>
       </View>
+
+      {totalSavings > 0 && (
+        <View style={styles.row}>
+          <Text style={styles.savingsLabel}>You save</Text>
+          <Text style={styles.savingsValue}>{formatPrice(totalSavings)}</Text>
+        </View>
+      )}
 
       <Text
         style={[styles.button, !isLoggedIn && styles.buttonOutlined]}
@@ -78,6 +85,16 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sans.semiBold,
     fontSize: moderateScale(fontSizes.base),
     color: colors.foreground,
+  },
+  savingsLabel: {
+    fontFamily: fonts.sans.regular,
+    fontSize: moderateScale(fontSizes.xs),
+    color: colors.mutedForeground,
+  },
+  savingsValue: {
+    fontFamily: fonts.sans.medium,
+    fontSize: moderateScale(fontSizes.sm),
+    color: colors.success,
   },
   button: {
     fontFamily: fonts.sans.medium,

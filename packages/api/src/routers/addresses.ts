@@ -73,6 +73,8 @@ export const addressesRouter = {
       },
       depth: ADDRESSES_DEPTH,
       sort: "-createdAt",
+      overrideAccess: false,
+      user: ctx.session.user,
     });
 
     return { addresses: result.docs };
@@ -91,6 +93,7 @@ export const addressesRouter = {
         },
         depth: ADDRESSES_DEPTH,
         overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { address };
@@ -133,6 +136,7 @@ export const addressesRouter = {
         data,
         depth: ADDRESSES_DEPTH,
         overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { address };
@@ -167,6 +171,7 @@ export const addressesRouter = {
         collection: "addresses",
         id: input.id,
         overrideAccess: false,
+        user: ctx.session.user,
       });
 
       return { success: true };

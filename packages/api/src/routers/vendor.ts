@@ -102,6 +102,8 @@ export const vendorRouter = {
       // The original schema had DOMPurify, but it was removed for mobile compatibility.
       // We can apply it here on the input values if we want.
 
+      // NOTE: tenant create + users update write admin-only fields (tenants array, roles);
+      // keep overrideAccess defaulted (bypassed) or vendor onboarding would be denied.
       try {
         const newTenant = await ctx.payload.create({
           collection: "tenants",
