@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+import { inrFieldComponents } from "@/fields/inrAmount";
+
 export const Coupons: CollectionConfig = {
   slug: "coupons",
   admin: {
@@ -64,6 +66,10 @@ export const Coupons: CollectionConfig = {
         description:
           "For percentage: 0–100. For fixed: the rupee amount to deduct.",
         step: 1,
+        components: {
+          Cell: { path: "@/components/admin/CouponValueCell#CouponValueCell" },
+          Field: { path: "@/components/admin/CouponValueInput#CouponValueInput" },
+        },
       },
     },
     {
@@ -72,6 +78,7 @@ export const Coupons: CollectionConfig = {
       min: 0,
       defaultValue: 0,
       admin: {
+        components: inrFieldComponents,
         description:
           "Minimum cart subtotal (₹) required to use this coupon. 0 = no minimum.",
       },

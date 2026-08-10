@@ -5,6 +5,7 @@ import {
   productsReadAccess,
   productsUpdateDeleteAccess,
 } from "@/access/products";
+import { inrFieldComponents } from "@/fields/inrAmount";
 
 export const VariantsCollection: CollectionOverride = ({
   defaultCollection,
@@ -24,6 +25,7 @@ export const VariantsCollection: CollectionOverride = ({
       type: "number",
       index: true,
       admin: {
+        components: inrFieldComponents,
         readOnly: true,
       },
     },

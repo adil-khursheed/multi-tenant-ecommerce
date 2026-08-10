@@ -12,7 +12,7 @@ const formatINR = (amount: number): string =>
     style: "currency",
     currency: "INR",
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(amount / 100);
 
 type Props = {
   user?: User | null;

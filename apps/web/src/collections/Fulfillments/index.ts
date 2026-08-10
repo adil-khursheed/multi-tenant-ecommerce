@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload";
 
 import { adminOnly } from "@/access/adminOnly";
 import { adminOrTenant } from "@/access/adminOrTenant";
+import { inrFieldComponents } from "@/fields/inrAmount";
 
 export const Fulfillments: CollectionConfig = {
   slug: "fulfillments",
@@ -72,7 +73,7 @@ export const Fulfillments: CollectionConfig = {
           label: "Line Total (₹)",
           type: "number",
           min: 0,
-          admin: { readOnly: true },
+          admin: { components: inrFieldComponents, readOnly: true },
         },
       ],
     },
@@ -87,7 +88,7 @@ export const Fulfillments: CollectionConfig = {
           type: "number",
           min: 0,
           required: true,
-          admin: { readOnly: true },
+          admin: { components: inrFieldComponents, readOnly: true },
         },
         {
           name: "status",
@@ -141,7 +142,7 @@ export const Fulfillments: CollectionConfig = {
           label: "Platform Commission (₹)",
           type: "number",
           required: true,
-          admin: { readOnly: true },
+          admin: { components: inrFieldComponents, readOnly: true },
         },
       ],
     },
@@ -152,7 +153,7 @@ export const Fulfillments: CollectionConfig = {
       label: "Vendor Payout (₹)",
       type: "number",
       required: true,
-      admin: { readOnly: true },
+      admin: { components: inrFieldComponents, readOnly: true },
     },
   ],
 

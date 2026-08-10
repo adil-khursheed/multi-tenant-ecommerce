@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload";
 
 import { adminOnly } from "@/access/adminOnly";
 import { adminOrTenant } from "@/access/adminOrTenant";
+import { inrFieldComponents } from "@/fields/inrAmount";
 
 export const Commissions: CollectionConfig = {
   slug: "commissions",
@@ -60,6 +61,7 @@ export const Commissions: CollectionConfig = {
           type: "number",
           required: true,
           admin: {
+            components: inrFieldComponents,
             readOnly: true,
             description: "Gross sale amount at time of order.",
           },
@@ -85,14 +87,14 @@ export const Commissions: CollectionConfig = {
           label: "Platform Commission (₹)",
           type: "number",
           required: true,
-          admin: { readOnly: true },
+          admin: { components: inrFieldComponents, readOnly: true },
         },
         {
           name: "vendorPayout",
           label: "Vendor Payout (₹)",
           type: "number",
           required: true,
-          admin: { readOnly: true },
+          admin: { components: inrFieldComponents, readOnly: true },
         },
       ],
     },

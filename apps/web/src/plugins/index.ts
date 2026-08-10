@@ -25,7 +25,9 @@ import { ProductsCollection } from "@/collections/Products";
 import { VariantOptionsCollection } from "@/collections/VariantOptions";
 import { VariantsCollection } from "@/collections/Variants";
 import { VariantTypesCollection } from "@/collections/VariantTypes";
+import { INR_CURRENCIES } from "@/currencies";
 import { env } from "@/env";
+import { inrFieldComponents } from "@/fields/inrAmount";
 import { sendOrderConfirmationEmail } from "@/hooks/orders/sendOrderConfirmationEmail";
 import { sendOrderStatusEmail } from "@/hooks/orders/sendOrderStatusEmail";
 import { createOrderFulfillments } from "@/hooks/orders/createOrderFulfillments";
@@ -207,7 +209,10 @@ function injectOrderItemFields(fields: Field[]): Field[] {
             type: "number",
             min: 0,
             defaultValue: 0,
-            admin: { readOnly: true },
+            admin: {
+              components: inrFieldComponents,
+              readOnly: true,
+            },
           },
         ],
       };
@@ -236,6 +241,7 @@ function injectCartItemFields(fields: Field[]): Field[] {
             type: "number",
             min: 0,
             admin: {
+              components: inrFieldComponents,
               readOnly: true,
               description: "Effective unit price locked when the item was added.",
             },
@@ -246,6 +252,7 @@ function injectCartItemFields(fields: Field[]): Field[] {
             type: "number",
             min: 0,
             admin: {
+              components: inrFieldComponents,
               readOnly: true,
               description: "Undiscounted base price locked when the item was added.",
             },
@@ -310,17 +317,7 @@ export const plugins: Plugin[] = [
     },
   }),
   ecommercePlugin({
-    currencies: {
-      defaultCurrency: "INR",
-      supportedCurrencies: [
-        {
-          code: "INR",
-          label: "Indian Rupee",
-          symbol: "₹",
-          decimals: 2,
-        },
-      ],
-    },
+    currencies: INR_CURRENCIES,
     access: {
       adminOnlyFieldAccess,
       adminOrPublishedStatus,
@@ -355,6 +352,7 @@ export const plugins: Plugin[] = [
             min: 0,
             defaultValue: 0,
             admin: {
+              components: inrFieldComponents,
               position: "sidebar",
               readOnly: true,
             },
@@ -365,6 +363,7 @@ export const plugins: Plugin[] = [
             min: 0,
             defaultValue: 0,
             admin: {
+              components: inrFieldComponents,
               position: "sidebar",
               readOnly: true,
             },
@@ -450,6 +449,7 @@ export const plugins: Plugin[] = [
             min: 0,
             defaultValue: 0,
             admin: {
+              components: inrFieldComponents,
               readOnly: true,
               description: "Auto-calculated discount amount.",
             },
@@ -460,6 +460,7 @@ export const plugins: Plugin[] = [
             min: 0,
             defaultValue: 0,
             admin: {
+              components: inrFieldComponents,
               readOnly: true,
               description: "Auto-calculated: subtotal - discount.",
             },
@@ -490,6 +491,7 @@ export const plugins: Plugin[] = [
             min: 0,
             defaultValue: 0,
             admin: {
+              components: inrFieldComponents,
               position: "sidebar",
               readOnly: true,
             },
@@ -500,6 +502,7 @@ export const plugins: Plugin[] = [
             min: 0,
             defaultValue: 0,
             admin: {
+              components: inrFieldComponents,
               position: "sidebar",
               readOnly: true,
             },

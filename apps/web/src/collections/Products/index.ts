@@ -28,6 +28,7 @@ import {
 import { CallToAction } from "@/blocks/CallToAction/config";
 import { Content } from "@/blocks/Content/config";
 import { MediaBlock } from "@/blocks/MediaBlock/config";
+import { inrFieldComponents } from "@/fields/inrAmount";
 import { generatePreviewPath } from "@/utilities/generatePreviewPath";
 
 export const ProductsCollection: CollectionOverride = ({
@@ -552,6 +553,7 @@ export const ProductsCollection: CollectionOverride = ({
       type: "number",
       index: true,
       admin: {
+        components: inrFieldComponents,
         position: "sidebar",
         readOnly: true,
         description:
@@ -563,6 +565,7 @@ export const ProductsCollection: CollectionOverride = ({
       type: "number",
       index: true,
       admin: {
+        components: inrFieldComponents,
         position: "sidebar",
         readOnly: true,
         description:
@@ -574,6 +577,7 @@ export const ProductsCollection: CollectionOverride = ({
       type: "number",
       index: true,
       admin: {
+        components: inrFieldComponents,
         position: "sidebar",
         readOnly: true,
         description:
