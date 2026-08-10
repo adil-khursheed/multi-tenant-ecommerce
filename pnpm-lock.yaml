@@ -511,6 +511,9 @@ importers:
 
   packages/api:
     dependencies:
+      '@repo/payments':
+        specifier: workspace:*
+        version: link:../payments
       '@repo/types':
         specifier: workspace:*
         version: link:../types

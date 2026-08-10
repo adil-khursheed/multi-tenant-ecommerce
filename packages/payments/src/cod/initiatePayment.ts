@@ -1,5 +1,7 @@
 import type { PayloadRequest } from "payload";
 
+import { COD_FEE } from "../constants";
+
 type CartItem = {
   product: unknown;
   variant?: unknown;
@@ -70,7 +72,6 @@ export const initiatePayment =
   }) => {
     const payload = req.payload as AnyPayload;
     const { customerEmail, currency, cart, billingAddress } = data;
-    const COD_FEE = 50;
     const amount = (cart.total || cart.subtotal || 0) + COD_FEE;
 
     if (!cart?.items?.length) {

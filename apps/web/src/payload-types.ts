@@ -80,8 +80,9 @@ export interface Config {
     categories: Category;
     collections: Collection;
     coupons: Coupon;
-    materials: Material;
     designs: Design;
+    fulfillments: Fulfillment;
+    materials: Material;
     sizeGuides: SizeGuide;
     reviews: Review;
     forms: Form;
@@ -122,8 +123,9 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     collections: CollectionsSelect<false> | CollectionsSelect<true>;
     coupons: CouponsSelect<false> | CouponsSelect<true>;
-    materials: MaterialsSelect<false> | MaterialsSelect<true>;
     designs: DesignsSelect<false> | DesignsSelect<true>;
+    fulfillments: FulfillmentsSelect<false> | FulfillmentsSelect<true>;
+    materials: MaterialsSelect<false> | MaterialsSelect<true>;
     sizeGuides: SizeGuidesSelect<false> | SizeGuidesSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -466,12 +468,13 @@ export interface Media {
  */
 export interface Order {
   id: string;
-  tenant?: (string | null) | Tenant;
   items?:
     | {
         product?: (string | null) | Product;
         variant?: (string | null) | Variant;
         quantity: number;
+        tenant?: (string | null) | Tenant;
+        lineTotal?: number | null;
         id?: string | null;
       }[]
     | null;
@@ -1618,6 +1621,14 @@ export interface Cart {
         product?: (string | null) | Product;
         variant?: (string | null) | Variant;
         quantity: number;
+        /**
+         * Effective unit price locked when the item was added.
+         */
+        unitPrice?: number | null;
+        /**
+         * Undiscounted base price locked when the item was added.
+         */
+        basePrice?: number | null;
         id?: string | null;
       }[]
     | null;
@@ -1782,6 +1793,34 @@ export interface Coupon {
    * Optional expiration date. Coupon cannot be used after this date.
    */
   expiresAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Per-tenant slice of an order. One record per tenant per order — each tenant sees only their own products.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fulfillments".
+ */
+export interface Fulfillment {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  order: string | Order;
+  items?:
+    | {
+        product?: (string | null) | Product;
+        variant?: (string | null) | Variant;
+        quantity: number;
+        tenant?: (string | null) | Tenant;
+        lineTotal?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  subtotal: number;
+  status: 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+  commissionRate: number;
+  commissionAmount: number;
+  vendorPayout: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -1970,12 +2009,16 @@ export interface PayloadLockedDocument {
         value: string | Coupon;
       } | null)
     | ({
-        relationTo: 'materials';
-        value: string | Material;
-      } | null)
-    | ({
         relationTo: 'designs';
         value: string | Design;
+      } | null)
+    | ({
+        relationTo: 'fulfillments';
+        value: string | Fulfillment;
+      } | null)
+    | ({
+        relationTo: 'materials';
+        value: string | Material;
       } | null)
     | ({
         relationTo: 'sizeGuides';
@@ -2502,6 +2545,48 @@ export interface CouponsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "designs_select".
+ */
+export interface DesignsSelect<T extends boolean = true> {
+  name?: T;
+  generateSlug?: T;
+  slug?: T;
+  description?: T;
+  designFamily?: T;
+  illustration?: T;
+  icon?: T;
+  active?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fulfillments_select".
+ */
+export interface FulfillmentsSelect<T extends boolean = true> {
+  tenant?: T;
+  order?: T;
+  items?:
+    | T
+    | {
+        product?: T;
+        variant?: T;
+        quantity?: T;
+        tenant?: T;
+        lineTotal?: T;
+        id?: T;
+      };
+  subtotal?: T;
+  status?: T;
+  commissionRate?: T;
+  commissionAmount?: T;
+  vendorPayout?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "materials_select".
  */
 export interface MaterialsSelect<T extends boolean = true> {
@@ -2512,23 +2597,6 @@ export interface MaterialsSelect<T extends boolean = true> {
   isPremium?: T;
   isNatural?: T;
   careInstructions?: T;
-  icon?: T;
-  active?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "designs_select".
- */
-export interface DesignsSelect<T extends boolean = true> {
-  name?: T;
-  generateSlug?: T;
-  slug?: T;
-  description?: T;
-  designFamily?: T;
-  illustration?: T;
   icon?: T;
   active?: T;
   order?: T;
@@ -2881,6 +2949,8 @@ export interface CartsSelect<T extends boolean = true> {
         product?: T;
         variant?: T;
         quantity?: T;
+        unitPrice?: T;
+        basePrice?: T;
         id?: T;
       };
   secret?: T;
@@ -2902,13 +2972,14 @@ export interface CartsSelect<T extends boolean = true> {
  * via the `definition` "orders_select".
  */
 export interface OrdersSelect<T extends boolean = true> {
-  tenant?: T;
   items?:
     | T
     | {
         product?: T;
         variant?: T;
         quantity?: T;
+        tenant?: T;
+        lineTotal?: T;
         id?: T;
       };
   shippingAddress?:

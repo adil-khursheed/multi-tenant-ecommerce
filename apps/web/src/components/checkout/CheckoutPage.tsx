@@ -182,11 +182,16 @@ export const CheckoutPage: React.FC = () => {
 
   const handlePaymentSuccess = useCallback(
     (result: { orderID: string; accessToken?: string }) => {
+      setProcessingPayment(false);
       setCompletedOrderId(result.orderID);
       handleNext("review", "success");
     },
     [],
   );
+
+  if (activeStep === "success" && completedOrderId) {
+    return <SuccessScreen orderID={completedOrderId} />;
+  }
 
   if (cartIsEmpty && isProcessingPayment) {
     return (
@@ -218,10 +223,6 @@ export const CheckoutPage: React.FC = () => {
         </Link>
       </div>
     );
-  }
-
-  if (activeStep === "success" && completedOrderId) {
-    return <SuccessScreen orderID={completedOrderId} />;
   }
 
   return (

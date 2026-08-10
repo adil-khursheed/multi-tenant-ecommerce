@@ -24,6 +24,7 @@ export default function CheckoutPayment() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const {
+    billingAddress,
     selectedPaymentMethod,
     setSelectedPaymentMethod,
     setPaymentData,
@@ -56,8 +57,11 @@ export default function CheckoutPayment() {
   const handleProceed = useCallback(() => {
     setLocalError(null);
     setIsInitiating(true);
-    initiateMutation.mutate({ method: selectedPaymentMethod });
-  }, [selectedPaymentMethod, initiateMutation]);
+    initiateMutation.mutate({
+      method: selectedPaymentMethod,
+      billingAddress: billingAddress ?? undefined,
+    });
+  }, [selectedPaymentMethod, initiateMutation, billingAddress]);
 
   return (
     <View

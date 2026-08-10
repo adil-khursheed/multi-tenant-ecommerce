@@ -52,7 +52,7 @@ export const ReviewStep: React.FC<Props> = ({
 
       <div className="space-y-6 mt-4">
         {/* Address Summary */}
-        <div className="bg-card border border-border rounded-[4px] p-6 relative overflow-hidden group">
+        <div className="bg-card border border-border p-6 relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-1 h-full bg-secondary group-hover:bg-primary transition-colors" />
           <div className="flex items-center justify-between mb-4 pl-3">
             <div className="flex items-center gap-3">
@@ -90,7 +90,7 @@ export const ReviewStep: React.FC<Props> = ({
         </div>
 
         {/* Payment Summary */}
-        <div className="bg-card border border-border rounded-[4px] p-6 relative overflow-hidden group">
+        <div className="bg-card border border-border p-6 relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-1 h-full bg-secondary group-hover:bg-primary transition-colors" />
           <div className="flex items-center justify-between mb-4 pl-3">
             <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export const ReviewStep: React.FC<Props> = ({
         </div>
 
         {/* Items */}
-        <div className="bg-card border border-border rounded-[4px] p-6 relative overflow-hidden">
+        <div className="bg-card border border-border p-6 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-secondary" />
           <p className="text-[11px] font-sans uppercase tracking-[0.1em] font-medium text-foreground mb-6 pl-3">
             Items ({cart.items.reduce((s, i) => s + (i.quantity || 0), 0)})
@@ -125,9 +125,60 @@ export const ReviewStep: React.FC<Props> = ({
             {cart.items.map((item, index) => {
               if (typeof item.product !== "object" || !item.product)
                 return null;
-              const { product, quantity } = item;
-              let price = product.priceInINR;
-              let image = product.gallery?.[0]?.image || product.meta?.image;
+              const { product, quantity, variant } = item;
+
+              const isVariant =
+                Boolean(variant) && typeof variant === "object";
+
+              let price =
+                item.unitPrice ??
+                product.effectivePrice ??
+                product.priceInINR;
+              let originalPrice = item.basePrice ?? product.priceInINR;
+              let image =
+                product.gallery?.[0]?.image || product.meta?.image;
+
+              if (isVariant) {
+                price =
+                  item.unitPrice ??
+                  variant?.effectivePrice ??
+                  variant?.priceInINR ??
+                  product.effectivePrice ??
+                  product.priceInINR;
+                originalPrice =
+                  item.basePrice ?? variant?.priceInINR ?? product.priceInINR;
+                const imageVariant = product.gallery?.find((g: any) => {
+                  if (!g.variantOption) return false;
+                  const variantOptionID =
+                    typeof g.variantOption === "object"
+                      ? g.variantOption.id
+                      : g.variantOption;
+                  return variant?.options?.some((o: any) =>
+                    typeof o === "object"
+                      ? o.id === variantOptionID
+                      : o === variantOptionID,
+                  );
+                });
+                if (imageVariant && typeof imageVariant.image !== "string") {
+                  image = imageVariant.image;
+                }
+              }
+
+              const variantLabel = isVariant
+                ? variant?.options
+                    ?.map((o: any) =>
+                      typeof o === "object" ? o.label : "",
+                    )
+                    .filter(Boolean)
+                    .join(", ")
+                : undefined;
+
+              const discountPct =
+                originalPrice > price
+                  ? Math.round(
+                      ((originalPrice - price) / originalPrice) * 100,
+                    )
+                  : product.discountPercent;
 
               return (
                 <div key={index} className="flex items-start gap-4">
@@ -148,9 +199,20 @@ export const ReviewStep: React.FC<Props> = ({
                     <p className="font-serif text-[16px] text-foreground truncate mb-1">
                       {product.title}
                     </p>
+                    {variantLabel && (
+                      <p className="text-[11px] font-sans uppercase tracking-wide text-muted-foreground mb-1">
+                        {variantLabel}
+                      </p>
+                    )}
                     {typeof price === "number" && (
                       <Price
                         amount={price * (quantity || 1)}
+                        originalAmount={
+                          typeof originalPrice === "number"
+                            ? originalPrice * (quantity || 1)
+                            : undefined
+                        }
+                        discountPercent={discountPct}
                         className="font-sans text-[13px] text-muted-foreground"
                       />
                     )}

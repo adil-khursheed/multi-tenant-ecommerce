@@ -86,6 +86,15 @@ export function createPaymentCaptureHandler(): RazorpayWebhookHandler {
     });
 
     if (!transaction.order) {
+      const freshTransaction = await payload.findByID({
+        id: transaction.id,
+        collection: "transactions",
+        req,
+        depth: 0,
+      });
+
+      if (freshTransaction?.order) return;
+
       const order = await payload.create({
         collection: "orders",
         data: {

@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import Razorpay from "razorpay";
+import { validateWebhookSignature } from "razorpay/dist/utils/razorpay-utils";
 import { z } from "zod";
 
-import { protectedProcedure } from "../trpc";
+import { COD_FEE, decrementInventory } from "@repo/payments";
 
-const COD_FEE = 50;
+import { protectedProcedure } from "../trpc";
 
 type CartItem = {
   product?: unknown;
@@ -19,6 +20,22 @@ type FlattenCartItem = {
   variant?: string;
   [key: string]: unknown;
 };
+
+const billingAddressSchema = z
+  .object({
+    title: z.string().optional(),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    company: z.string().optional(),
+    addressLine1: z.string().optional(),
+    addressLine2: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    postalCode: z.string().optional(),
+    country: z.string().optional(),
+    phone: z.string().optional(),
+  })
+  .optional();
 
 function flattenCartItems(items: CartItem[]): FlattenCartItem[] {
   return items.map((item) => {
@@ -50,11 +67,104 @@ function getRazorpayCredentials() {
   return { keyId, keySecret };
 }
 
+/**
+ * Mirrors the ecommerce plugin's `defaultProductsValidation`: every item must
+ * resolve to a product/variant with a price in INR and enough inventory.
+ */
+async function validateCartItems(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any,
+  items: CartItem[],
+): Promise<void> {
+  for (const item of items) {
+    const quantity = item.quantity || 1;
+
+    if (item.variant) {
+      const variantID =
+        typeof item.variant === "object" && item.variant !== null
+          ? (item.variant as { id: string }).id
+          : (item.variant as string);
+
+      const variant = await payload.findByID({
+        id: variantID,
+        collection: "variants",
+        depth: 0,
+        select: { inventory: true, priceInINR: true },
+      });
+
+      if (!variant) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Variant with ID ${variantID} not found.`,
+        });
+      }
+      if (!variant.priceInINR) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Variant with ID ${variantID} does not have a price in INR.`,
+        });
+      }
+      if (
+        variant.inventory === 0 ||
+        (variant.inventory && variant.inventory < quantity)
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Variant with ID ${variantID} is out of stock or does not have enough inventory.`,
+        });
+      }
+    } else {
+      const productID =
+        typeof item.product === "object" && item.product !== null
+          ? (item.product as { id: string }).id
+          : (item.product as string);
+
+      const product = await payload.findByID({
+        id: productID,
+        collection: "products",
+        depth: 0,
+        select: { inventory: true, priceInINR: true },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Product with ID ${productID} not found.`,
+        });
+      }
+      if (!product.priceInINR) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Product with ID ${productID} does not have a price in INR.`,
+        });
+      }
+      if (
+        product.inventory === 0 ||
+        (product.inventory && product.inventory < quantity)
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Product with ID ${productID} is out of stock or does not have enough inventory.`,
+        });
+      }
+    }
+  }
+}
+
+function getCustomerID(
+  customer: string | { id?: string } | null | undefined,
+): string | null | undefined {
+  return typeof customer === "object" && customer !== null
+    ? customer.id
+    : customer;
+}
+
 export const paymentsRouter = {
   initiate: protectedProcedure
     .input(
       z.object({
         method: z.enum(["razorpay", "cod"]),
+        billingAddress: billingAddressSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -96,6 +206,8 @@ export const paymentsRouter = {
       const subtotal = cart.subtotal ?? 0;
       const discount = cart.discount ?? 0;
       const couponCode = cart.couponCode ?? null;
+
+      await validateCartItems(ctx.payload, cart.items ?? []);
 
       // NOTE: orders/transactions are admin-only in the plugin — keep overrideAccess defaulted
       // (bypassed) here, but attach user for hooks (accessToken generation, masking).
@@ -144,6 +256,9 @@ export const paymentsRouter = {
               orderID: razorpayOrder.id,
             },
             ...(couponCode ? { couponCode } : {}),
+            ...(input.billingAddress
+              ? { billingAddress: input.billingAddress }
+              : {}),
             discount,
             shippingCharge: 0,
           },
@@ -177,6 +292,9 @@ export const paymentsRouter = {
             codConfirmed: false,
           },
           ...(couponCode ? { couponCode } : {}),
+          ...(input.billingAddress
+            ? { billingAddress: input.billingAddress }
+            : {}),
           discount,
           shippingCharge: COD_FEE,
         },
@@ -244,6 +362,35 @@ export const paymentsRouter = {
           });
         }
 
+        if (getCustomerID(transaction.customer) !== userId) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Transaction not found for the provided Razorpay Order ID",
+          });
+        }
+
+        if (transaction.paymentMethod !== "razorpay") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Transaction is not a Razorpay transaction",
+          });
+        }
+
+        if (razorpaySignature) {
+          const body = razorpayOrderID + "|" + razorpayPaymentID;
+          const valid = validateWebhookSignature(
+            body,
+            razorpaySignature,
+            keySecret,
+          );
+          if (!valid) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Invalid Razorpay signature",
+            });
+          }
+        }
+
         const existingOrders = await ctx.payload.find({
           collection: "orders",
           where: {
@@ -279,6 +426,7 @@ export const paymentsRouter = {
             currency: transaction.currency,
             customer: userId,
             items: transaction.items,
+            shippingAddress: transaction.billingAddress,
             status: "processing",
             transactions: [transaction.id],
             ...(transaction.couponCode
@@ -289,6 +437,8 @@ export const paymentsRouter = {
           },
           req,
         });
+
+        await decrementInventory(ctx.payload, transaction.items ?? []);
 
         await ctx.payload.update({
           id: transaction.cart as string,
@@ -345,6 +495,27 @@ export const paymentsRouter = {
         });
       }
 
+      if (getCustomerID(transaction.customer) !== userId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Transaction not found",
+        });
+      }
+
+      if (transaction.paymentMethod !== "cod") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Transaction is not a COD transaction",
+        });
+      }
+
+      if (transaction.status !== "pending") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Transaction is not pending",
+        });
+      }
+
       const existingOrders = await ctx.payload.find({
         collection: "orders",
         where: {
@@ -370,6 +541,7 @@ export const paymentsRouter = {
           currency: transaction.currency,
           customer: userId,
           items: transaction.items,
+          shippingAddress: transaction.billingAddress,
           status: "processing",
           transactions: [transaction.id],
           ...(transaction.couponCode
@@ -380,6 +552,8 @@ export const paymentsRouter = {
         },
         req,
       });
+
+      await decrementInventory(ctx.payload, transaction.items ?? []);
 
       await ctx.payload.update({
         id: transaction.cart as string,

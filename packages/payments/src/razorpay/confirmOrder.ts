@@ -51,7 +51,11 @@ export const confirmOrder =
     try {
       if (razorpaySignature) {
         const body = razorpayOrderID + "|" + razorpayPaymentID;
-        validateWebhookSignature(body, razorpaySignature, keySecret);
+        try {
+          validateWebhookSignature(body, razorpaySignature, keySecret);
+        } catch {
+          throw new Error("Invalid Razorpay signature.");
+        }
       }
 
       const transactionsResults = await payload.find({

@@ -31,6 +31,7 @@ import { Header } from "@/globals/Header";
 import { Collections } from "./collections/Collections";
 import { Commissions } from "./collections/Commissions";
 import { Designs } from "./collections/Designs";
+import { Fulfillments } from "./collections/Fulfillments";
 import { Materials } from "./collections/Materials";
 import { Reviews } from "./collections/Reviews";
 import { SizeGuides } from "./collections/SizeGuides";
@@ -82,8 +83,9 @@ export default buildConfig({
     Categories,
     Collections,
     Coupons,
-    Materials,
     Designs,
+    Fulfillments,
+    Materials,
     SizeGuides,
     Reviews,
   ],

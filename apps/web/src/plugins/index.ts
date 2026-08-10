@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-import { CollectionBeforeChangeHook, Plugin } from "payload";
+import { CollectionBeforeChangeHook, Field, Plugin } from "payload";
 import { ecommercePlugin } from "@payloadcms/plugin-ecommerce";
 import { formBuilderPlugin } from "@payloadcms/plugin-form-builder";
 import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant";
@@ -28,6 +28,8 @@ import { VariantTypesCollection } from "@/collections/VariantTypes";
 import { env } from "@/env";
 import { sendOrderConfirmationEmail } from "@/hooks/orders/sendOrderConfirmationEmail";
 import { sendOrderStatusEmail } from "@/hooks/orders/sendOrderStatusEmail";
+import { createOrderFulfillments } from "@/hooks/orders/createOrderFulfillments";
+import { enrichOrderItems } from "@/hooks/orders/enrichOrderItems";
 import { sendPaymentFailedEmail } from "@/hooks/transactions/sendPaymentFailedEmail";
 import type { Config } from "@/payload-types";
 import { Page, Product } from "@/payload-types";
@@ -45,9 +47,28 @@ const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
   return doc?.slug ? `${url}/${doc.slug}` : url;
 };
 
+type CartItemWithLock = {
+  id?: string | null;
+  product?: unknown;
+  variant?: unknown;
+  quantity?: number;
+  unitPrice?: number;
+  basePrice?: number;
+};
+
+const resolveRelationshipId = (value: unknown): string | undefined => {
+  if (!value) return undefined;
+  if (typeof value === "object") {
+    const id = (value as { id?: unknown }).id;
+    return typeof id === "string" ? id : undefined;
+  }
+  return typeof value === "string" ? value : undefined;
+};
+
 const cartSubtotalBeforeChange: CollectionBeforeChangeHook = async ({
   data,
   operation,
+  originalDoc,
   req,
 }) => {
   if (!data) return data;
@@ -61,33 +82,58 @@ const cartSubtotalBeforeChange: CollectionBeforeChangeHook = async ({
   }
 
   if (data.items && Array.isArray(data.items)) {
-    let subtotal = 0;
-    for (const item of data.items) {
-      const quantity = item.quantity || 1;
+    const items = data.items as CartItemWithLock[];
+    const previousItems = ((originalDoc?.items ?? []) as CartItemWithLock[]).filter(
+      (item) => item && typeof item === "object",
+    );
 
-      if (item.variant) {
-        const id =
-          typeof item.variant === "object" ? item.variant.id : item.variant;
+    let subtotal = 0;
+    for (const item of items) {
+      const quantity = item.quantity || 1;
+      const productId = resolveRelationshipId(item.product);
+      const variantId = resolveRelationshipId(item.variant);
+
+      const previous = previousItems.find(
+        (prev) => prev.id && prev.id === item.id,
+      );
+      const previousVariantId = resolveRelationshipId(previous?.variant);
+      const previousProductId = resolveRelationshipId(previous?.product);
+
+      // Price lock: keep the snapshot for unchanged rows so later saves
+      // (e.g. coupon apply) never re-price items already in the cart.
+      const priceLocked =
+        previous &&
+        typeof previous.unitPrice === "number" &&
+        previousVariantId === variantId &&
+        previousProductId === productId;
+
+      if (priceLocked && previous) {
+        item.unitPrice = previous.unitPrice;
+        item.basePrice = previous.basePrice;
+      } else if (variantId) {
         const variant = await req.payload.findByID({
           collection: "variants",
-          id,
+          id: variantId,
           depth: 0,
           select: { effectivePrice: true, priceInINR: true },
         });
-        subtotal +=
-          (variant?.effectivePrice ?? variant?.priceInINR ?? 0) * quantity;
-      } else {
-        const id =
-          typeof item.product === "object" ? item.product.id : item.product;
+        item.unitPrice = variant?.effectivePrice ?? variant?.priceInINR ?? 0;
+        item.basePrice = variant?.priceInINR ?? item.unitPrice;
+      } else if (productId) {
         const product = await req.payload.findByID({
           collection: "products",
-          id,
+          id: productId,
           depth: 0,
           select: { effectivePrice: true, priceInINR: true },
         });
-        subtotal +=
-          (product?.effectivePrice ?? product?.priceInINR ?? 0) * quantity;
+        item.unitPrice = product?.effectivePrice ?? product?.priceInINR ?? 0;
+        item.basePrice = product?.priceInINR ?? item.unitPrice;
+      } else {
+        item.unitPrice = 0;
+        item.basePrice = 0;
       }
+
+      subtotal += (item.unitPrice ?? 0) * quantity;
     }
     data.subtotal = subtotal;
   } else {
@@ -119,6 +165,97 @@ const cartCouponBeforeChange: CollectionBeforeChangeHook = ({ data }) => {
 
   return data;
 };
+
+// Adds per-item `tenant` + `lineTotal` subfields to the plugin's `items`
+// array field on the orders collection (the field lives inside a tabs group).
+function injectOrderItemFields(fields: Field[]): Field[] {
+  return fields.map((field) => {
+    if ("type" in field && field.type === "tabs") {
+      return {
+        ...field,
+        tabs: (field.tabs ?? []).map((tab) => ({
+          ...tab,
+          fields: injectOrderItemFields(tab.fields ?? []),
+        })),
+      };
+    }
+    if ("type" in field && field.type === "group") {
+      return {
+        ...field,
+        fields: injectOrderItemFields(field.fields ?? []),
+      };
+    }
+    if (
+      "type" in field &&
+      "name" in field &&
+      field.type === "array" &&
+      field.name === "items"
+    ) {
+      return {
+        ...field,
+        fields: [
+          ...(field.fields ?? []),
+          {
+            name: "tenant",
+            type: "relationship",
+            relationTo: "tenants",
+            admin: { readOnly: true },
+          },
+          {
+            name: "lineTotal",
+            label: "Line Total (₹)",
+            type: "number",
+            min: 0,
+            defaultValue: 0,
+            admin: { readOnly: true },
+          },
+        ],
+      };
+    }
+    return field;
+  });
+}
+
+// Adds per-item `unitPrice` + `basePrice` snapshot subfields to the plugin's
+// `items` array field on the carts collection (top-level array field).
+function injectCartItemFields(fields: Field[]): Field[] {
+  return fields.map((field) => {
+    if (
+      "type" in field &&
+      "name" in field &&
+      field.type === "array" &&
+      field.name === "items"
+    ) {
+      return {
+        ...field,
+        fields: [
+          ...(field.fields ?? []),
+          {
+            name: "unitPrice",
+            label: "Unit Price (locked)",
+            type: "number",
+            min: 0,
+            admin: {
+              readOnly: true,
+              description: "Effective unit price locked when the item was added.",
+            },
+          },
+          {
+            name: "basePrice",
+            label: "Base Price (₹)",
+            type: "number",
+            min: 0,
+            admin: {
+              readOnly: true,
+              description: "Undiscounted base price locked when the item was added.",
+            },
+          },
+        ],
+      };
+    }
+    return field;
+  });
+}
 
 export const plugins: Plugin[] = [
   seoPlugin({
@@ -197,8 +334,13 @@ export const plugins: Plugin[] = [
     orders: {
       ordersCollectionOverride: ({ defaultCollection }) => ({
         ...defaultCollection,
+        admin: {
+          ...defaultCollection.admin,
+          // Orders are customer-facing; vendors manage their slice via Fulfillments.
+          hidden: ({ user }) => !user?.roles?.includes("admin"),
+        },
         fields: [
-          ...defaultCollection.fields,
+          ...injectOrderItemFields(defaultCollection.fields),
           {
             name: "couponCode",
             type: "text",
@@ -250,8 +392,13 @@ export const plugins: Plugin[] = [
         ],
         hooks: {
           ...defaultCollection.hooks,
+          beforeChange: [
+            ...(defaultCollection.hooks?.beforeChange || []),
+            enrichOrderItems,
+          ],
           afterChange: [
             ...(defaultCollection.hooks?.afterChange || []),
+            createOrderFulfillments,
             sendOrderConfirmationEmail,
             sendOrderStatusEmail,
           ],
@@ -266,7 +413,7 @@ export const plugins: Plugin[] = [
           hidden: ({ user }) => !user.roles.includes("admin"),
         },
         fields: [
-          ...defaultCollection.fields,
+          ...injectCartItemFields(defaultCollection.fields),
           {
             name: "couponCode",
             type: "text",
@@ -395,8 +542,8 @@ export const plugins: Plugin[] = [
   }),
   multiTenantPlugin<Config>({
     collections: {
+      fulfillments: {},
       products: {},
-      orders: {},
       variants: {},
       variantTypes: {},
       variantOptions: {},
@@ -404,6 +551,7 @@ export const plugins: Plugin[] = [
     tenantsArrayField: {
       includeDefaultField: false,
     },
-    userHasAccessToAllTenants: (user) => checkRole(["admin"], user),
+    userHasAccessToAllTenants: (user) =>
+      checkRole(["admin"], user) || checkRole(["customer"], user),
   }),
 ];

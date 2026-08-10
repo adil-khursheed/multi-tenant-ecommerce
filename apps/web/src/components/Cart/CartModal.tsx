@@ -72,11 +72,11 @@ export function CartModal() {
       const variant = item.variant;
       const isVariant = Boolean(variant) && typeof variant === "object";
       const price = isVariant
-        ? (variant?.effectivePrice ?? variant?.priceInINR)
-        : (product.effectivePrice ?? product.priceInINR);
+        ? (item.unitPrice ?? variant?.effectivePrice ?? variant?.priceInINR)
+        : (item.unitPrice ?? product.effectivePrice ?? product.priceInINR);
       const originalPrice = isVariant
-        ? variant?.priceInINR
-        : product.priceInINR;
+        ? (item.basePrice ?? variant?.priceInINR)
+        : (item.basePrice ?? product.priceInINR);
       if (
         typeof price === "number" &&
         typeof originalPrice === "number" &&
@@ -177,17 +177,28 @@ export function CartModal() {
                             : undefined;
 
                         let image = firstGalleryImage || metaImage;
-                        const discountPct = product.discountPercent;
 
                         const isVariant =
                           Boolean(variant) && typeof variant === "object";
 
                         const price = isVariant
-                          ? (variant?.effectivePrice ?? variant?.priceInINR)
-                          : (product.effectivePrice ?? product.priceInINR);
+                          ? (item.unitPrice ??
+                            variant?.effectivePrice ??
+                            variant?.priceInINR)
+                          : (item.unitPrice ??
+                            product.effectivePrice ??
+                            product.priceInINR);
                         const originalPrice = isVariant
-                          ? variant?.priceInINR
-                          : product.priceInINR;
+                          ? (item.basePrice ?? variant?.priceInINR)
+                          : (item.basePrice ?? product.priceInINR);
+                        const discountPct =
+                          typeof originalPrice === "number" &&
+                          typeof price === "number" &&
+                          originalPrice > price
+                            ? Math.round(
+                                ((originalPrice - price) / originalPrice) * 100,
+                              )
+                            : product.discountPercent;
 
                         if (isVariant) {
                           const imageVariant = product.gallery?.find(

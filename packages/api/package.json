@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/payments": "workspace:*",
     "@repo/validators": "workspace:*",
     "@repo/types": "workspace:*",
     "@trpc/server": "^11.0.0-rc.366",

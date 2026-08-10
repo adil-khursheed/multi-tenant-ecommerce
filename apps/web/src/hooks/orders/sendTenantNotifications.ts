@@ -20,10 +20,7 @@ export async function sendTenantNotifications({
   >();
 
   for (const item of order.items || []) {
-    const product = item.product;
-    if (!product || typeof product === "string") continue;
-
-    const tenant = product.tenant;
+    const tenant = item.tenant;
     if (!tenant || typeof tenant === "string" || !tenant.id) continue;
 
     const existing = tenantMap.get(tenant.id);

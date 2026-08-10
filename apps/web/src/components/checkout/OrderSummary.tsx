@@ -118,9 +118,11 @@ export const OrderSummary: React.FC<Props> = ({
                     return null;
 
                   const { product, quantity, variant } = item;
-                  let price = product.effectivePrice ?? product.priceInINR;
-                  let originalPrice = product.priceInINR;
-                  const discountPct = product.discountPercent;
+                  let price =
+                    item.unitPrice ??
+                    product.effectivePrice ??
+                    product.priceInINR;
+                  let originalPrice = item.basePrice ?? product.priceInINR;
                   let image =
                     product.gallery?.[0]?.image || product.meta?.image;
 
@@ -128,11 +130,15 @@ export const OrderSummary: React.FC<Props> = ({
                     Boolean(variant) && typeof variant === "object";
                   if (isVariant) {
                     price =
+                      item.unitPrice ??
                       variant?.effectivePrice ??
                       variant?.priceInINR ??
                       product.effectivePrice ??
                       product.priceInINR;
-                    originalPrice = variant?.priceInINR ?? product.priceInINR;
+                    originalPrice =
+                      item.basePrice ??
+                      variant?.priceInINR ??
+                      product.priceInINR;
                     const imageVariant = product.gallery?.find((g: any) => {
                       if (!g.variantOption) return false;
                       const variantOptionID =
@@ -161,6 +167,13 @@ export const OrderSummary: React.FC<Props> = ({
                         .filter(Boolean)
                         .join(", ")
                     : undefined;
+
+                  const discountPct =
+                    originalPrice > price
+                      ? Math.round(
+                          ((originalPrice - price) / originalPrice) * 100,
+                        )
+                      : product.discountPercent;
 
                   return (
                     <div
