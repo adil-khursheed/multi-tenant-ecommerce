@@ -137,7 +137,7 @@ export const productsRouter = {
           const min = parseInt(cleanStr.replace("+", ""), 10);
           if (!isNaN(min)) {
             andConstraints.push({
-              minEffectivePrice: { greater_than_equal: min },
+              minEffectivePrice: { greater_than_equal: min * 100 },
             });
           }
         } else if (cleanStr.includes("-")) {
@@ -149,8 +149,8 @@ export const productsRouter = {
           if (!isNaN(min) && !isNaN(max)) {
             andConstraints.push({
               and: [
-                { minEffectivePrice: { greater_than_equal: min } },
-                { minEffectivePrice: { less_than_equal: max } },
+                { minEffectivePrice: { greater_than_equal: min * 100 } },
+                { minEffectivePrice: { less_than_equal: max * 100 } },
               ],
             });
           }
