@@ -70,6 +70,7 @@ export default buildConfig({
           url: "/favicon.ico",
         },
       ],
+      titleSuffix: `- ${env.SITE_NAME}`,
     },
     autoRefresh: true,
   },

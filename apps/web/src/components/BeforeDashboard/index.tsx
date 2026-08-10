@@ -1,91 +1,155 @@
-import React from "react";
+import type { Payload } from "payload";
 
-import { Banner } from "@payloadcms/ui";
-
-import { SeedButton } from "./SeedButton";
+import { checkRole } from "@/access/utilities";
+import type { User } from "@/payload-types";
 
 import "./index.scss";
 
 const baseClass = "before-dashboard";
 
-export const BeforeDashboard: React.FC = () => {
+const formatINR = (amount: number): string =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(amount);
+
+type Props = {
+  user?: User | null;
+  payload: Payload;
+};
+
+const LIVE_ORDER_STATUSES = ["processing", "completed"];
+
+const LIVE_FULFILLMENT_STATUSES = [
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+];
+
+const COMMISSION_LEDGER_STATUSES = {
+  not_in: ["refunded", "disputed"],
+};
+
+export const BeforeDashboard: React.FC<Props> = async ({ user, payload }) => {
+  if (!user) return null;
+
+  const isAdmin = checkRole(["admin"], user);
+
+  if (isAdmin) {
+    const orderWhere = { status: { in: LIVE_ORDER_STATUSES } };
+
+    const [orderCount, orderDocs, commissionDocs] = await Promise.all([
+      payload.count({
+        collection: "orders",
+        where: orderWhere,
+        overrideAccess: false,
+        user,
+      }),
+      payload.find({
+        collection: "orders",
+        depth: 0,
+        limit: 0,
+        pagination: false,
+        select: { amount: true },
+        where: orderWhere,
+        overrideAccess: false,
+        user,
+      }),
+      payload.find({
+        collection: "commissions",
+        depth: 0,
+        limit: 0,
+        pagination: false,
+        select: { commissionAmount: true },
+        where: { status: COMMISSION_LEDGER_STATUSES },
+        overrideAccess: false,
+        user,
+      }),
+    ]);
+
+    const totalRevenue = orderDocs.docs.reduce(
+      (sum, order) => sum + (order.amount ?? 0),
+      0,
+    );
+
+    const totalCommission = commissionDocs.docs.reduce(
+      (sum, commission) => sum + (commission.commissionAmount ?? 0),
+      0,
+    );
+
+    return (
+      <div className={baseClass}>
+        <h2 className={`${baseClass}__title`}>Platform Overview</h2>
+        <div className={`${baseClass}__cards`}>
+          <StatCard
+            label="Total Orders"
+            value={String(orderCount.totalDocs)}
+          />
+          <StatCard label="Total Revenue" value={formatINR(totalRevenue)} />
+          <StatCard
+            label="Total Commission"
+            value={formatINR(totalCommission)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const tenantIds = (user.tenants ?? [])
+    .map((t) => (typeof t.tenant === "string" ? t.tenant : t.tenant?.id))
+    .filter((id): id is string => Boolean(id));
+
+  const tenantWhere = {
+    tenant: { in: tenantIds },
+    status: { in: LIVE_FULFILLMENT_STATUSES },
+  };
+
+  const [fulfillmentCount, fulfillmentDocs] = await Promise.all([
+    payload.count({
+      collection: "fulfillments",
+      where: tenantWhere,
+      overrideAccess: false,
+      user,
+    }),
+    payload.find({
+      collection: "fulfillments",
+      depth: 0,
+      limit: 0,
+      pagination: false,
+      select: { subtotal: true },
+      where: tenantWhere,
+      overrideAccess: false,
+      user,
+    }),
+  ]);
+
+  const totalRevenue = fulfillmentDocs.docs.reduce(
+    (sum, fulfillment) => sum + (fulfillment.subtotal ?? 0),
+    0,
+  );
+
   return (
     <div className={baseClass}>
-      <Banner className={`${baseClass}__banner`} type="success">
-        <h4>Welcome to your dashboard!</h4>
-      </Banner>
-      Here&apos;s what to do next:
-      <ul className={`${baseClass}__instructions`}>
-        <li>
-          <SeedButton />
-          {
-            " with a few products and pages to jump-start your new project, then "
-          }
-          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a href="/">visit your website</a>
-          {" to see the results."}
-        </li>
-        <li>
-          {"Head over to "}
-          <a
-            href="https://dashboard.stripe.com/test/apikeys"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Stripe to obtain your API Keys
-          </a>
-          {
-            ". Create a new account if needed, then copy them into your environment variables and restart your server. See the "
-          }
-          <a
-            href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            README
-          </a>
-          {" for more details."}
-        </li>
-        <li>
-          {"Modify your "}
-          <a
-            href="https://payloadcms.com/docs/configuration/collections"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            collections
-          </a>
-          {" and add more "}
-          <a
-            href="https://payloadcms.com/docs/fields/overview"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            fields
-          </a>
-          {
-            " as needed. If you are new to Payload, we also recommend you check out the "
-          }
-          <a
-            href="https://payloadcms.com/docs/getting-started/what-is-payload"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Getting Started
-          </a>
-          {" docs."}
-        </li>
-      </ul>
-      {"Pro Tip: This block is a "}
-      <a
-        href="https://payloadcms.com/docs/admin/components#base-component-overrides"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        custom component
-      </a>
-      , you can remove it at any time by updating your{" "}
-      <strong>payload.config</strong>.
+      <h2 className={`${baseClass}__title`}>Store Overview</h2>
+      <div className={`${baseClass}__cards`}>
+        <StatCard
+          label="Total Orders"
+          value={String(fulfillmentCount.totalDocs)}
+        />
+        <StatCard label="Total Revenue" value={formatINR(totalRevenue)} />
+      </div>
     </div>
   );
 };
+
+const StatCard: React.FC<{ label: string; value: string }> = ({
+  label,
+  value,
+}) => (
+  <div className={`${baseClass}__card`}>
+    <span className={`${baseClass}__card-label`}>{label}</span>
+    <span className={`${baseClass}__card-value`}>{value}</span>
+  </div>
+);

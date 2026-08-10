@@ -1,12 +1,15 @@
 import { env } from "@/env";
 import type { Footer } from "@/payload-types";
 import { getCachedGlobal } from "@/utilities/getGlobals";
+import { FooterMenu } from "./menu";
 
 const { COMPANY_NAME, SITE_NAME } = env;
 
 export async function Footer() {
   const footer: Footer = await getCachedGlobal("footer", 1)();
   const menu = footer.navItems || [];
+  console.log(JSON.stringify(menu, null, 2));
+
   const currentYear = new Date().getFullYear();
   const skeleton =
     "w-full h-6 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700";
@@ -16,6 +19,7 @@ export async function Footer() {
   return (
     <footer className="text-sm text-neutral-500 dark:text-neutral-400">
       <div className="border-t border-neutral-200 py-6 text-sm dark:border-neutral-700">
+        <FooterMenu menu={menu} />
         <div className="container mx-auto flex w-full flex-col items-center gap-1 md:flex-row md:gap-0">
           <p>
             &copy; {currentYear} {copyrightName}
