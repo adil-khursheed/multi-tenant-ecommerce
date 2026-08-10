@@ -86,15 +86,19 @@ export const TabsClient: React.FC<TabsClientProps> = ({
       <Tabs defaultValue={defaultTab} className="w-full">
         <div className="mb-6 w-full overflow-x-auto pb-2 scrollbar-none">
           <TabsList
-            variant="line"
-            className="inline-flex w-max min-w-full justify-start border-b border-border"
+            variant={isCategories ? "default" : "line"}
+            className={
+              isCategories
+                ? "inline-flex w-max justify-start gap-2 rounded-none bg-transparent p-0"
+                : "inline-flex w-max min-w-full justify-start border-b border-border"
+            }
           >
             {isCategories
               ? categoryTabs?.map((parent) => (
                   <TabsTrigger
                     key={parent.parentSlug}
                     value={parent.parentSlug}
-                    className="px-4 pb-3 font-serif text-lg capitalize sm:text-xl"
+                    className="flex-none rounded-none border border-input bg-transparent px-4 py-2 text-sm font-medium capitalize data-active:border-primary data-active:bg-primary data-active:text-white dark:border-input dark:data-active:border-primary dark:data-active:bg-primary dark:data-active:text-white"
                   >
                     {parent.parentName}
                   </TabsTrigger>
