@@ -15,14 +15,34 @@ export const Footer: GlobalConfig = {
   },
   fields: [
     {
-      name: "navItems",
+      name: "logo",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        description: "Optional footer logo. Falls back to the site wordmark if empty.",
+      },
+    },
+    {
+      name: "columns",
       type: "array",
+      maxRows: 4,
       fields: [
-        link({
-          appearances: false,
-        }),
+        {
+          name: "title",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "links",
+          type: "array",
+          maxRows: 8,
+          fields: [
+            link({
+              appearances: false,
+            }),
+          ],
+        },
       ],
-      maxRows: 6,
     },
   ],
 };

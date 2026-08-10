@@ -1,3 +1,7 @@
+import Link from "next/link";
+
+import { LogoIcon } from "@/components/icons/logo";
+import { Media } from "@/components/Media";
 import { env } from "@/env";
 import type { Footer } from "@/payload-types";
 import { getCachedGlobal } from "@/utilities/getGlobals";
@@ -7,20 +11,34 @@ const { COMPANY_NAME, SITE_NAME } = env;
 
 export async function Footer() {
   const footer: Footer = await getCachedGlobal("footer", 1)();
-  const menu = footer.navItems || [];
-  console.log(JSON.stringify(menu, null, 2));
+  const columns = footer.columns || [];
+  const logo = footer.logo || null;
 
   const currentYear = new Date().getFullYear();
-  const skeleton =
-    "w-full h-6 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700";
-
   const copyrightName = COMPANY_NAME || SITE_NAME || "";
 
   return (
     <footer className="text-sm text-neutral-500 dark:text-neutral-400">
-      <div className="border-t border-neutral-200 py-6 text-sm dark:border-neutral-700">
-        <FooterMenu menu={menu} />
-        <div className="container mx-auto flex w-full flex-col items-center gap-1 md:flex-row md:gap-0">
+      <div className="border-t border-neutral-200 py-12 dark:border-neutral-700">
+        <div className="container grid gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:gap-16">
+          <div>
+            <Link className="inline-block" href="/">
+              {logo && typeof logo === "object" && "url" in logo ? (
+                <Media
+                  imgClassName="size-16"
+                  className="h-full w-full"
+                  resource={logo}
+                />
+              ) : (
+                <LogoIcon className="h-auto w-6" />
+              )}
+            </Link>
+          </div>
+
+          {columns.length > 0 && <FooterMenu columns={columns} />}
+        </div>
+
+        <div className="container mx-auto mt-10 flex w-full flex-col items-center gap-1 border-t border-neutral-200 pt-6 dark:border-neutral-700 md:flex-row md:gap-0">
           <p>
             &copy; {currentYear} {copyrightName}
             {copyrightName.length && !copyrightName.endsWith(".")

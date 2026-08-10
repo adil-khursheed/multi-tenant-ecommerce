@@ -42,7 +42,17 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
         }`
       : url;
 
-  if (!href) return null;
+  if (!href) {
+    if (label || children) {
+      return (
+        <span className={cn(className)}>
+          {label && label}
+          {children && children}
+        </span>
+      );
+    }
+    return null;
+  }
 
   const size = appearance === "link" ? "sm" : sizeFromProps;
   const newTabProps = newTab
