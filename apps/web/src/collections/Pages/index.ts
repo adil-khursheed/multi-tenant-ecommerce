@@ -14,6 +14,7 @@ import { Archive } from "@/blocks/ArchiveBlock/config";
 import { Banner } from "@/blocks/Banner/config";
 import { CallToAction } from "@/blocks/CallToAction/config";
 import { Carousel } from "@/blocks/Carousel/config";
+import { CollectionsStrip } from "@/blocks/CollectionsStrip/config";
 import { Content } from "@/blocks/Content/config";
 import { FiveItemGrid } from "@/blocks/FiveItemGrid/config";
 import { FormBlock } from "@/blocks/Form/config";
@@ -97,6 +98,7 @@ export const Pages: CollectionConfig = {
                 MediaBlock,
                 Archive,
                 Carousel,
+                CollectionsStrip,
                 ThreeItemGrid,
                 FourItemGrid,
                 FiveItemGrid,

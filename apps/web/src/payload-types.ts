@@ -810,6 +810,7 @@ export interface Page {
     | MediaBlock
     | ArchiveBlock
     | CarouselBlock
+    | CollectionsStripBlock
     | ThreeItemGridBlock
     | FourItemGridBlock
     | FiveItemGridBlock
@@ -1083,6 +1084,83 @@ export interface CarouselBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'carousel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CollectionsStripBlock".
+ */
+export interface CollectionsStripBlock {
+  /**
+   * Optional title shown above the strip.
+   */
+  heading?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Pick the occasion collections to display as cards. Leave empty to auto-show all active collections.
+   */
+  collections?: (string | Collection)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'collectionsStrip';
+}
+/**
+ * Curated product groupings (Festive, Wedding, Autumn/Winter, etc.). Appear under the Collections nav item.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections".
+ */
+export interface Collection {
+  id: string;
+  name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  season?: ('autumn-winter' | 'spring-summer' | 'festive' | 'year-round') | null;
+  /**
+   * Collection becomes visible on this date. Leave blank to show immediately.
+   */
+  startDate?: string | null;
+  /**
+   * Collection is hidden after this date. Leave blank for no expiry.
+   */
+  endDate?: string | null;
+  /**
+   * Hero / card image for the collection.
+   */
+  coverImage?: (string | null) | Media;
+  /**
+   * Optional mood-board images shown in the collection header.
+   */
+  moodboard?:
+    | {
+        image: string | Media;
+        altText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  active?: boolean | null;
+  /**
+   * Mark this collection as featured for curated sections and campaigns.
+   */
+  isFeatured?: boolean | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1434,52 +1512,6 @@ export interface Variant {
   createdAt: string;
   deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * Curated product groupings (Festive, Wedding, Autumn/Winter, etc.). Appear under the Collections nav item.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections".
- */
-export interface Collection {
-  id: string;
-  name: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  season?: ('autumn-winter' | 'spring-summer' | 'festive' | 'year-round') | null;
-  /**
-   * Collection becomes visible on this date. Leave blank to show immediately.
-   */
-  startDate?: string | null;
-  /**
-   * Collection is hidden after this date. Leave blank for no expiry.
-   */
-  endDate?: string | null;
-  /**
-   * Hero / card image for the collection.
-   */
-  coverImage?: (string | null) | Media;
-  /**
-   * Optional mood-board images shown in the collection header.
-   */
-  moodboard?:
-    | {
-        image: string | Media;
-        altText?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  active?: boolean | null;
-  /**
-   * Show on homepage featured collections strip.
-   */
-  isFeatured?: boolean | null;
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * Fabric/textile types. Drives the "By Materials" nav item and the fabric filter on PLPs.
@@ -2209,6 +2241,7 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         carousel?: T | CarouselBlockSelect<T>;
+        collectionsStrip?: T | CollectionsStripBlockSelect<T>;
         threeItemGrid?: T | ThreeItemGridBlockSelect<T>;
         fourItemGrid?: T | FourItemGridBlockSelect<T>;
         fiveItemGrid?: T | FiveItemGridBlockSelect<T>;
@@ -2317,6 +2350,16 @@ export interface CarouselBlockSelect<T extends boolean = true> {
   selectedDocs?: T;
   populatedDocs?: T;
   populatedDocsTotal?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CollectionsStripBlock_select".
+ */
+export interface CollectionsStripBlockSelect<T extends boolean = true> {
+  heading?: T;
+  collections?: T;
   id?: T;
   blockName?: T;
 }

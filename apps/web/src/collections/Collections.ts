@@ -103,7 +103,8 @@ export const Collections: CollectionConfig = {
       type: "checkbox",
       defaultValue: false,
       admin: {
-        description: "Show on homepage featured collections strip.",
+        description:
+          "Mark this collection as featured for curated sections and campaigns.",
         position: "sidebar",
       },
     },
