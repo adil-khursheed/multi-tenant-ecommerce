@@ -2,8 +2,8 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import type { ReadonlyURLSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { useCurrency } from "@payloadcms/plugin-ecommerce/client/react";
 
@@ -66,7 +66,7 @@ export const ProductInfo: React.FC<{
             </AvatarFallback>
           </Avatar>
           <Link
-            href={`/seller/${tenant.id}`}
+            href={`/shop?brand=${tenant.storeName}`}
             className="text-sm font-medium hover:underline underline-offset-4"
           >
             {tenant.storeName}
@@ -129,7 +129,7 @@ export const ProductInfo: React.FC<{
               <HugeiconsIcon icon={RulerIcon} size={14} />
               Size Guide
             </SheetTrigger>
-            <SheetContent className="sm:max-w-[425px]">
+            <SheetContent className="sm:max-w-106.25">
               <SheetHeader>
                 <SheetTitle>Size Guide</SheetTitle>
                 <SheetDescription>Find your perfect fit.</SheetDescription>

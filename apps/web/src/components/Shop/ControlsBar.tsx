@@ -54,7 +54,7 @@ export const ControlsBar = ({
             <HugeiconsIcon icon={ArrowDown01Icon} size={14} />
           </button>
 
-          <div className="absolute top-full right-0 w-48 bg-card border border-border shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all origin-top scale-y-95 group-hover:scale-y-100">
+          <div className="absolute z-20 top-full right-0 w-48 bg-card border border-border shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all origin-top scale-y-95 group-hover:scale-y-100">
             {sorting.map((option) => (
               <button
                 key={option.title}

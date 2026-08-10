@@ -60,7 +60,7 @@ export const ProductGridItem: React.FC<Props> = ({
         className="flex gap-8 border-b border-border pb-8 mb-8 last:border-0 relative"
       >
         <Link
-          className="w-[200px] h-[240px] bg-secondary overflow-hidden shrink-0 group"
+          className="w-50 h-60 bg-secondary overflow-hidden shrink-0 group"
           href={`/products/${product.slug}`}
         >
           {image && (
@@ -161,7 +161,7 @@ export const ProductGridItem: React.FC<Props> = ({
         {ribbon && (
           <div
             className={clsx(
-              "absolute top-0 left-0 px-3 py-1 font-sans text-[9px] font-bold uppercase tracking-widest z-20",
+              "absolute top-0 left-0 px-3 py-1 font-sans text-[9px] font-bold uppercase tracking-widest z-10",
               ribbon === "NEW"
                 ? "bg-primary text-primary-foreground"
                 : ribbon === "SALE"

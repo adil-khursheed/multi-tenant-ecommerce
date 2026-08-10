@@ -56,7 +56,7 @@ export const VendorCard: React.FC<{ product: Product }> = ({ product }) => {
                 )}
               </div>
               {tenant.storeDescription && (
-                <p className="text-sm text-muted-foreground line-clamp-2 max-w-[400px]">
+                <p className="text-sm text-muted-foreground line-clamp-2 max-w-100">
                   {tenant.storeDescription}
                 </p>
               )}
@@ -65,7 +65,7 @@ export const VendorCard: React.FC<{ product: Product }> = ({ product }) => {
 
           <div className="flex w-full sm:w-auto items-center gap-3">
             <Link
-              href={`/seller/${tenant.id}`}
+              href={`/shop?brand=${tenant.storeName}`}
               className={cn(
                 buttonVariants({ variant: "outline" }),
                 "w-full sm:w-auto",

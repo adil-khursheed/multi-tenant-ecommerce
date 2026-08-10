@@ -34,7 +34,10 @@ export const productsRouter = {
       }),
       ctx.payload.find({
         collection: "tenants",
-        where: { storeName: { exists: true } },
+        where: {
+          storeName: { exists: true },
+          isTenantActive: { equals: true },
+        },
         select: { storeName: true },
         pagination: false,
         depth: 0,

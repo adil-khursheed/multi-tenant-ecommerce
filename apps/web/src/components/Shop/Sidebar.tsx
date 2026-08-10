@@ -102,7 +102,7 @@ export const Sidebar = () => {
   const activeMaterial = searchParams.get("material");
 
   return (
-    <aside className="w-[260px] shrink-0 sticky top-10 h-[calc(100vh-80px)] overflow-y-auto pr-6 hidden md:block">
+    <aside className="w-65 shrink-0 sticky top-10 h-[calc(100vh-80px)] overflow-y-auto pr-6 hidden md:block">
       <div className="flex items-center justify-between mb-8">
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Filters
@@ -228,7 +228,7 @@ export const Sidebar = () => {
                   key={size}
                   onClick={() => setQuery("size", size)}
                   className={cn(
-                    "h-9 flex items-center justify-center border font-sans font-medium text-[12px] rounded-[2px] transition-all",
+                    "h-8 px-3 flex items-center justify-center border font-sans font-medium text-[12px] transition-all",
                     isActive
                       ? "bg-foreground text-background border-foreground"
                       : "border-border text-foreground hover:border-foreground",
