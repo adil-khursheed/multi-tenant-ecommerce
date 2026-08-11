@@ -60,7 +60,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           snapEnabled
           onSnapToItem={handleSnap}
           renderItem={({ item }) => {
-            const imageUrl = item.mediaUrl;
+            const imageUrl = `${process.env.EXPO_PUBLIC_API_URL}${item.mediaUrl}`;
 
             return (
               <Pressable

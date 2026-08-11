@@ -401,7 +401,7 @@ async function resolveCategoryTabs(
   const childrenByParent = new Map<string, RawCategory[]>();
   for (const child of childrenResult.docs as RawCategory[]) {
     const parentId =
-      typeof child.parent === "object"
+      child.parent && typeof child.parent === "object"
         ? (child.parent as { id?: string }).id
         : child.parent;
     if (!parentId) continue;

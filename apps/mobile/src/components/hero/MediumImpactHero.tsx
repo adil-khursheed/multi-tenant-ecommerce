@@ -7,7 +7,6 @@ import { RichText } from "@/components/rich-text/RichText";
 import {
   horizontalScale,
   moderateScale,
-  width as SCREEN_WIDTH,
   verticalScale,
 } from "@/constants/responsive";
 import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
@@ -62,7 +61,7 @@ export function MediumImpactHero({
       {mediaUrl && (
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: mediaUrl }}
+            source={{ uri: `${process.env.EXPO_PUBLIC_API_URL}${mediaUrl}` }}
             style={styles.image}
             contentFit="cover"
             transition={300}

@@ -79,7 +79,9 @@ export function HighImpactHero({
         {displayUrl && (
           <Animated.View style={[styles.imageWrapper, animatedImageStyle]}>
             <Image
-              source={{ uri: displayUrl }}
+              source={{
+                uri: `${process.env.EXPO_PUBLIC_API_URL}${displayUrl}`,
+              }}
               style={styles.image}
               contentFit="cover"
               transition={300}

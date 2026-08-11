@@ -26,7 +26,7 @@ export function resolveMediaUrl(media: MediaReference): string | null {
   if (!url) return null;
   // Media can be stored as an absolute URL (e.g. Vercel Blob) or relative path.
   if (/^https?:\/\//.test(url)) return url;
-  return `${getServerUrl()}${url}`;
+  return `${url}`;
 }
 
 export function resolveMedia(media: MediaReference): {
