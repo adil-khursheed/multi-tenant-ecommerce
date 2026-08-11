@@ -1,70 +1,12 @@
-import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
 
+import { Skeleton } from "@/components/blocks/skeletons/Skeleton";
 import { horizontalScale, verticalScale } from "@/constants/responsive";
-import { colors, radii, spacing } from "@/constants/theme";
+import { colors, spacing } from "@/constants/theme";
 
 type ProductCardSkeletonProps = {
   viewMode?: "grid" | "list";
 };
-
-function SkeletonRect({
-  width,
-  height,
-  style,
-}: {
-  width: number | string;
-  height: number;
-  style?: object;
-}) {
-  const opacity = useSharedValue(0.4);
-
-  useEffect(() => {
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(1, {
-          duration: 800,
-          easing: Easing.inOut(Easing.ease),
-        }),
-        withDelay(
-          200,
-          withTiming(0.4, {
-            duration: 800,
-            easing: Easing.inOut(Easing.ease),
-          }),
-        ),
-      ),
-      -1,
-    );
-  }, [opacity]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        {
-          width,
-          height,
-          backgroundColor: colors.muted,
-        },
-        animatedStyle,
-        style,
-      ]}
-    />
-  );
-}
 
 export function ProductCardSkeleton({
   viewMode = "grid",
@@ -72,41 +14,48 @@ export function ProductCardSkeleton({
   if (viewMode === "list") {
     return (
       <View style={styles.listContainer}>
-        <SkeletonRect
+        <Skeleton
           width={horizontalScale(120)}
           height={verticalScale(160)}
+          borderRadius={0}
           style={styles.listImage}
         />
         <View style={styles.listContent}>
           <View style={styles.listBadges}>
-            <SkeletonRect
+            <Skeleton
               width={horizontalScale(50)}
               height={verticalScale(14)}
+              borderRadius={4}
               style={styles.listBadge}
             />
-            <SkeletonRect
+            <Skeleton
               width={horizontalScale(40)}
               height={verticalScale(10)}
+              borderRadius={4}
             />
           </View>
-          <SkeletonRect
+          <Skeleton
             width="85%"
             height={verticalScale(18)}
+            borderRadius={9999}
             style={styles.content}
           />
-          <SkeletonRect
+          <Skeleton
             width="60%"
             height={verticalScale(12)}
+            borderRadius={9999}
             style={styles.content}
           />
-          <SkeletonRect
+          <Skeleton
             width="35%"
             height={verticalScale(10)}
+            borderRadius={9999}
             style={styles.content}
           />
-          <SkeletonRect
+          <Skeleton
             width="45%"
             height={verticalScale(14)}
+            borderRadius={9999}
             style={styles.content}
           />
         </View>
@@ -116,26 +65,30 @@ export function ProductCardSkeleton({
 
   return (
     <View style={styles.gridContainer}>
-      <SkeletonRect width="100%" height={verticalScale(170)} />
+      <Skeleton width="100%" height={verticalScale(170)} borderRadius={0} />
       <View style={styles.gridContentWrapper}>
-        <SkeletonRect
+        <Skeleton
           width="35%"
           height={verticalScale(8)}
+          borderRadius={9999}
           style={styles.content}
         />
-        <SkeletonRect
+        <Skeleton
           width="90%"
           height={verticalScale(14)}
+          borderRadius={9999}
           style={styles.content}
         />
-        <SkeletonRect
+        <Skeleton
           width="35%"
           height={verticalScale(10)}
+          borderRadius={9999}
           style={styles.content}
         />
-        <SkeletonRect
+        <Skeleton
           width="50%"
           height={verticalScale(14)}
+          borderRadius={9999}
           style={styles.content}
         />
       </View>
@@ -153,7 +106,7 @@ const styles = StyleSheet.create({
     gap: verticalScale(spacing[1]),
   },
   content: {
-    borderRadius: radii.full,
+    borderRadius: 9999,
   },
   listContainer: {
     flexDirection: "row",

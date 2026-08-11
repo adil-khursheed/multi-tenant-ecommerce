@@ -1,14 +1,10 @@
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useQuery } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 
+import { RenderBlocks } from "@/components/blocks/RenderBlocks";
+import { HomeSkeleton } from "@/components/blocks/skeletons/HomeSkeleton";
 import { RenderHero } from "@/components/hero/RenderHero";
 import { colors, typography } from "@/constants/theme";
 import { useTRPC } from "@/utils/api";
@@ -17,7 +13,7 @@ export default function Home() {
   const trpc = useTRPC();
 
   const { data, isLoading } = useQuery(
-    trpc.pages.getHero.queryOptions({ slug: "home" }),
+    trpc.pages.getPageBySlug.queryOptions({ slug: "home" }),
   );
 
   return (
@@ -28,11 +24,12 @@ export default function Home() {
     >
       <StatusBar style="dark" />
       {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <HomeSkeleton />
       ) : data ? (
-        <RenderHero hero={data as any} />
+        <>
+          <RenderHero hero={data.hero as never} />
+          <RenderBlocks blocks={data.layout as never} />
+        </>
       ) : (
         <View style={styles.placeholder}>
           <Text style={typography.heading2}>Home</Text>
@@ -48,12 +45,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 300,
   },
   placeholder: {
     flex: 1,

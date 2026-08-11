@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { baseProcedure } from "../trpc";
+import { fetchCardProducts } from "../utils/productCards";
+import { buildProductWhere, type ProductFilter } from "../utils/productQuery";
 
 export const blocksRouter = {
   getFiveItemGrid: baseProcedure
@@ -17,41 +19,13 @@ export const blocksRouter = {
       const { payload } = ctx;
       const { filter, categoryIds, limit } = input;
 
-      const andConditions: any[] = [];
-
-      if (filter && filter !== "none") {
-        let flagKey = "";
-        switch (filter) {
-          case "featured":
-            flagKey = "flags.isFeatured";
-            break;
-          case "newArrivals":
-            flagKey = "flags.isNewArrival";
-            break;
-          case "bestsellers":
-            flagKey = "flags.isBestseller";
-            break;
-          case "flashSale":
-            flagKey = "isFlashSale";
-            break;
-        }
-        if (flagKey) {
-          andConditions.push({ [flagKey]: { equals: true } });
-        }
-      }
-
-      if (categoryIds && categoryIds.length > 0) {
-        andConditions.push({ categories: { in: categoryIds } });
-      }
-
-      const where =
-        andConditions.length > 0 ? { and: andConditions } : undefined;
-
-      const result = await payload.find({
-        collection: "products",
-        where,
+      const result = await fetchCardProducts(payload, {
         limit,
-        depth: 1, // To populate image/categories
+        where: buildProductWhere({
+          filter: filter as ProductFilter,
+          categoryIds,
+        }),
+        ...(filter && filter !== "none" ? { sort: "-createdAt" } : {}),
       });
 
       return result.docs;
