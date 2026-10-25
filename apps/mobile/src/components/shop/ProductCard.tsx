@@ -10,7 +10,14 @@ import {
   moderateScale,
   verticalScale,
 } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import {
+  colors,
+  fonts,
+  fontSizes,
+  radii,
+  shadows,
+  spacing,
+} from "@/constants/theme";
 import { useCurrency } from "@/providers/Currency";
 
 export type ShopProduct = {
@@ -153,7 +160,6 @@ function getRibbonStyle(ribbon: string) {
 
 export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const router = useRouter();
-  const { formatPrice } = useCurrency();
 
   const {
     title,
@@ -279,7 +285,16 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   return (
     <Animated.View style={styles.gridContainer}>
       <View>
-        <Pressable onPress={navigateToProduct}>
+        <Pressable
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={({ pressed }) => [
+            styles.gridImageShadow,
+            pressed && styles.gridImageShadowPressed,
+          ]}
+          onPress={navigateToProduct}
+        >
           <View style={styles.gridImageContainer}>
             {imageUrl ? (
               <Image
@@ -312,7 +327,11 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         />
       </View>
 
-      <View style={styles.gridContent}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={navigateToProduct}
+        style={styles.gridContent}
+      >
         {categoryName && (
           <Text style={styles.categoryLabel}>{categoryName}</Text>
         )}
@@ -336,7 +355,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           minEffectivePrice={minEffectivePrice}
           maxEffectivePrice={maxEffectivePrice}
         />
-      </View>
+      </Pressable>
     </Animated.View>
   );
 }
@@ -346,10 +365,18 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: verticalScale(spacing[6]),
   },
+  gridImageShadow: {
+    ...shadows.sm,
+    backgroundColor: colors.card,
+  },
+  gridImageShadowPressed: {
+    ...shadows.md,
+    backgroundColor: colors.card,
+  },
   gridImageContainer: {
     position: "relative",
     aspectRatio: 3 / 4,
-    backgroundColor: colors.muted,
+    backgroundColor: colors.secondary,
     overflow: "hidden",
   },
   gridImage: {
@@ -370,7 +397,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: horizontalScale(spacing[2]),
     right: horizontalScale(spacing[2]),
-    backgroundColor: `${colors.background}CC`,
+    backgroundColor: `${colors.background}E6`,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: `${colors.border}B3`,
     borderRadius: radii.full,
     padding: horizontalScale(spacing[1]),
   },
@@ -459,11 +488,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
   categoryLabel: {
-    fontFamily: fonts.sans.regular,
+    fontFamily: fonts.sans.medium,
     fontSize: moderateScale(10),
     color: colors.accentForeground,
     textTransform: "uppercase",
-    letterSpacing: 0.1,
+    letterSpacing: 1,
   },
   ratingRow: {
     flexDirection: "row",
@@ -491,7 +520,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(spacing[1]),
   },
   price: {
-    fontFamily: fonts.sans.medium,
+    fontFamily: fonts.sans.semiBold,
     fontSize: moderateScale(fontSizes.sm),
     color: colors.primary,
   },

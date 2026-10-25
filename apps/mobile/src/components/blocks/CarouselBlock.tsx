@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
 
 import { width as SCREEN_WIDTH } from "@/constants/responsive";
-
 import { BlockWrapper } from "./BlockWrapper";
 import { CategoryCard } from "./tiles/CategoryCard";
 import { CollectionCard } from "./tiles/CollectionCard";
@@ -19,6 +19,7 @@ const AUTOPLAY_INTERVAL = 4000;
 
 export function CarouselBlock({ heading, items }: CarouselBlockProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const reducedMotion = useReducedMotion();
 
   const handleSnap = useCallback((index: number) => {
     setCurrentIndex(index);
@@ -36,7 +37,7 @@ export function CarouselBlock({ heading, items }: CarouselBlockProps) {
           height={slideWidth}
           data={items}
           loop
-          autoPlay
+          autoPlay={!reducedMotion}
           autoPlayInterval={AUTOPLAY_INTERVAL}
           snapEnabled
           onSnapToItem={handleSnap}
@@ -58,7 +59,11 @@ export function CarouselBlock({ heading, items }: CarouselBlockProps) {
             if (item.type === "category") {
               return (
                 <View style={styles.slide}>
-                  <CategoryCard slug={item.slug} name={item.name} image={item.image} />
+                  <CategoryCard
+                    slug={item.slug}
+                    name={item.name}
+                    image={item.image}
+                  />
                 </View>
               );
             }

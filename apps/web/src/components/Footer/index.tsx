@@ -18,11 +18,14 @@ export async function Footer() {
   const copyrightName = COMPANY_NAME || SITE_NAME || "";
 
   return (
-    <footer className="text-sm text-neutral-500 dark:text-neutral-400">
-      <div className="border-t border-neutral-200 py-12 dark:border-neutral-700">
+    <footer className="text-sm text-muted-foreground">
+      <div className="border-t border-border py-12">
         <div className="container grid gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:gap-16">
           <div>
-            <Link className="inline-block" href="/">
+            <Link
+              className="inline-block opacity-90 transition-opacity duration-300 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              href="/"
+            >
               {logo && typeof logo === "object" && "url" in logo ? (
                 <Media
                   imgClassName="size-16"
@@ -38,7 +41,7 @@ export async function Footer() {
           {columns.length > 0 && <FooterMenu columns={columns} />}
         </div>
 
-        <div className="container mx-auto mt-10 flex w-full flex-col items-center gap-1 border-t border-neutral-200 pt-6 dark:border-neutral-700 md:flex-row md:gap-0">
+        <div className="container mx-auto mt-10 flex w-full flex-col items-center gap-1 border-t border-border pt-6 md:flex-row md:gap-0">
           <p>
             &copy; {currentYear} {copyrightName}
             {copyrightName.length && !copyrightName.endsWith(".")
@@ -48,7 +51,7 @@ export async function Footer() {
           </p>
           <p className="md:ml-auto">
             <a
-              className="text-black dark:text-white"
+              className="text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
               href="https://codezora.com"
             >
               Crafted by Codezora

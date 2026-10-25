@@ -4,17 +4,22 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  ArrowUpRight,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   useCarousel,
 } from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
 import type { Media } from "@/payload-types";
+import { cn } from "@/utilities/cn";
 
 export type StripItem = {
   slug: string;
@@ -22,27 +27,68 @@ export type StripItem = {
   coverImage: Media | null;
 };
 
-const StripCard: React.FC<{ item: StripItem }> = ({ item }) => (
-  <Link
-    className="group relative block aspect-3/4 w-full overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-black"
-    href={`/collections/${item.slug}`}
-  >
-    {item.coverImage?.url && (
-      <Image
-        fill
-        src={item.coverImage.url}
-        alt={item.coverImage.alt ?? item.name}
-        className="object-cover transition duration-300 ease-out group-hover:scale-105"
-        sizes="(max-width: 640px) 68vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+const StripCard: React.FC<{ item: StripItem }> = ({ item }) => {
+  const hasImage = Boolean(item.coverImage?.url);
+
+  return (
+    <Link
+      className="group relative flex aspect-3/4 w-full flex-col justify-end overflow-hidden border border-border/70 bg-secondary outline-offset-4 transition-colors duration-300 hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-ring"
+      href={`/collections/${item.slug}`}
+    >
+      {hasImage ? (
+        <Image
+          fill
+          src={item.coverImage!.url!}
+          alt={item.coverImage?.alt ?? item.name}
+          className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+          sizes="(max-width: 640px) 68vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+        />
+      ) : (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-5 right-1 select-none font-serif text-[8rem] leading-none text-primary/10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:text-primary/20 sm:text-[10rem]"
+        >
+          {item.name.charAt(0)}
+        </span>
+      )}
+
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0",
+          hasImage
+            ? "bg-linear-to-t from-black/80 via-black/10 to-transparent"
+            : "bg-linear-to-t from-secondary via-secondary/30 to-transparent",
+        )}
       />
-    )}
-    <div className="absolute inset-0 flex items-end bg-linear-to-b from-transparent via-transparent to-black/60 p-4">
-      <span className="text-base font-semibold uppercase tracking-wide text-white drop-shadow-sm md:text-lg">
-        {item.name}
-      </span>
-    </div>
-  </Link>
-);
+
+      <div className="relative z-10 flex items-end justify-between gap-3 p-4">
+        <span
+          className={cn(
+            "max-w-[15ch] font-serif text-[22px] leading-[0.98] tracking-[-0.01em]",
+            hasImage ? "text-white" : "text-foreground",
+          )}
+        >
+          {item.name}
+        </span>
+        <span
+          className={cn(
+            "mb-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
+            hasImage
+              ? "border-white/40 text-white/90 group-hover:border-white group-hover:bg-white group-hover:text-black"
+              : "border-border text-primary group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground",
+          )}
+        >
+          <HugeiconsIcon
+            icon={ArrowUpRight}
+            size={13}
+            strokeWidth={2}
+            className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          />
+        </span>
+      </div>
+    </Link>
+  );
+};
 
 const StripArrows: React.FC = () => {
   const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } =
@@ -54,7 +100,7 @@ const StripArrows: React.FC = () => {
         variant="outline"
         size="icon-sm"
         aria-label="Previous collections"
-        className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full md:inline-flex"
+        className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border-border/80 bg-background/90 text-foreground shadow-2xs backdrop-blur-md transition-colors duration-300 hover:bg-foreground hover:text-background disabled:opacity-30 md:inline-flex"
         disabled={!canScrollPrev}
         onClick={scrollPrev}
       >
@@ -64,7 +110,7 @@ const StripArrows: React.FC = () => {
         variant="outline"
         size="icon-sm"
         aria-label="Next collections"
-        className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full md:inline-flex"
+        className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border-border/80 bg-background/90 text-foreground shadow-2xs backdrop-blur-md transition-colors duration-300 hover:bg-foreground hover:text-background disabled:opacity-30 md:inline-flex"
         disabled={!canScrollNext}
         onClick={scrollNext}
       >

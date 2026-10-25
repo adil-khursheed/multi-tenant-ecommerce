@@ -49,3 +49,10 @@ public/media
 
 # Build outputs
 dist/
+
+# Agents
+.agent
+.opencode
+.agents
+.codex
+.impeccable

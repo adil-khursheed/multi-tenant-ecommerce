@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import {
   Cash02Icon,
@@ -47,13 +47,21 @@ const items = [
 
 const TrustBar = () => {
   return (
-    <div className="container">
-      <InfiniteMovingCards items={items} speed="normal" />
+    <div className="border-y border-border/70">
+      <div className="container">
+        <InfiniteMovingCards items={items} speed="normal" />
+      </div>
     </div>
   );
 };
 
 export default TrustBar;
+
+type MarqueeItem = {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+};
 
 export function InfiniteMovingCards({
   items,
@@ -62,91 +70,59 @@ export function InfiniteMovingCards({
   pauseOnHover = true,
   className,
 }: {
-  items: {
-    id: string;
-    label: string;
-    icon: React.ReactNode;
-  }[];
+  items: MarqueeItem[];
   direction?: "left" | "right";
   speed?: "fast" | "normal" | "slow";
   pauseOnHover?: boolean;
   className?: string;
 }) {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const scrollerRef = React.useRef<HTMLUListElement>(null);
+  const duration =
+    speed === "fast" ? "20s" : speed === "normal" ? "40s" : "80s";
 
-  useEffect(() => {
-    addAnimation();
-  }, []);
-  const [start, setStart] = useState(false);
-  function addAnimation() {
-    if (containerRef.current && scrollerRef.current) {
-      const scrollerContent = Array.from(scrollerRef.current.children);
-
-      scrollerContent.forEach((item) => {
-        const duplicatedItem = item.cloneNode(true);
-        if (scrollerRef.current) {
-          scrollerRef.current.appendChild(duplicatedItem);
-        }
-      });
-
-      getDirection();
-      getSpeed();
-      setStart(true);
-    }
-  }
-  const getDirection = () => {
-    if (containerRef.current) {
-      if (direction === "left") {
-        containerRef.current.style.setProperty(
-          "--animation-direction",
-          "forwards",
-        );
-      } else {
-        containerRef.current.style.setProperty(
-          "--animation-direction",
-          "reverse",
-        );
-      }
-    }
-  };
-  const getSpeed = () => {
-    if (containerRef.current) {
-      if (speed === "fast") {
-        containerRef.current.style.setProperty("--animation-duration", "20s");
-      } else if (speed === "normal") {
-        containerRef.current.style.setProperty("--animation-duration", "40s");
-      } else {
-        containerRef.current.style.setProperty("--animation-duration", "80s");
-      }
-    }
-  };
   return (
     <div
-      ref={containerRef}
       className={cn(
-        "scroller relative z-20 overflow-hidden mask-[linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]",
+        "group/marquee relative z-20 overflow-hidden mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]",
         className,
       )}
     >
       <ul
-        ref={scrollerRef}
         className={cn(
-          "flex w-max min-w-full shrink-0 flex-nowrap gap-4 py-4",
-          start && "animate-scroll",
-          pauseOnHover && "hover:paused",
+          "flex w-max min-w-full shrink-0 flex-nowrap items-center py-1 animate-scroll",
+          pauseOnHover && "hover:[animation-play-state:paused]",
+          "motion-reduce:w-full motion-reduce:min-w-0 motion-reduce:animate-none motion-reduce:flex-wrap motion-reduce:justify-center",
         )}
+        style={
+          {
+            "--animation-duration": duration,
+            "--animation-direction":
+              direction === "left" ? "forwards" : "reverse",
+          } as React.CSSProperties
+        }
       >
         {items.map((item) => (
-          <li
-            className="relative w-fit max-w-full shrink-0 flex items-center gap-3 bg-transparent px-8 py-4 text-sm font-medium uppercase tracking-widest"
-            key={item.id}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </li>
+          <MarqueeRow key={item.id} item={item} />
+        ))}
+        {items.map((item) => (
+          <MarqueeRow key={`${item.id}-clone`} item={item} clone />
         ))}
       </ul>
     </div>
+  );
+}
+
+function MarqueeRow({ item, clone }: { item: MarqueeItem; clone?: boolean }) {
+  return (
+    <li
+      aria-hidden={clone || undefined}
+      className={cn(
+        "relative flex w-fit max-w-full shrink-0 items-center gap-2.5 px-6 py-4 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground",
+        clone && "motion-reduce:hidden",
+      )}
+    >
+      <span className="[&_svg]:size-4">{item.icon}</span>
+      <span className="whitespace-nowrap">{item.label}</span>
+      <span aria-hidden className="ml-6 h-3 w-px bg-border" />
+    </li>
   );
 }

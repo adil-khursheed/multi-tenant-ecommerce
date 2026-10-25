@@ -2,12 +2,15 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { RichText } from "@/components/rich-text/RichText";
-import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
-
-import type { CategoryTab, CustomTab } from "./types";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import { colors, fonts, radii, spacing } from "@/constants/theme";
 import { BlockWrapper } from "./BlockWrapper";
 import { CategoryCard } from "./tiles/CategoryCard";
+import type { CategoryTab, CustomTab } from "./types";
 
 type TabsBlockProps = {
   heading?: unknown;
@@ -39,6 +42,7 @@ export function TabsBlock({
     <BlockWrapper heading={heading}>
       <ScrollView
         horizontal
+        accessibilityRole="tablist"
         showsHorizontalScrollIndicator={false}
         style={styles.tabBar}
         contentContainerStyle={styles.tabBarContent}
@@ -48,8 +52,15 @@ export function TabsBlock({
           return (
             <Pressable
               key={`${label}-${index}`}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={label}
               onPress={() => setActiveIndex(index)}
-              style={[styles.chip, active && styles.chipActive]}
+              style={({ pressed }) => [
+                styles.chip,
+                active && styles.chipActive,
+                pressed && styles.chipPressed,
+              ]}
             >
               <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {label}
@@ -68,7 +79,6 @@ export function TabsBlock({
                   slug={child.slug}
                   name={child.name}
                   image={child.image}
-                  height={Math.round(200)}
                 />
               </View>
             ))}
@@ -98,20 +108,24 @@ const styles = StyleSheet.create({
     borderColor: colors.input,
     borderRadius: radii.none,
     paddingHorizontal: horizontalScale(spacing[4]),
-    paddingVertical: verticalScale(spacing[2]),
+    paddingVertical: verticalScale(spacing[2.5]),
   },
   chipActive: {
     borderColor: colors.primary,
     backgroundColor: colors.primary,
   },
+  chipPressed: {
+    opacity: 0.8,
+  },
   chipText: {
     fontFamily: fonts.sans.medium,
-    fontSize: moderateScale(fontSizes.sm),
-    textTransform: "capitalize",
-    color: colors.foreground,
+    fontSize: moderateScale(11),
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    color: colors.mutedForeground,
   },
   chipTextActive: {
-    color: colors.white,
+    color: colors.primaryForeground,
   },
   content: {
     width: "100%",

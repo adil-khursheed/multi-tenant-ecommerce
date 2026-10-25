@@ -23,8 +23,14 @@ const signals = [
 export function TrustSignals() {
   return (
     <View style={styles.container}>
-      {signals.map((signal) => (
-        <View key={signal.label} style={styles.item}>
+      {signals.map((signal, index) => (
+        <View
+          key={signal.label}
+          style={[
+            styles.item,
+            index < signals.length - 1 && styles.itemDivider,
+          ]}
+        >
           <HugeiconsIcon
             icon={signal.icon}
             size={moderateScale(18)}
@@ -40,8 +46,10 @@ export function TrustSignals() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    gap: horizontalScale(spacing[2]),
     marginTop: verticalScale(spacing[4]),
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
   item: {
     flex: 1,
@@ -49,14 +57,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: verticalScale(spacing[1.5]),
     paddingVertical: verticalScale(spacing[3]),
-    backgroundColor: `${colors.muted}80`,
+    paddingHorizontal: horizontalScale(spacing[1]),
+  },
+  itemDivider: {
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderRightColor: colors.border,
   },
   label: {
     fontFamily: fonts.sans.medium,
     fontSize: moderateScale(9),
-    color: colors.foreground,
+    color: colors.mutedForeground,
     textTransform: "uppercase",
-    letterSpacing: 0.08,
+    letterSpacing: 0.8,
     textAlign: "center",
   },
 });

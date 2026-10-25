@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -53,9 +54,15 @@ export function HighImpactHero({
   featuredProduct,
 }: HighImpactHeroProps) {
   const router = useRouter();
+  const reducedMotion = useReducedMotion();
   const scale = useSharedValue(1);
 
   useEffect(() => {
+    if (reducedMotion) {
+      scale.value = 1;
+      return;
+    }
+
     scale.value = withRepeat(
       withTiming(1.04, {
         duration: 4000,
@@ -64,7 +71,7 @@ export function HighImpactHero({
       -1,
       true,
     );
-  }, [scale]);
+  }, [scale, reducedMotion]);
 
   const animatedImageStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

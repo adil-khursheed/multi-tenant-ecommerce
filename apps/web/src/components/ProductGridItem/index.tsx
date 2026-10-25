@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 
 import clsx from "clsx";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 
 import { Media } from "@/components/Media";
 import { Price } from "@/components/Price";
@@ -22,8 +22,6 @@ export const ProductGridItem: React.FC<Props> = ({
   product,
   viewMode = "grid",
 }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
-
   const {
     gallery,
     priceInINR,
@@ -140,20 +138,15 @@ export const ProductGridItem: React.FC<Props> = ({
   }
 
   return (
-    <motion.div
-      layout
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="group relative"
-    >
+    <motion.div layout className="group relative">
       <Link
         href={`/products/${product.slug}`}
-        className="block relative aspect-4/5 bg-secondary overflow-hidden"
+        className="relative block aspect-4/5 overflow-hidden bg-secondary shadow-2xs transition-shadow duration-300 group-hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         {image && (
           <Media
-            className="w-full h-full object-cover transition duration-300 ease-out group-hover:scale-[1.03]"
-            imgClassName="w-full h-full object-cover"
+            className="h-full w-full object-cover"
+            imgClassName="h-full w-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
             resource={image}
           />
         )}
@@ -172,32 +165,18 @@ export const ProductGridItem: React.FC<Props> = ({
             {ribbon}
           </div>
         )}
-
-        <AnimatePresence>
-          {isHovered && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 z-10 pointer-events-none"
-            >
-              <div className="absolute top-3 left-3 flex flex-col gap-2 pointer-events-auto">
-                {typeof tenant === "object" && tenant?.storeName && (
-                  <span className="font-sans text-[9px] uppercase tracking-widest text-foreground bg-card/90 backdrop-blur-md border border-border/40 px-2.5 py-1">
-                    {tenant.storeName}
-                  </span>
-                )}
-              </div>
-
-              <WishlistButton
-                productId={product.id!}
-                className="absolute top-3 right-3 size-8 flex items-center justify-center bg-card/90 rounded-full border border-border/40 hover:bg-card transition-colors pointer-events-auto"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </Link>
+
+      {typeof tenant === "object" && tenant?.storeName && (
+        <span className="pointer-events-none absolute left-3 top-3 z-20 max-w-[70%] -translate-y-1 truncate border border-border/40 bg-card/90 px-2.5 py-1 font-sans text-[9px] uppercase tracking-widest text-foreground opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+          {tenant.storeName}
+        </span>
+      )}
+
+      <WishlistButton
+        productId={product.id!}
+        className="absolute right-3 top-3 z-20 flex size-8 items-center justify-center rounded-full border border-border/40 bg-card/90 pointer-events-auto opacity-100 transition-opacity duration-300 hover:bg-card md:pointer-events-none md:opacity-0 md:group-hover:pointer-events-auto md:group-hover:opacity-100 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100"
+      />
 
       <div className="mt-4">
         {categories?.[0] && typeof categories[0] === "object" && (
@@ -206,7 +185,7 @@ export const ProductGridItem: React.FC<Props> = ({
           </span>
         )}
         <Link href={`/products/${product.slug}`}>
-          <h3 className="font-sans font-medium text-[14px] text-foreground line-clamp-2 mb-1 hover:underline">
+          <h3 className="font-sans font-medium text-[14px] text-foreground line-clamp-2 mb-1 decoration-primary/40 underline-offset-4 hover:underline">
             {title}
           </h3>
         </Link>

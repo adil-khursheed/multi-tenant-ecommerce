@@ -11,8 +11,6 @@ type BlockWrapperProps = {
 };
 
 export function BlockWrapper({ heading, children, style }: BlockWrapperProps) {
-  console.log(JSON.stringify(heading, null, 2));
-
   return (
     <View style={[styles.container, style]}>
       {heading != null && (

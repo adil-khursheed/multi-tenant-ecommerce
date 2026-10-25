@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 
 import { horizontalScale, width as SCREEN_WIDTH } from "@/constants/responsive";
 import { spacing } from "@/constants/theme";
@@ -20,7 +20,7 @@ export function CollectionsStripBlock({
   const cardWidth = Math.round(SCREEN_WIDTH * 0.68);
 
   return (
-    <BlockWrapper heading={heading} style={styles.wrapper}>
+    <BlockWrapper heading={heading}>
       <FlatList
         horizontal
         data={items}
@@ -30,14 +30,12 @@ export function CollectionsStripBlock({
         snapToInterval={cardWidth + horizontalScale(spacing[4])}
         decelerationRate="fast"
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <CollectionCard
-              slug={item.slug}
-              name={item.name}
-              coverImage={item.coverImage}
-              width={cardWidth}
-            />
-          </View>
+          <CollectionCard
+            slug={item.slug}
+            name={item.name}
+            coverImage={item.coverImage}
+            width={cardWidth}
+          />
         )}
       />
     </BlockWrapper>
@@ -45,12 +43,8 @@ export function CollectionsStripBlock({
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    // paddingHorizontal: 0,
-  },
   content: {
     paddingHorizontal: horizontalScale(spacing[5]),
     gap: horizontalScale(spacing[4]),
   },
-  card: {},
 });

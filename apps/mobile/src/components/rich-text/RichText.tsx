@@ -183,7 +183,10 @@ function HeadingRenderer({
 // ─── Text Leaf ───────────────────────────────────────────────────────────────
 
 function TextLeafRenderer({ node }: { node: TextNode }) {
-  const textStyle = getTextStyle(node.format);
+  const textStyle = {
+    ...getTextStyle(node.format),
+    ...getTextStateStyle(node),
+  };
 
   if (node.format && node.format & CODE) {
     return <Text style={[textStyle, styles.inlineCode]}>{node.text}</Text>;
@@ -299,6 +302,56 @@ function FallbackRenderer({
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+// Mirrors apps/web/src/fields/textStateConfig.ts with native type values.
+const textStateStyles: Record<string, Record<string, object>> = {
+  letterSpacing: {
+    tight: { letterSpacing: 0.5 },
+    normal: { letterSpacing: 1 },
+    wide: { letterSpacing: 1.5 },
+    wider: { letterSpacing: 2 },
+    widest: { letterSpacing: 2.5 },
+  },
+  fontSize: {
+    "x-small": { fontSize: moderateScale(12) },
+    small: { fontSize: moderateScale(14) },
+    large: { fontSize: moderateScale(16) },
+    xlarge: { fontSize: moderateScale(18) },
+    xxlarge: { fontSize: moderateScale(20) },
+    heroHeading: {
+      fontSize: moderateScale(36),
+      lineHeight: moderateScale(36 * 1.15),
+    },
+    subHeading: {
+      fontSize: moderateScale(30),
+      lineHeight: moderateScale(30 * 1.2),
+    },
+  },
+  fontFamily: {
+    sans: { fontFamily: fonts.sans.regular },
+    serif: { fontFamily: fonts.serif.regular },
+    mono: {
+      fontFamily: Platform.select({ ios: "Menlo", android: "monospace" }),
+    },
+  },
+  color: {
+    primary: { color: colors.primary },
+    secondary: { color: colors.accent },
+    foreground: { color: colors.foreground },
+    background: { color: colors.background },
+  },
+};
+
+function getTextStateStyle(node: TextNode): object {
+  const nodeState = node["$"] as Record<string, string> | undefined;
+  if (!nodeState) return {};
+
+  const style: Record<string, unknown> = {};
+  for (const [stateKey, stateValue] of Object.entries(nodeState)) {
+    Object.assign(style, textStateStyles[stateKey]?.[stateValue] ?? {});
+  }
+  return style;
+}
 
 function getTextStyle(format: number | undefined): object {
   if (!format) return {};

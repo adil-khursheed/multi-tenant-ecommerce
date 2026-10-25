@@ -226,10 +226,20 @@
   /* Infinite moving cards */
   --animate-scroll: scroll var(--animation-duration, 40s)
     var(--animation-direction, forwards) linear infinite;
+  --animate-hero-progress: hero-progress 5s linear forwards;
 
   @keyframes scroll {
     to {
-      transform: translate(calc(-50% - 0.5rem));
+      transform: translate(-50%);
+    }
+  }
+
+  @keyframes hero-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
     }
   }
 }
@@ -249,18 +259,33 @@
     @apply border-border outline-ring/50;
   }
 
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 22%, transparent);
+    color: var(--foreground);
+  }
+
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 20%, transparent)
+      transparent;
+    scrollbar-width: thin;
+  }
+
   body {
     @apply bg-background text-foreground flex min-h-screen flex-col;
     letter-spacing: var(--tracking-normal);
   }
 
-  html {
-    @apply font-sans;
-  }
-
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 }
 

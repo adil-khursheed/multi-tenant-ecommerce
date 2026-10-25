@@ -13,7 +13,7 @@ export function FooterMenu({ columns }: Props) {
       {columns.map((column, columnIndex) => (
         <div key={column.id ?? columnIndex}>
           {column.title && (
-            <h4 className="text-xs font-semibold uppercase tracking-widest text-neutral-900 dark:text-white">
+            <h4 className="text-[10px] font-medium uppercase tracking-[0.14em] text-foreground">
               {column.title}
             </h4>
           )}
@@ -23,7 +23,7 @@ export function FooterMenu({ columns }: Props) {
                 <li key={item.id ?? linkIndex}>
                   <CMSLink
                     appearance="link"
-                    className="text-neutral-500 hover:text-primary dark:text-neutral-400 dark:hover:text-primary"
+                    className="text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
                     {...item.link}
                   />
                 </li>

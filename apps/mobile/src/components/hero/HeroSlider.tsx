@@ -1,10 +1,18 @@
 import { useCallback, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import Carousel, {
   type ICarouselInstance,
 } from "react-native-reanimated-carousel";
 
+import {
+  ArrowRight01Icon,
+  PauseIcon,
+  PlayIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
 import {
@@ -32,7 +40,9 @@ const AUTOPLAY_INTERVAL = 4000;
 
 export function HeroSlider({ slides }: HeroSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [autoplayPaused, setAutoplayPaused] = useState(false);
   const carouselRef = useRef<ICarouselInstance>(null);
+  const reducedMotion = useReducedMotion();
   const router = useRouter();
 
   const handleSnap = useCallback((index: number) => {
@@ -44,6 +54,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   if (validSlides.length === 0) return null;
 
   const slideHeight = SCREEN_WIDTH * (5 / 3);
+  const autoPlay = !reducedMotion && !autoplayPaused;
 
   return (
     <View style={styles.container}>
@@ -54,17 +65,21 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           width={SCREEN_WIDTH}
           height={slideHeight}
           loop
-          autoPlay
+          autoPlay={autoPlay}
           autoPlayInterval={AUTOPLAY_INTERVAL}
           pagingEnabled
           snapEnabled
           onSnapToItem={handleSnap}
-          renderItem={({ item }) => {
+          renderItem={({ item, index }) => {
             const imageUrl = `${process.env.EXPO_PUBLIC_API_URL}${item.mediaUrl}`;
 
             return (
               <Pressable
                 style={styles.slide}
+                accessibilityRole={item.linkHref ? "button" : "image"}
+                accessibilityLabel={
+                  item.heading ?? `Featured collection ${index + 1}`
+                }
                 onPress={() => {
                   if (item.linkHref) {
                     if (item.linkHref.startsWith("http")) {
@@ -84,6 +99,17 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                   />
                 )}
 
+                <LinearGradient
+                  pointerEvents="none"
+                  colors={[
+                    "transparent",
+                    "rgba(0,0,0,0.18)",
+                    "rgba(0,0,0,0.82)",
+                  ]}
+                  locations={[0.3, 0.62, 1]}
+                  style={StyleSheet.absoluteFill}
+                />
+
                 {/* Text overlay — bottom-left */}
                 <View style={styles.textOverlay}>
                   {item.heading && (
@@ -95,6 +121,12 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                   {item.linkLabel && (
                     <View style={styles.ctaBadge}>
                       <Text style={styles.ctaText}>{item.linkLabel}</Text>
+                      <HugeiconsIcon
+                        icon={ArrowRight01Icon}
+                        size={moderateScale(12)}
+                        strokeWidth={2}
+                        color={colors.foreground}
+                      />
                     </View>
                   )}
                 </View>
@@ -103,8 +135,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           }}
         />
 
-        {/* Pagination dots */}
-        {validSlides.length > 1 && (
+        <View pointerEvents="box-none" style={styles.controls}>
           <View style={styles.pagination}>
             {validSlides.map((_, i) => (
               <View
@@ -113,7 +144,36 @@ export function HeroSlider({ slides }: HeroSliderProps) {
               />
             ))}
           </View>
-        )}
+
+          <View style={styles.controlsRight}>
+            <Text style={styles.counter}>
+              {String(currentIndex + 1).padStart(2, "0")}
+              <Text style={styles.counterMuted}>
+                {" / "}
+                {String(validSlides.length).padStart(2, "0")}
+              </Text>
+            </Text>
+
+            {!reducedMotion && validSlides.length > 1 && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  autoPlay ? "Pause slideshow" : "Play slideshow"
+                }
+                onPress={() => setAutoplayPaused((paused) => !paused)}
+                hitSlop={8}
+                style={styles.playButton}
+              >
+                <HugeiconsIcon
+                  icon={autoPlay ? PauseIcon : PlayIcon}
+                  size={moderateScale(12)}
+                  strokeWidth={2}
+                  color={colors.white}
+                />
+              </Pressable>
+            )}
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -135,14 +195,6 @@ const styles = StyleSheet.create({
   slideImage: {
     width: "100%",
     height: "100%",
-  },
-  gradientOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 10,
   },
   textOverlay: {
     position: "absolute",
@@ -170,9 +222,12 @@ const styles = StyleSheet.create({
   },
   ctaBadge: {
     alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[1.5]),
     backgroundColor: colors.white,
     paddingHorizontal: horizontalScale(spacing[4]),
-    paddingVertical: verticalScale(spacing[1.5]),
+    paddingVertical: verticalScale(spacing[2]),
     borderRadius: radii.sm,
   },
   ctaText: {
@@ -182,15 +237,43 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
-  pagination: {
+  controls: {
     position: "absolute",
-    bottom: verticalScale(spacing[3]),
-    left: 0,
-    right: 0,
+    bottom: verticalScale(spacing[4]),
+    left: horizontalScale(spacing[5]),
+    right: horizontalScale(spacing[5]),
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  pagination: {
+    flexDirection: "row",
     alignItems: "center",
     gap: horizontalScale(spacing[1.5]),
+  },
+  controlsRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(spacing[3]),
+  },
+  counter: {
+    fontFamily: fonts.sans.medium,
+    fontSize: moderateScale(10),
+    letterSpacing: 1.6,
+    color: "rgba(255,255,255,0.85)",
+  },
+  counterMuted: {
+    color: "rgba(255,255,255,0.45)",
+  },
+  playButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: moderateScale(32),
+    height: moderateScale(32),
+    borderRadius: moderateScale(16),
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(0,0,0,0.22)",
   },
   dot: {
     width: 6,

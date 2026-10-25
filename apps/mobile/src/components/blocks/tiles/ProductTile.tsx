@@ -1,10 +1,22 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
-import { horizontalScale, moderateScale, verticalScale } from "@/constants/responsive";
-import { colors, fonts, fontSizes, radii, spacing } from "@/constants/theme";
+import {
+  horizontalScale,
+  moderateScale,
+  verticalScale,
+} from "@/constants/responsive";
+import {
+  colors,
+  fonts,
+  fontSizes,
+  radii,
+  shadows,
+  spacing,
+} from "@/constants/theme";
 import { useCurrency } from "@/providers/Currency";
 import { getImageUrl, type MediaSource } from "@/utils/media";
 
@@ -16,7 +28,13 @@ type ProductTileProps = {
   height?: number;
 };
 
-export function ProductTile({ slug, title, price, image, height }: ProductTileProps) {
+export function ProductTile({
+  slug,
+  title,
+  price,
+  image,
+  height,
+}: ProductTileProps) {
   const router = useRouter();
   const { formatPrice } = useCurrency();
 
@@ -24,39 +42,63 @@ export function ProductTile({ slug, title, price, image, height }: ProductTilePr
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.tile, { height }, pressed && styles.pressed]}
+      accessibilityRole="button"
+      accessibilityLabel={title ? `View ${title}` : "View product"}
+      style={({ pressed }) => [
+        styles.shadow,
+        pressed && styles.shadowPressed,
+        { height, aspectRatio: height ? undefined : 1 },
+        pressed && styles.pressed,
+      ]}
       onPress={() => router.push(`/(shop)/${slug}`)}
     >
-      {imageUrl ? (
-        <Image
-          source={{ uri: imageUrl }}
-          style={styles.image}
-          contentFit="cover"
-          transition={300}
+      <View style={styles.tile}>
+        {imageUrl ? (
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.image}
+            contentFit="cover"
+            transition={300}
+          />
+        ) : (
+          <View style={[styles.image, styles.placeholder]} />
+        )}
+        <LinearGradient
+          pointerEvents="none"
+          colors={["transparent", "rgba(0,0,0,0.72)"]}
+          locations={[0.5, 1]}
+          style={StyleSheet.absoluteFill}
         />
-      ) : (
-        <View style={[styles.image, styles.placeholder]} />
-      )}
-      <View style={styles.overlay}>
-        {title ? <Text style={styles.title}>{title}</Text> : null}
-        {price != null ? (
-          <View style={styles.pricePill}>
-            <Text style={styles.priceText}>{formatPrice(price)}</Text>
-          </View>
-        ) : null}
+        <View style={styles.overlay}>
+          {title ? <Text style={styles.title}>{title}</Text> : null}
+          {price != null ? (
+            <View style={styles.pricePill}>
+              <Text style={styles.priceText}>{formatPrice(price)}</Text>
+            </View>
+          ) : null}
+        </View>
       </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  tile: {
+  shadow: {
     width: "100%",
-    aspectRatio: 1,
-    borderRadius: radii.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
     backgroundColor: colors.card,
+    ...shadows.sm,
+  },
+  shadowPressed: {
+    backgroundColor: colors.card,
+    ...shadows.md,
+  },
+  tile: {
+    flex: 1,
+    width: "100%",
+    borderRadius: radii.none,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: `${colors.border}B3`,
+    backgroundColor: colors.secondary,
     overflow: "hidden",
   },
   image: {
@@ -82,8 +124,9 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    fontFamily: fonts.sans.semiBold,
-    fontSize: moderateScale(fontSizes.sm),
+    fontFamily: fonts.serif.regular,
+    fontSize: moderateScale(fontSizes.lg),
+    lineHeight: moderateScale(fontSizes.lg * 1.05),
     color: colors.white,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowOffset: { width: 0, height: 1 },
@@ -91,8 +134,8 @@ const styles = StyleSheet.create({
   },
   pricePill: {
     backgroundColor: colors.primary,
-    borderRadius: radii.full,
-    paddingHorizontal: horizontalScale(spacing[3]),
+    borderRadius: radii.none,
+    paddingHorizontal: horizontalScale(spacing[2.5]),
     paddingVertical: verticalScale(spacing[1]),
   },
   priceText: {

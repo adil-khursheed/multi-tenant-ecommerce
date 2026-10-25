@@ -4,11 +4,14 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { ArrowUpRight } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { motion } from "motion/react";
 
 import { RichText } from "@/components/RichText";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Media } from "@/payload-types";
+import { cn } from "@/utilities/cn";
 
 export type CategoryTab = {
   parentName: string;
@@ -37,36 +40,77 @@ const CategoryCard: React.FC<{
   name: string;
   slug: string;
   image: Media | null;
-}> = ({ name, id, image }) => (
-  <motion.div
-    variants={{
-      hidden: { opacity: 0, y: 15 },
-      visible: { opacity: 1, y: 0 },
-    }}
-    whileHover={{ scale: 1.03, y: -4 }}
-    transition={{ duration: 0.3, ease: "easeOut" }}
-  >
-    <Link
-      href={`/shop?category=${id}`}
-      className="group relative flex h-[200px] w-full items-center justify-center overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-black sm:h-[250px]"
+}> = ({ name, id, image }) => {
+  const hasImage = Boolean(image?.url);
+
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 12 },
+        visible: { opacity: 1, y: 0 },
+      }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className="h-full"
     >
-      {image?.url && (
-        <Image
-          fill
-          src={image.url}
-          alt={image.alt ?? name}
-          className="object-cover transition duration-500 ease-in-out group-hover:scale-110"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+      <Link
+        href={`/shop?category=${id}`}
+        className="group relative flex aspect-[4/5] w-full flex-col justify-end overflow-hidden border border-border/70 bg-secondary outline-offset-4 transition-colors duration-300 hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-ring sm:aspect-[3/4]"
+      >
+        {hasImage ? (
+          <Image
+            fill
+            src={image!.url!}
+            alt={image?.alt ?? name}
+            className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.05]"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
+        ) : (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-6 right-1 select-none font-serif text-[9rem] leading-none text-primary/10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:text-primary/20 sm:text-[11rem]"
+          >
+            {name.charAt(0)}
+          </span>
+        )}
+
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0",
+            hasImage
+              ? "bg-linear-to-t from-black/80 via-black/10 to-transparent"
+              : "bg-linear-to-t from-secondary via-secondary/40 to-transparent",
+          )}
         />
-      )}
-      <div className="absolute inset-0 flex items-end bg-linear-to-b from-transparent via-black/10 to-black/70 p-4 transition-opacity duration-300 group-hover:to-black/80">
-        <span className="text-base font-semibold capitalize text-white drop-shadow-md sm:text-lg">
-          {name}
-        </span>
-      </div>
-    </Link>
-  </motion.div>
-);
+
+        <div className="relative z-10 flex items-end justify-between gap-4 p-4 sm:p-5">
+          <span
+            className={cn(
+              "max-w-[12ch] font-serif text-[26px] leading-[0.95] tracking-[-0.01em] sm:text-[30px]",
+              hasImage ? "text-white" : "text-foreground",
+            )}
+          >
+            {name}
+          </span>
+          <span
+            className={cn(
+              "mb-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
+              hasImage
+                ? "border-white/40 text-white/90 group-hover:border-white group-hover:bg-white group-hover:text-black"
+                : "border-border text-primary group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground",
+            )}
+          >
+            <HugeiconsIcon
+              icon={ArrowUpRight}
+              size={14}
+              strokeWidth={2}
+              className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </span>
+        </div>
+      </Link>
+    </motion.div>
+  );
+};
 
 export const TabsClient: React.FC<TabsClientProps> = ({
   contentType,
@@ -98,7 +142,7 @@ export const TabsClient: React.FC<TabsClientProps> = ({
                   <TabsTrigger
                     key={parent.parentSlug}
                     value={parent.parentSlug}
-                    className="flex-none rounded-none border border-input bg-transparent px-4 py-2 text-sm font-medium capitalize data-active:border-primary data-active:bg-primary data-active:text-white dark:border-input dark:data-active:border-primary dark:data-active:bg-primary dark:data-active:text-white"
+                    className="flex-none rounded-none border border-border bg-transparent px-4 py-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground transition-colors duration-200 hover:border-primary/40 hover:text-foreground data-active:border-primary data-active:bg-primary data-active:text-primary-foreground"
                   >
                     {parent.parentName}
                   </TabsTrigger>
