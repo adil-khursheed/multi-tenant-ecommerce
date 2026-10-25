@@ -7,6 +7,7 @@ import { LoginForm } from "@/components/forms/LoginForm";
 import { RenderParams } from "@/components/RenderParams";
 import { env } from "@/env";
 import { getUser } from "@/utilities/getUser";
+import { noIndexRobots } from "@/utilities/seo";
 
 export default async function Login() {
   const user = await getUser();
@@ -60,5 +61,6 @@ export const metadata: Metadata = {
     title: "Login",
     url: "/login",
   },
+  robots: noIndexRobots,
   title: "Login",
 };

@@ -22,10 +22,12 @@ import { env } from "@/env";
 import { cn } from "@/utilities/cn";
 import { getPopulatedTenants } from "@/utilities/getPopulatedTenants";
 import { getUser } from "@/utilities/getUser";
+import { noIndexRobots } from "@/utilities/seo";
 
 export const metadata: Metadata = {
   title: "Application Received | Seller Onboarding",
   description: "Your application is being reviewed by our editorial team.",
+  robots: noIndexRobots,
 };
 
 export default async function ThankYouPage() {

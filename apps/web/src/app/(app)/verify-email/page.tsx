@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import VerifyEmailForm from "@/components/VerifyEmail";
+import { noIndexRobots } from "@/utilities/seo";
+
+export const metadata: Metadata = {
+  description: "Verify the email address on your DTlea account.",
+  robots: noIndexRobots,
+  title: "Verify Email",
+};
 
 const VerifyEmailPage = async ({
   searchParams,

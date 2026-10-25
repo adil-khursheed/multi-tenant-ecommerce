@@ -8,6 +8,7 @@ import configPromise from "@payload-config";
 
 import { FindOrderForm } from "@/components/forms/FindOrderForm";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
+import { noIndexRobots } from "@/utilities/seo";
 
 export default async function FindOrderPage() {
   const headers = await getHeaders();
@@ -27,5 +28,6 @@ export const metadata: Metadata = {
     title: "Find order",
     url: "/find-order",
   }),
+  robots: noIndexRobots,
   title: "Find order",
 };

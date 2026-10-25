@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import { ForgotPasswordForm } from "@/components/forms/ForgotPasswordForm";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
+import { noIndexRobots } from "@/utilities/seo";
 
 export default async function ForgotPasswordPage() {
   return (
@@ -18,5 +19,6 @@ export const metadata: Metadata = {
     title: "Forgot Password",
     url: "/forgot-password",
   }),
+  robots: noIndexRobots,
   title: "Forgot Password",
 };

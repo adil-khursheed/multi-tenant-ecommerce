@@ -4,17 +4,57 @@ import type { Metadata } from "next";
 
 import ShopProducts, { ShopProductsSkeleton } from "@/components/Shop";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
-
-export const metadata: Metadata = {
-  description: "Search for products in the store.",
-  title: "Shop",
-};
+import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
+import { getTwitterMetadata, HOME_TWITTER_IMAGE } from "@/utilities/seo";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
 type Props = {
   searchParams: Promise<SearchParams>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const searchValue = typeof params.q === "string" ? params.q : undefined;
+  const hasFilters = [
+    "q",
+    "category",
+    "priceRange",
+    "size",
+    "color",
+    "brand",
+    "rating",
+    "occasion",
+    "material",
+    "sort",
+  ].some((key) => Boolean(params[key]));
+
+  const title = searchValue ? `Search: ${searchValue}` : "Shop";
+  const description = searchValue
+    ? `Products matching “${searchValue}” from independent sellers on DTlea.`
+    : "Browse products from independent sellers on DTlea.";
+
+  return {
+    alternates: {
+      canonical: "/shop",
+    },
+    description,
+    openGraph: mergeOpenGraph({
+      description,
+      title,
+      url: "/shop",
+    }),
+    robots: hasFilters ? { follow: true, index: false } : undefined,
+    title,
+    twitter: getTwitterMetadata({
+      description,
+      images: [HOME_TWITTER_IMAGE],
+      title,
+    }),
+  };
+}
 
 export default async function ShopPage({ searchParams }: Props) {
   const {

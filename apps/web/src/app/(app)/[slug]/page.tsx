@@ -8,9 +8,12 @@ import configPromise from "@payload-config";
 
 import { RenderBlocks } from "@/blocks/RenderBlocks";
 import { homeStaticData } from "@/endpoints/seed/home-static";
+import { env } from "@/env";
 import { RenderHero } from "@/heros/RenderHero";
 import type { Page } from "@/payload-types";
 import { generateMeta } from "@/utilities/generateMeta";
+import { getServerSideURL } from "@/utilities/getURL";
+import { serializeJsonLd } from "@/utilities/serializeJsonLd";
 import TrustBar from "./components/trust-bar";
 
 export async function generateStaticParams() {
@@ -45,7 +48,6 @@ type Args = {
 
 export default async function Page({ params }: Args) {
   const { slug = "home" } = await params;
-  const url = "/" + slug;
 
   let page = await queryPageBySlug({
     slug,
@@ -61,12 +63,37 @@ export default async function Page({ params }: Args) {
   }
 
   const { hero, layout } = page;
+  const isHome = slug === "home";
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: env.SITE_NAME,
+    url: getServerSideURL(),
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${getServerSideURL()}/shop?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
 
   return (
     <article>
+      {isHome ? (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: serializeJsonLd(websiteJsonLd),
+          }}
+          type="application/ld+json"
+        />
+      ) : null}
+
       <RenderHero {...hero} />
 
-      {slug === "home" ? <TrustBar /> : null}
+      {isHome ? <TrustBar /> : null}
 
       <RenderBlocks blocks={layout} />
     </article>
@@ -80,7 +107,7 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
     slug,
   });
 
-  return generateMeta({ doc: page });
+  return generateMeta({ doc: page, slug });
 }
 
 const queryPageBySlug = async ({ slug }: { slug: string }) => {

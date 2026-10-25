@@ -7,6 +7,7 @@ import { RenderParams } from "@/components/RenderParams";
 import { getPopulatedTenants } from "@/utilities/getPopulatedTenants";
 import { getUser } from "@/utilities/getUser";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
+import { noIndexRobots } from "@/utilities/seo";
 
 export default async function CreateVendorAccount() {
   const user = await getUser();
@@ -35,5 +36,6 @@ export const metadata: Metadata = {
     title: "Create Seller Account",
     url: "/create-account/seller",
   }),
+  robots: noIndexRobots,
   title: "Create Seller Account",
 };

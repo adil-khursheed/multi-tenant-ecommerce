@@ -36,6 +36,9 @@ const nextConfig: NextConfig = {
       }),
     ],
   },
+  outputFileTracingIncludes: {
+    "/*": ["./src/fonts/**/*"],
+  },
   reactStrictMode: true,
   redirects,
   webpack: (webpackConfig) => {

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 import { headers as getHeaders } from "next/headers.js";
 
 import { getPayload } from "payload";
@@ -7,6 +8,11 @@ import configPromise from "@payload-config";
 
 import { AccountNav } from "@/components/AccountNav";
 import { RenderParams } from "@/components/RenderParams";
+import { noIndexRobots } from "@/utilities/seo";
+
+export const metadata: Metadata = {
+  robots: noIndexRobots,
+};
 
 export default async function RootLayout({
   children,

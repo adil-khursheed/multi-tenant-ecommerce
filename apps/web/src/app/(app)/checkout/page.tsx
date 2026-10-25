@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { CheckoutPage } from "@/components/checkout/CheckoutPage";
 import { env } from "@/env";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
+import { noIndexRobots } from "@/utilities/seo";
 
 export default function Checkout() {
   return (
@@ -37,5 +38,6 @@ export const metadata: Metadata = {
     title: "Checkout",
     url: "/checkout",
   }),
+  robots: noIndexRobots,
   title: "Checkout",
 };

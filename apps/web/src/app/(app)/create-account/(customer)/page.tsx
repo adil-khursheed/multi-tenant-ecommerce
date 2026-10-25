@@ -6,6 +6,7 @@ import { CreateAccountForm } from "@/components/forms/CreateAccountForm";
 import { RenderParams } from "@/components/RenderParams";
 import { getUser } from "@/utilities/getUser";
 import { mergeOpenGraph } from "@/utilities/mergeOpenGraph";
+import { noIndexRobots } from "@/utilities/seo";
 
 export default async function CreateAccount() {
   const user = await getUser();
@@ -34,5 +35,6 @@ export const metadata: Metadata = {
     title: "Create Account",
     url: "/create-account",
   }),
+  robots: noIndexRobots,
   title: "Create Account",
 };
